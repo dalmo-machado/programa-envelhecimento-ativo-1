@@ -1,0 +1,5 @@
+{
+  "name": "programa-envelhecimento-ativo_1",
+  "description": "A web application to support a Brazil-Spain study on active aging through a technology-mediated neuromuscular training program. It includes features for participant onboarding, assessments, training sessions, and researcher dashboards.",
+  "requestFramePermissions": []
+}
