@@ -14,6 +14,10 @@ const Header: React.FC = () => {
     const [showConfirm, setShowConfirm] = useState(false);
     const [showResetConfirm, setShowResetConfirm] = useState(false);
 
+    // Only researchers and admins may switch their active view.
+    // Participants must not be able to self-elevate to researcher.
+    const canSwitchView = role === UserRole.RESEARCHER || role === UserRole.ADMIN;
+
     const handleRoleChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
         setRole(e.target.value as UserRole);
     }
@@ -59,19 +63,22 @@ const Header: React.FC = () => {
                         </div>
                         <h1 className="text-xl font-bold">{t('welcome_title')}</h1>
                     </div>
-                    {role !== UserRole.NONE && (
-                         <div className="flex items-center space-x-2">
-                             <label htmlFor="role-switcher" className="text-sm">View:</label>
-                             <select 
+                    {canSwitchView && (
+                        <div className="flex items-center space-x-2">
+                            <label htmlFor="role-switcher" className="text-sm">View:</label>
+                            <select
                                 id="role-switcher"
-                                value={role} 
-                                onChange={handleRoleChange} 
+                                value={role}
+                                onChange={handleRoleChange}
                                 className="bg-primary text-white border-accent rounded-md p-2 text-sm"
-                             >
+                            >
                                 <option value={UserRole.PARTICIPANT}>{t('participant_view')}</option>
                                 <option value={UserRole.RESEARCHER}>{t('researcher_view')}</option>
+                                {role === UserRole.ADMIN && (
+                                    <option value={UserRole.ADMIN}>Admin</option>
+                                )}
                             </select>
-                         </div>
+                        </div>
                     )}
                 </div>
             </header>

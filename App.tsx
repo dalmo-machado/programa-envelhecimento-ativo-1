@@ -5,6 +5,7 @@ import { LocalizationProvider } from './context/LocalizationContext';
 import { UserRoleProvider, useUserRole } from './context/UserRoleContext';
 import { ParticipantDataProvider } from './context/ParticipantDataContext';
 import { Language, UserRole } from './types';
+import RouteGuard from './components/RouteGuard';
 import WelcomePage from './pages/WelcomePage';
 import DashboardPage from './pages/DashboardPage';
 import AssessmentPage from './pages/AssessmentPage';
@@ -64,24 +65,79 @@ const App: React.FC = () => {
   );
 };
 
+// Roles that are considered "logged in" for the purpose of the home redirect.
+const AUTHENTICATED_ROLES = [UserRole.PARTICIPANT, UserRole.RESEARCHER, UserRole.ADMIN];
+
+// Roles allowed on participant-only routes.
+const PARTICIPANT_ROLES = [UserRole.PARTICIPANT, UserRole.ADMIN];
+
+// Roles allowed on routes shared between participants and researchers.
+const ALL_AUTHENTICATED = [UserRole.PARTICIPANT, UserRole.RESEARCHER, UserRole.ADMIN];
+
 const AppRouter: React.FC = () => {
   const { role } = useUserRole();
-  const isAuthenticated = role !== UserRole.NONE;
 
   return (
     <HashRouter>
       <Routes>
-        <Route path="/" element={isAuthenticated ? <Navigate to="/dashboard" /> : <WelcomePage />} />
+        {/* Public routes — redirect to dashboard if already authenticated */}
+        <Route
+          path="/"
+          element={
+            AUTHENTICATED_ROLES.includes(role)
+              ? <Navigate to="/dashboard" replace />
+              : <WelcomePage />
+          }
+        />
         <Route path="/consent" element={<ConsentPage />} />
         <Route path="/screening" element={<ScreeningPage />} />
-        <Route path="/dashboard" element={isAuthenticated ? <DashboardPage /> : <Navigate to="/" />} />
-        <Route path="/training-plan" element={isAuthenticated ? <TrainingPlanPage /> : <Navigate to="/" />} />
-        <Route path="/assessment/new" element={isAuthenticated ? <AssessmentPage /> : <Navigate to="/" />} />
-        <Route path="/assessment/summary" element={isAuthenticated ? <AssessmentSummaryPage /> : <Navigate to="/" />} />
-        <Route path="/session/:sessionIndex" element={isAuthenticated ? <SessionPage /> : <Navigate to="/" />} />
+
+        {/* Shared: participants and researchers */}
+        <Route
+          path="/dashboard"
+          element={
+            <RouteGuard allowedRoles={ALL_AUTHENTICATED}>
+              <DashboardPage />
+            </RouteGuard>
+          }
+        />
+
+        {/* Participant-only routes */}
+        <Route
+          path="/training-plan"
+          element={
+            <RouteGuard allowedRoles={PARTICIPANT_ROLES}>
+              <TrainingPlanPage />
+            </RouteGuard>
+          }
+        />
+        <Route
+          path="/assessment/new"
+          element={
+            <RouteGuard allowedRoles={PARTICIPANT_ROLES}>
+              <AssessmentPage />
+            </RouteGuard>
+          }
+        />
+        <Route
+          path="/assessment/summary"
+          element={
+            <RouteGuard allowedRoles={PARTICIPANT_ROLES}>
+              <AssessmentSummaryPage />
+            </RouteGuard>
+          }
+        />
+        <Route
+          path="/session/:sessionIndex"
+          element={
+            <RouteGuard allowedRoles={PARTICIPANT_ROLES}>
+              <SessionPage />
+            </RouteGuard>
+          }
+        />
       </Routes>
     </HashRouter>
   );
-}
+};
 
 export default App;

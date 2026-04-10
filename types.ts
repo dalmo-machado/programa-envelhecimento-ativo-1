@@ -10,6 +10,7 @@ export enum UserRole {
   NONE = 'none',
   PARTICIPANT = 'participant',
   RESEARCHER = 'researcher',
+  ADMIN = 'admin',
 }
 
 export interface Assessment {
