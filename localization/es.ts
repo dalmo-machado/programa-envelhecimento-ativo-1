@@ -221,6 +221,16 @@ export const es = {
   researcher_table_age: 'Edad',
   confirm_end_session: '¿Desea finalizar la sesión actual y volver al inicio?',
   confirm_reset_all: 'ATENCIÓN: ¿Desea también BORRAR TODOS LOS DATOS (eliminar todos los participantes y evaluaciones) para reiniciar el programa desde cero?',
+  login_subtitle: 'Acceda al programa con su código y contraseña.',
+  login_access_code: 'Código de acceso',
+  login_access_code_placeholder: 'Ej: ES-001',
+  login_password: 'Contraseña',
+  login_password_placeholder: 'DD/MM/AAAA',
+  login_password_hint: 'Participantes: su fecha de nacimiento en formato DD/MM/AAAA.',
+  login_submit: 'Entrar',
+  login_error: 'Código o contraseña incorrectos. Verifique los datos e inténtelo de nuevo.',
+  login_new_participant: '¿Todavía no tiene cuenta?',
+  login_enroll_link: 'Iniciar registro como nuevo participante',
 };
 
 export type I18nKeys = typeof es;

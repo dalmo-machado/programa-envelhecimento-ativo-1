@@ -6,7 +6,7 @@ import { UserRoleProvider, useUserRole } from './context/UserRoleContext';
 import { ParticipantDataProvider } from './context/ParticipantDataContext';
 import { Language, UserRole } from './types';
 import RouteGuard from './components/RouteGuard';
-import WelcomePage from './pages/WelcomePage';
+import LoginPage from './pages/LoginPage';
 import DashboardPage from './pages/DashboardPage';
 import AssessmentPage from './pages/AssessmentPage';
 import SessionPage from './pages/SessionPage';
@@ -86,7 +86,7 @@ const AppRouter: React.FC = () => {
           element={
             AUTHENTICATED_ROLES.includes(role)
               ? <Navigate to="/dashboard" replace />
-              : <WelcomePage />
+              : <LoginPage />
           }
         />
         <Route path="/consent" element={<ConsentPage />} />
