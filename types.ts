@@ -14,14 +14,30 @@ export enum UserRole {
 }
 
 export interface Assessment {
-  grip_kgf: number;
-  balance_s: number;
-  back_scratch_cm: number;
+  // Station 1 — Body Composition
   weight_kg: number;
   height_cm: number;
   bmi: number;
   calf_circum_cm: number;
   cc_bmi_index: number;
+  cintura_cm?: number;
+  quadril_cm?: number;
+  gordura_percent?: number;
+  rcq?: number;
+  // Station 2 — Force and Agility
+  grip_kgf: number;
+  balance_s: number;
+  back_scratch_cm: number;
+  handgrip_nondominant_kgf?: number;
+  chair_stand_reps?: number;
+  arm_curl_reps?: number;
+  chair_sit_reach_cm?: number;
+  up_and_go_seconds?: number;
+  // Station 3 — Aerobic Capacity
+  six_min_walk_meters?: number;
+  six_min_walk_predicted?: number;
+  six_min_walk_percent?: number;
+  // Other
   whoqol_total: number;
 }
 

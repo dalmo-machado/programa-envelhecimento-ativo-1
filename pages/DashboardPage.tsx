@@ -27,7 +27,7 @@ const DashboardPage: React.FC = () => {
 
 const metrics: (keyof Assessment)[] = ['grip_kgf', 'balance_s', 'back_scratch_cm', 'bmi', 'cc_bmi_index', 'calf_circum_cm'];
 
-const metricTranslationKeys: Record<keyof Assessment, string> = {
+const metricTranslationKeys: Partial<Record<keyof Assessment, string>> = {
     grip_kgf: 'handgrip_strength',
     balance_s: 'balance',
     back_scratch_cm: 'flexibility',
@@ -35,7 +35,19 @@ const metricTranslationKeys: Record<keyof Assessment, string> = {
     cc_bmi_index: 'cc_bmi_index',
     calf_circum_cm: 'calf_circumference',
     weight_kg: 'weight',
-    height_cm: 'height'
+    height_cm: 'height',
+    cintura_cm: 'waist_circumference',
+    quadril_cm: 'hip_circumference',
+    gordura_percent: 'body_fat_percent',
+    rcq: 'waist_hip_ratio',
+    handgrip_nondominant_kgf: 'handgrip_nondominant',
+    chair_stand_reps: 'chair_stand_test',
+    arm_curl_reps: 'arm_curl_test',
+    chair_sit_reach_cm: 'chair_sit_reach',
+    up_and_go_seconds: 'up_and_go',
+    six_min_walk_meters: 'six_min_walk',
+    six_min_walk_predicted: 'six_min_walk_predicted',
+    six_min_walk_percent: 'six_min_walk_percent',
 };
 
 const CustomTooltip = ({ active, payload, label, firstAssessment, selectedMetricKey, t, formatNumber }: any) => {
@@ -236,36 +248,47 @@ const ResearcherDashboard: React.FC = () => {
     const handleExport = () => {
         const headers = [
             "study_id", "name", "sex", "birth_date", "site", "sessions_completed", "adherence_rate_percent",
-            "assessment_date", "grip_kgf", "balance_s", "back_scratch_cm",
-            "weight_kg", "height_cm", "bmi", "calf_circum_cm", "cc_bmi_index"
+            "assessment_date",
+            // Station 1
+            "weight_kg", "height_cm", "bmi", "calf_circum_cm", "cc_bmi_index",
+            "cintura_cm", "quadril_cm", "gordura_percent", "rcq",
+            // Station 2
+            "grip_kgf", "handgrip_nondominant_kgf",
+            "chair_stand_reps", "arm_curl_reps", "chair_sit_reach_cm", "up_and_go_seconds",
+            "balance_s", "back_scratch_cm",
+            // Station 3
+            "six_min_walk_meters", "six_min_walk_predicted", "six_min_walk_percent",
         ];
 
         const csvRows = [headers.join(',')];
 
+        const na = (val: number | undefined) => val !== undefined ? val : '';
+
         participants.forEach(p => {
             const adherence = (p.sessions_completed / 24) * 100;
             if (p.assessments.length === 0) {
-                const row = [p.study_id, p.name, p.sex, p.birth_date, p.site, p.sessions_completed, adherence.toFixed(2), 'N/A', 'N/A', 'N/A', 'N/A', 'N/A', 'N/A', 'N/A', 'N/A', 'N/A'];
+                const row = [p.study_id, p.name, p.sex, p.birth_date, p.site, p.sessions_completed, adherence.toFixed(2),
+                    'N/A', 'N/A', 'N/A', 'N/A', 'N/A', 'N/A', 'N/A', 'N/A', 'N/A', 'N/A',
+                    'N/A', 'N/A', 'N/A', 'N/A', 'N/A', 'N/A', 'N/A', 'N/A', 'N/A', 'N/A', 'N/A'];
                 csvRows.push(row.join(','));
             } else {
                 p.assessments.forEach(assessment => {
-                     const row = [
-                        p.study_id,
-                        p.name,
-                        p.sex,
-                        p.birth_date,
-                        p.site,
-                        p.sessions_completed,
-                        adherence.toFixed(2),
-                        assessment.date,
-                        assessment.data.grip_kgf,
-                        assessment.data.balance_s,
-                        assessment.data.back_scratch_cm,
-                        assessment.data.weight_kg,
-                        assessment.data.height_cm,
-                        assessment.data.bmi.toFixed(2),
-                        assessment.data.calf_circum_cm,
-                        assessment.data.cc_bmi_index.toFixed(2),
+                    const d = assessment.data;
+                    const row = [
+                        p.study_id, p.name, p.sex, p.birth_date, p.site,
+                        p.sessions_completed, adherence.toFixed(2), assessment.date,
+                        // Station 1
+                        d.weight_kg, d.height_cm, d.bmi.toFixed(2), d.calf_circum_cm, d.cc_bmi_index.toFixed(2),
+                        na(d.cintura_cm), na(d.quadril_cm), na(d.gordura_percent),
+                        d.rcq !== undefined ? d.rcq.toFixed(3) : '',
+                        // Station 2
+                        d.grip_kgf, na(d.handgrip_nondominant_kgf),
+                        na(d.chair_stand_reps), na(d.arm_curl_reps), na(d.chair_sit_reach_cm), na(d.up_and_go_seconds),
+                        d.balance_s, d.back_scratch_cm,
+                        // Station 3
+                        na(d.six_min_walk_meters),
+                        d.six_min_walk_predicted !== undefined ? d.six_min_walk_predicted.toFixed(1) : '',
+                        d.six_min_walk_percent !== undefined ? d.six_min_walk_percent.toFixed(1) : '',
                     ];
                     csvRows.push(row.join(','));
                 });

@@ -260,6 +260,23 @@ export const es = {
   birth_date_password_hint: 'Esta fecha se usará como contraseña de acceso del participante.',
   enrollment_save_and_return: 'Guardar y Volver al Panel',
   register_assessment: 'Registrar Evaluación',
+  // Assessment stations
+  assessment_station1: 'Estación 1 — Composición Corporal',
+  assessment_station2: 'Estación 2 — Fuerza y Agilidad',
+  assessment_station3: 'Estación 3 — Capacidad Aeróbica',
+  waist_circumference: 'Circunferencia de Cintura (cm)',
+  hip_circumference: 'Circunferencia de Cadera (cm)',
+  body_fat_percent: 'Porcentaje de Grasa (%)',
+  waist_hip_ratio: 'Relación Cintura-Cadera (RCC)',
+  handgrip_dominant: 'Prensión — Mano Dominante (kgf)',
+  handgrip_nondominant: 'Prensión — Mano No Dominante (kgf)',
+  chair_stand_test: 'Chair Stand Test (rep)',
+  arm_curl_test: 'Arm Curl Test (rep)',
+  chair_sit_reach: 'Chair Sit-and-Reach (cm)',
+  up_and_go: '8-Foot Up-and-Go (s)',
+  six_min_walk: 'TC6 — Caminata 6 Minutos (m)',
+  six_min_walk_predicted: 'Distancia Prevista (m)',
+  six_min_walk_percent: 'Porcentaje de lo Previsto (%)',
 };
 
 export type I18nKeys = typeof es;
