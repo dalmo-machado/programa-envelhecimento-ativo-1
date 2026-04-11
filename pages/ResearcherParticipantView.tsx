@@ -130,7 +130,7 @@ const ResearcherParticipantView: React.FC = () => {
         <Header />
         <main className="p-8">
           <Card>
-            <p className="text-slate-600 mb-4">Participante não encontrado.</p>
+            <p className="text-slate-600 mb-4">{t('participant_not_found' as any)}</p>
             <Button onClick={() => navigate('/dashboard')} variant="ghost">
               {t('back_to_dashboard')}
             </Button>
@@ -312,7 +312,7 @@ const ResearcherParticipantView: React.FC = () => {
           {/* Training plan grid — cards are clickable */}
           {participant.training_plan.length > 0 && (
             <Card title={t('my_training_plan_title')}>
-              <p className="text-slate-500 text-sm mb-3">Clique em uma sessão para ver os exercícios.</p>
+              <p className="text-slate-500 text-sm mb-3">{t('click_session_hint' as any)}</p>
               <div className="grid grid-cols-3 sm:grid-cols-6 md:grid-cols-8 gap-2">
                 {participant.training_plan.map((session, i) => {
                   const isCompleted = i < participant.sessions_completed;
@@ -331,7 +331,7 @@ const ResearcherParticipantView: React.FC = () => {
                     >
                       <p className="font-bold">{i + 1}</p>
                       <p className="truncate">{t(trainingPrograms[session.sessionType].titleKey)}</p>
-                      <p>Nv {session.level}</p>
+                      <p>{t('level_abbr' as any)} {session.level}</p>
                     </button>
                   );
                 })}

@@ -56,6 +56,8 @@ export interface IncidentReport {
   session_index: number;
   reported_date: string; // ISO string
   reviewed: boolean;
+  occurrence_description?: string;
+  action_taken?: string;
 }
 
 export interface Participant {

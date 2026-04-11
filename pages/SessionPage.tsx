@@ -109,7 +109,7 @@ const SessionPage: React.FC = () => {
                 <div className="w-24 h-24 bg-primary-light rounded-full flex items-center justify-center mb-6">
                     <Award size={48} className="text-primary-dark" />
                 </div>
-                <h2 className="text-3xl font-bold text-slate-800 mb-4">Pronto para começar?</h2>
+                <h2 className="text-3xl font-bold text-slate-800 mb-4">{t('ready_to_start' as any)}</h2>
                 <p className="text-xl text-slate-600 mb-10 max-w-lg">{t(preMessage)}</p>
                 <Button onClick={() => setSessionState('active')} className="text-lg px-8 py-4">
                     {t('start_workout')}

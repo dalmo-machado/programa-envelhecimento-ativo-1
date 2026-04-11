@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { AlertTriangle, CheckCircle, ChevronLeft } from 'lucide-react';
 import { useLocalization } from '../context/LocalizationContext';
@@ -14,10 +14,25 @@ interface FlatIncident extends IncidentReport {
   participantName: string;
 }
 
+interface LocalText {
+  occurrence: string;
+  action: string;
+}
+
 const AlertsPage: React.FC = () => {
   const navigate = useNavigate();
   const { t, formatDate } = useLocalization();
   const { participants, updateParticipant } = useParticipantData();
+
+  // Local state for occurrence/action text before resolving
+  const [localTexts, setLocalTexts] = useState<Record<string, LocalText>>({});
+
+  const setLocalField = (id: string, field: 'occurrence' | 'action', value: string) => {
+    setLocalTexts(prev => ({
+      ...prev,
+      [id]: { occurrence: '', action: '', ...prev[id], [field]: value },
+    }));
+  };
 
   // Flatten all incidents sorted newest first
   const allIncidents: FlatIncident[] = participants
@@ -32,11 +47,19 @@ const AlertsPage: React.FC = () => {
 
   const pendingCount = allIncidents.filter(i => !i.reviewed).length;
 
-  const handleMarkReviewed = (participantId: string, incidentId: string) => {
+  const handleMarkResolved = (participantId: string, incidentId: string) => {
     const participant = participants.find(p => p.study_id === participantId);
     if (!participant) return;
+    const texts = localTexts[incidentId] ?? { occurrence: '', action: '' };
     const updatedIncidents = (participant.incidents || []).map(inc =>
-      inc.id === incidentId ? { ...inc, reviewed: true } : inc
+      inc.id === incidentId
+        ? {
+            ...inc,
+            reviewed: true,
+            occurrence_description: texts.occurrence || inc.occurrence_description,
+            action_taken: texts.action || inc.action_taken,
+          }
+        : inc
     );
     updateParticipant(participantId, { incidents: updatedIncidents });
   };
@@ -88,7 +111,9 @@ const AlertsPage: React.FC = () => {
                     <th className="p-3">{t('alerts_col_participant')}</th>
                     <th className="p-3">{t('alerts_col_session')}</th>
                     <th className="p-3">{t('alerts_col_date')}</th>
+                    <th className="p-3 min-w-[180px]">{t('alerts_col_occurrence' as any)}</th>
                     <th className="p-3 text-center">{t('alerts_col_status')}</th>
+                    <th className="p-3 min-w-[180px]">{t('alerts_col_action_taken' as any)}</th>
                     <th className="p-3 text-center">{t('alerts_col_action')}</th>
                   </tr>
                 </thead>
@@ -96,8 +121,9 @@ const AlertsPage: React.FC = () => {
                   {allIncidents.map(incident => (
                     <tr
                       key={incident.id}
-                      className={incident.reviewed ? 'opacity-50' : 'bg-amber-50/30'}
+                      className={incident.reviewed ? 'opacity-60 bg-slate-50' : 'bg-amber-50/30'}
                     >
+                      {/* Participant */}
                       <td className="p-3">
                         <p
                           className="font-semibold text-primary hover:underline cursor-pointer"
@@ -107,10 +133,14 @@ const AlertsPage: React.FC = () => {
                         </p>
                         <p className="text-slate-500 text-xs">{incident.participantName}</p>
                       </td>
+
+                      {/* Session */}
                       <td className="p-3">
                         {t('session_number_label', { number: incident.session_index + 1 })}
                       </td>
-                      <td className="p-3 text-slate-600">
+
+                      {/* Date */}
+                      <td className="p-3 text-slate-600 whitespace-nowrap">
                         {formatDate(new Date(incident.reported_date), {
                           day: '2-digit',
                           month: '2-digit',
@@ -119,7 +149,25 @@ const AlertsPage: React.FC = () => {
                           minute: '2-digit',
                         })}
                       </td>
-                      <td className="p-3 text-center">
+
+                      {/* Occurrence (editable if pending) */}
+                      <td className="p-3">
+                        <textarea
+                          rows={2}
+                          className="w-full text-sm p-2 border border-slate-200 rounded-lg resize-none focus:ring-1 focus:ring-primary disabled:bg-transparent disabled:border-transparent disabled:p-0 disabled:resize-none"
+                          placeholder={incident.reviewed ? '' : t('incident_occurrence_placeholder' as any)}
+                          value={
+                            incident.reviewed
+                              ? (incident.occurrence_description ?? '')
+                              : (localTexts[incident.id]?.occurrence ?? '')
+                          }
+                          onChange={e => setLocalField(incident.id, 'occurrence', e.target.value)}
+                          disabled={incident.reviewed}
+                        />
+                      </td>
+
+                      {/* Status badge */}
+                      <td className="p-3 text-center whitespace-nowrap">
                         <span
                           className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-bold ${
                             incident.reviewed
@@ -130,12 +178,30 @@ const AlertsPage: React.FC = () => {
                           {incident.reviewed ? t('alert_reviewed') : t('alert_pending')}
                         </span>
                       </td>
+
+                      {/* Action taken (editable if pending) */}
+                      <td className="p-3">
+                        <textarea
+                          rows={2}
+                          className="w-full text-sm p-2 border border-slate-200 rounded-lg resize-none focus:ring-1 focus:ring-primary disabled:bg-transparent disabled:border-transparent disabled:p-0 disabled:resize-none"
+                          placeholder={incident.reviewed ? '' : t('incident_action_placeholder' as any)}
+                          value={
+                            incident.reviewed
+                              ? (incident.action_taken ?? '')
+                              : (localTexts[incident.id]?.action ?? '')
+                          }
+                          onChange={e => setLocalField(incident.id, 'action', e.target.value)}
+                          disabled={incident.reviewed}
+                        />
+                      </td>
+
+                      {/* Resolve button */}
                       <td className="p-3 text-center">
                         {!incident.reviewed && (
                           <Button
                             variant="ghost"
-                            className="text-sm py-1 px-3 text-primary"
-                            onClick={() => handleMarkReviewed(incident.participantId, incident.id)}
+                            className="text-sm py-1 px-3 text-primary whitespace-nowrap"
+                            onClick={() => handleMarkResolved(incident.participantId, incident.id)}
                           >
                             {t('mark_reviewed')}
                           </Button>

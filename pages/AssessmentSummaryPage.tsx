@@ -80,7 +80,7 @@ const AssessmentSummaryPage: React.FC = () => {
         <Header />
         <main className="p-8">
           <Card>
-            <p>Nenhum dado de avaliação encontrado.</p>
+            <p>{t('no_assessment_data' as any)}</p>
             <Button onClick={() => navigate('/dashboard')} className="mt-4">{t('back_button')}</Button>
           </Card>
         </main>
