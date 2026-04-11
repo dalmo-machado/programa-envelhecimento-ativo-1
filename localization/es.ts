@@ -260,6 +260,7 @@ export const es = {
   birth_date_password_hint: 'Esta fecha se usará como contraseña de acceso del participante.',
   enrollment_save_and_return: 'Guardar y Volver al Panel',
   register_assessment: 'Registrar Evaluación',
+  logout_button: 'Salir',
   // Bilingualism corrections — hardcoded strings moved to i18n
   participant_not_found: 'Participante no encontrado.',
   participant_session_expired: 'Participante no encontrado o sesión expirada.',

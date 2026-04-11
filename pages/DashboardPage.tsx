@@ -93,8 +93,14 @@ const CustomTooltip = ({ active, payload, label, firstAssessment, selectedMetric
 const ParticipantDashboard: React.FC = () => {
     const { t, formatNumber, formatDate } = useLocalization();
     const navigate = useNavigate();
-    const { participantId } = useUserRole();
+    const { participantId, setRole, setParticipantId } = useUserRole();
     const { participants } = useParticipantData();
+
+    const handleLogout = () => {
+        setRole(UserRole.NONE);
+        setParticipantId(null);
+        navigate('/');
+    };
     const [selectedMetric, setSelectedMetric] = useState<keyof Assessment>('grip_kgf');
 
     const participant = participants.find(p => p.study_id === participantId);
@@ -154,6 +160,9 @@ const ParticipantDashboard: React.FC = () => {
                         <span className="font-semibold">{participant.name}</span> • {age} {t('years_old' as any)} • {getSexLabel(participant.sex)}
                     </p>
                 </div>
+                <Button variant="ghost" onClick={handleLogout} className="border border-slate-300 text-slate-600 hover:text-danger hover:border-danger py-2 px-4 text-base shrink-0">
+                    {t('logout_button' as any)}
+                </Button>
             </div>
 
             {isBirthday && (

@@ -262,6 +262,7 @@ export const pt: I18nKeys = {
   birth_date_password_hint: 'Esta data será usada como senha de acesso do participante.',
   enrollment_save_and_return: 'Salvar e Voltar ao Painel',
   register_assessment: 'Registrar Avaliação',
+  logout_button: 'Sair',
   // Bilingualism corrections — hardcoded strings moved to i18n
   participant_not_found: 'Participante não encontrado.',
   participant_session_expired: 'Participante não encontrado ou sessão expirada.',
