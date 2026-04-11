@@ -262,6 +262,13 @@ export const pt: I18nKeys = {
   birth_date_password_hint: 'Esta data será usada como senha de acesso do participante.',
   enrollment_save_and_return: 'Salvar e Voltar ao Painel',
   register_assessment: 'Registrar Avaliação',
+  // Metric group labels (dropdown)
+  metric_group_body_comp: 'Composição Corporal',
+  metric_group_strength: 'Força e Função',
+  metric_group_mobility: 'Mobilidade',
+  metric_group_aerobic: 'Capacidade Aeróbica',
+  close_modal: 'Fechar',
+  session_modal_level: 'Nível {level}',
   // Assessment stations
   assessment_station1: 'Estação 1 — Composição Corporal',
   assessment_station2: 'Estação 2 — Força e Agilidade',

@@ -4,30 +4,115 @@ import { useParams, useNavigate } from 'react-router-dom';
 import {
   LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer,
 } from 'recharts';
-import { Award, ChevronLeft, Shield } from 'lucide-react';
+import { Award, ChevronLeft, Shield, X } from 'lucide-react';
 import { useLocalization } from '../context/LocalizationContext';
 import { useParticipantData } from '../context/ParticipantDataContext';
-import { Assessment } from '../types';
+import { Assessment, PersonalizedSession } from '../types';
 import { trainingPrograms } from '../services/trainingData';
 import { getCurrentBelt } from '../utils/gamification';
 import Card from '../components/ui/Card';
 import Button from '../components/ui/Button';
 import Header from '../components/Header';
 
-const metrics: (keyof Assessment)[] = [
-  'grip_kgf', 'balance_s', 'back_scratch_cm', 'bmi', 'cc_bmi_index', 'calf_circum_cm',
+// ── Grouped metric dropdown ──────────────────────────────────────────────────
+
+const metricGroups: { labelKey: string; metrics: (keyof Assessment)[] }[] = [
+  {
+    labelKey: 'metric_group_body_comp',
+    metrics: ['bmi', 'rcq', 'gordura_percent', 'calf_circum_cm'],
+  },
+  {
+    labelKey: 'metric_group_strength',
+    metrics: ['chair_stand_reps', 'arm_curl_reps', 'grip_kgf', 'handgrip_nondominant_kgf'],
+  },
+  {
+    labelKey: 'metric_group_mobility',
+    metrics: ['up_and_go_seconds', 'chair_sit_reach_cm'],
+  },
+  {
+    labelKey: 'metric_group_aerobic',
+    metrics: ['six_min_walk_meters', 'six_min_walk_percent'],
+  },
 ];
 
-const metricTranslationKeys: Record<string, string> = {
-  grip_kgf: 'handgrip_strength',
+const metricTranslationKeys: Partial<Record<keyof Assessment, string>> = {
+  bmi: 'bmi',
+  rcq: 'waist_hip_ratio',
+  gordura_percent: 'body_fat_percent',
+  calf_circum_cm: 'calf_circumference',
+  chair_stand_reps: 'chair_stand_test',
+  arm_curl_reps: 'arm_curl_test',
+  grip_kgf: 'handgrip_dominant',
+  handgrip_nondominant_kgf: 'handgrip_nondominant',
+  up_and_go_seconds: 'up_and_go',
+  chair_sit_reach_cm: 'chair_sit_reach',
+  six_min_walk_meters: 'six_min_walk',
+  six_min_walk_percent: 'six_min_walk_percent',
   balance_s: 'balance',
   back_scratch_cm: 'flexibility',
-  bmi: 'bmi',
-  cc_bmi_index: 'cc_bmi_index',
-  calf_circum_cm: 'calf_circumference',
   weight_kg: 'weight',
   height_cm: 'height',
+  cc_bmi_index: 'cc_bmi_index',
 };
+
+// ── Session modal ────────────────────────────────────────────────────────────
+
+interface SessionModalProps {
+  sessionIndex: number;
+  session: PersonalizedSession;
+  onClose: () => void;
+}
+
+const SessionModal: React.FC<SessionModalProps> = ({ sessionIndex, session, onClose }) => {
+  const { t } = useLocalization();
+  const program = trainingPrograms[session.sessionType];
+  const levelIdx = session.level - 1;
+
+  return (
+    <div
+      className="fixed inset-0 bg-black/50 z-50 flex items-start justify-center p-4 overflow-y-auto"
+      onClick={(e) => { if (e.target === e.currentTarget) onClose(); }}
+    >
+      <div className="bg-white rounded-2xl shadow-2xl max-w-lg w-full mt-10 mb-10">
+        {/* Header */}
+        <div className="flex items-start justify-between p-6 border-b border-slate-200">
+          <div>
+            <h2 className="text-xl font-bold text-primary-dark">
+              {t('session_number_label', { number: sessionIndex + 1 })} — {t(program.titleKey)}
+            </h2>
+            <p className="text-slate-500 mt-1">
+              {t('session_modal_level' as any, { level: session.level })}
+            </p>
+          </div>
+          <button
+            onClick={onClose}
+            className="flex items-center gap-1.5 text-sm font-semibold text-white bg-primary hover:bg-primary-dark px-3 py-1.5 rounded-lg transition-colors ml-4 shrink-0"
+          >
+            <X size={14} />
+            {t('close_modal' as any)}
+          </button>
+        </div>
+
+        {/* Exercise list */}
+        <div className="divide-y divide-slate-100">
+          {program.exercises.map((exercise, i) => {
+            const duration = exercise.levels[levelIdx];
+            return (
+              <div key={i} className="flex items-center justify-between px-6 py-4">
+                <span className="font-semibold text-slate-700">{t(exercise.nameKey)}</span>
+                <span className="ml-4 text-secondary font-bold whitespace-nowrap">
+                  {t(duration.key, duration.params)}
+                </span>
+              </div>
+            );
+          })}
+        </div>
+      </div>
+    </div>
+  );
+};
+
+// ── Main component ───────────────────────────────────────────────────────────
 
 const ResearcherParticipantView: React.FC = () => {
   const { id } = useParams<{ id: string }>();
@@ -35,6 +120,7 @@ const ResearcherParticipantView: React.FC = () => {
   const { t, formatNumber, formatDate } = useLocalization();
   const { participants } = useParticipantData();
   const [selectedMetric, setSelectedMetric] = useState<keyof Assessment>('grip_kgf');
+  const [modalSessionIndex, setModalSessionIndex] = useState<number | null>(null);
 
   const participant = participants.find(p => p.study_id === id);
 
@@ -74,14 +160,15 @@ const ResearcherParticipantView: React.FC = () => {
     date: formatDate(new Date(a.date), { month: 'short', day: 'numeric' }),
     value: a.data[selectedMetric],
   }));
-  const firstAssessment = participant.assessments[0];
+
+  const modalSession = modalSessionIndex !== null ? participant.training_plan[modalSessionIndex] : null;
 
   return (
     <div className="bg-background min-h-screen">
       <Header />
       <main className="p-4 sm:p-6 md:p-8">
 
-        {/* Top bar: back button | action buttons | read-only badge */}
+        {/* Top bar */}
         <div className="flex items-center justify-between mb-6 gap-3 flex-wrap">
           <Button
             variant="ghost"
@@ -138,7 +225,7 @@ const ResearcherParticipantView: React.FC = () => {
             </Card>
           </div>
 
-          {/* Progress chart */}
+          {/* Progress chart with grouped dropdown */}
           <Card>
             <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-4 gap-4">
               <h2 className="text-2xl font-bold text-primary-dark">{t('my_progress_title')}</h2>
@@ -149,8 +236,14 @@ const ResearcherParticipantView: React.FC = () => {
                   className="p-2 rounded-md border-slate-300 border bg-white text-slate-700 shadow-sm"
                   aria-label={t('select_metric')}
                 >
-                  {metrics.map(mk => (
-                    <option key={mk} value={mk}>{t(metricTranslationKeys[mk] as any)}</option>
+                  {metricGroups.map(group => (
+                    <optgroup key={group.labelKey} label={t(group.labelKey as any)}>
+                      {group.metrics.map(mk => (
+                        <option key={mk} value={mk}>
+                          {t((metricTranslationKeys[mk] ?? mk) as any)}
+                        </option>
+                      ))}
+                    </optgroup>
                   ))}
                 </select>
               )}
@@ -164,19 +257,14 @@ const ResearcherParticipantView: React.FC = () => {
                   <Tooltip
                     formatter={(value: number) => [
                       formatNumber(value, { maximumFractionDigits: 1 }),
-                      t(metricTranslationKeys[selectedMetric] as any),
+                      t((metricTranslationKeys[selectedMetric] ?? selectedMetric) as any),
                     ]}
-                    labelFormatter={(label) => {
-                      if (!firstAssessment) return label;
-                      const initialValue = firstAssessment.data[selectedMetric];
-                      return label;
-                    }}
                   />
                   <Legend />
                   <Line
                     type="monotone"
                     dataKey="value"
-                    name={t(metricTranslationKeys[selectedMetric] as any)}
+                    name={t((metricTranslationKeys[selectedMetric] ?? selectedMetric) as any)}
                     stroke="#005f73"
                     strokeWidth={3}
                   />
@@ -221,17 +309,19 @@ const ResearcherParticipantView: React.FC = () => {
             </Card>
           )}
 
-          {/* Training plan grid */}
+          {/* Training plan grid — cards are clickable */}
           {participant.training_plan.length > 0 && (
             <Card title={t('my_training_plan_title')}>
+              <p className="text-slate-500 text-sm mb-3">Clique em uma sessão para ver os exercícios.</p>
               <div className="grid grid-cols-3 sm:grid-cols-6 md:grid-cols-8 gap-2">
                 {participant.training_plan.map((session, i) => {
                   const isCompleted = i < participant.sessions_completed;
                   const isNext = i === participant.sessions_completed;
                   return (
-                    <div
+                    <button
                       key={i}
-                      className={`p-2 rounded-lg text-center text-xs border ${
+                      onClick={() => setModalSessionIndex(i)}
+                      className={`p-2 rounded-lg text-center text-xs border transition-shadow hover:shadow-md focus:outline-none focus:ring-2 focus:ring-primary ${
                         isCompleted
                           ? 'bg-green-50 border-green-300 text-green-700'
                           : isNext
@@ -242,7 +332,7 @@ const ResearcherParticipantView: React.FC = () => {
                       <p className="font-bold">{i + 1}</p>
                       <p className="truncate">{t(trainingPrograms[session.sessionType].titleKey)}</p>
                       <p>Nv {session.level}</p>
-                    </div>
+                    </button>
                   );
                 })}
               </div>
@@ -251,6 +341,15 @@ const ResearcherParticipantView: React.FC = () => {
 
         </div>
       </main>
+
+      {/* Session detail modal */}
+      {modalSessionIndex !== null && modalSession && (
+        <SessionModal
+          sessionIndex={modalSessionIndex}
+          session={modalSession}
+          onClose={() => setModalSessionIndex(null)}
+        />
+      )}
     </div>
   );
 };

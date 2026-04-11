@@ -260,6 +260,13 @@ export const es = {
   birth_date_password_hint: 'Esta fecha se usará como contraseña de acceso del participante.',
   enrollment_save_and_return: 'Guardar y Volver al Panel',
   register_assessment: 'Registrar Evaluación',
+  // Metric group labels (dropdown)
+  metric_group_body_comp: 'Composición Corporal',
+  metric_group_strength: 'Fuerza y Función',
+  metric_group_mobility: 'Movilidad',
+  metric_group_aerobic: 'Capacidad Aeróbica',
+  close_modal: 'Cerrar',
+  session_modal_level: 'Nivel {level}',
   // Assessment stations
   assessment_station1: 'Estación 1 — Composición Corporal',
   assessment_station2: 'Estación 2 — Fuerza y Agilidad',

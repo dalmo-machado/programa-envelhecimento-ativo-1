@@ -25,29 +25,46 @@ const DashboardPage: React.FC = () => {
     );
 };
 
-const metrics: (keyof Assessment)[] = ['grip_kgf', 'balance_s', 'back_scratch_cm', 'bmi', 'cc_bmi_index', 'calf_circum_cm'];
+const metricGroups: { labelKey: string; metrics: (keyof Assessment)[] }[] = [
+    {
+        labelKey: 'metric_group_body_comp',
+        metrics: ['bmi', 'rcq', 'gordura_percent', 'calf_circum_cm'],
+    },
+    {
+        labelKey: 'metric_group_strength',
+        metrics: ['chair_stand_reps', 'arm_curl_reps', 'grip_kgf', 'handgrip_nondominant_kgf'],
+    },
+    {
+        labelKey: 'metric_group_mobility',
+        metrics: ['up_and_go_seconds', 'chair_sit_reach_cm'],
+    },
+    {
+        labelKey: 'metric_group_aerobic',
+        metrics: ['six_min_walk_meters', 'six_min_walk_percent'],
+    },
+];
 
 const metricTranslationKeys: Partial<Record<keyof Assessment, string>> = {
-    grip_kgf: 'handgrip_strength',
-    balance_s: 'balance',
-    back_scratch_cm: 'flexibility',
     bmi: 'bmi',
-    cc_bmi_index: 'cc_bmi_index',
-    calf_circum_cm: 'calf_circumference',
-    weight_kg: 'weight',
-    height_cm: 'height',
-    cintura_cm: 'waist_circumference',
-    quadril_cm: 'hip_circumference',
-    gordura_percent: 'body_fat_percent',
     rcq: 'waist_hip_ratio',
-    handgrip_nondominant_kgf: 'handgrip_nondominant',
+    gordura_percent: 'body_fat_percent',
+    calf_circum_cm: 'calf_circumference',
     chair_stand_reps: 'chair_stand_test',
     arm_curl_reps: 'arm_curl_test',
-    chair_sit_reach_cm: 'chair_sit_reach',
+    grip_kgf: 'handgrip_dominant',
+    handgrip_nondominant_kgf: 'handgrip_nondominant',
     up_and_go_seconds: 'up_and_go',
+    chair_sit_reach_cm: 'chair_sit_reach',
     six_min_walk_meters: 'six_min_walk',
-    six_min_walk_predicted: 'six_min_walk_predicted',
     six_min_walk_percent: 'six_min_walk_percent',
+    balance_s: 'balance',
+    back_scratch_cm: 'flexibility',
+    weight_kg: 'weight',
+    height_cm: 'height',
+    cc_bmi_index: 'cc_bmi_index',
+    cintura_cm: 'waist_circumference',
+    quadril_cm: 'hip_circumference',
+    six_min_walk_predicted: 'six_min_walk_predicted',
 };
 
 const CustomTooltip = ({ active, payload, label, firstAssessment, selectedMetricKey, t, formatNumber }: any) => {
@@ -58,11 +75,12 @@ const CustomTooltip = ({ active, payload, label, firstAssessment, selectedMetric
         if (initialValue !== 0) {
             percentChange = ((currentValue - initialValue) / Math.abs(initialValue)) * 100;
         }
+        const metricLabel = (metricTranslationKeys[selectedMetricKey as keyof Assessment] ?? selectedMetricKey) as any;
 
         return (
             <div className="bg-white p-3 border border-slate-300 rounded-lg shadow-lg">
                 <p className="font-bold text-primary-dark">{label}</p>
-                <p>{`${t(metricTranslationKeys[selectedMetricKey as keyof Assessment] as any)}: ${formatNumber(currentValue, { maximumFractionDigits: 1 })}`}</p>
+                <p>{`${t(metricLabel)}: ${formatNumber(currentValue, { maximumFractionDigits: 1 })}`}</p>
                 <p className={`font-semibold ${percentChange >= 0 ? 'text-green-600' : 'text-red-600'}`}>
                     {t('percent_change')}: {percentChange > 0 ? '+' : ''}{formatNumber(percentChange, { maximumFractionDigits: 1 })}%
                 </p>
@@ -210,8 +228,14 @@ const ParticipantDashboard: React.FC = () => {
                             className="p-2 rounded-md border-slate-300 border bg-white text-slate-700 shadow-sm"
                             aria-label={t('select_metric')}
                         >
-                            {metrics.map(metric => (
-                                <option key={metric} value={metric}>{t(metricTranslationKeys[metric] as any)}</option>
+                            {metricGroups.map(group => (
+                                <optgroup key={group.labelKey} label={t(group.labelKey as any)}>
+                                    {group.metrics.map(mk => (
+                                        <option key={mk} value={mk}>
+                                            {t((metricTranslationKeys[mk] ?? mk) as any)}
+                                        </option>
+                                    ))}
+                                </optgroup>
                             ))}
                         </select>
                     )}
@@ -224,7 +248,7 @@ const ParticipantDashboard: React.FC = () => {
                             <YAxis />
                             <Tooltip content={<CustomTooltip firstAssessment={firstAssessment} selectedMetricKey={selectedMetric} t={t} formatNumber={formatNumber} />} />
                             <Legend />
-                            <Line type="monotone" dataKey="value" name={t(metricTranslationKeys[selectedMetric] as any)} stroke="#005f73" strokeWidth={3} />
+                            <Line type="monotone" dataKey="value" name={t((metricTranslationKeys[selectedMetric] ?? selectedMetric) as any)} stroke="#005f73" strokeWidth={3} />
                         </LineChart>
                     </ResponsiveContainer>
                 ) : (
@@ -346,13 +370,14 @@ const ResearcherDashboard: React.FC = () => {
                                 <th className="p-3">{t('researcher_table_name' as any)}</th>
                                 <th className="p-3">{t('researcher_table_sex' as any)}</th>
                                 <th className="p-3">{t('researcher_table_age' as any)}</th>
-                                <th className="p-3">{t('researcher_table_site')}</th>
                                 <th className="p-3 text-center">{t('researcher_table_sessions')}</th>
                                 <th className="p-3 text-center">{t('researcher_table_adherence')}</th>
                                 <th className="p-3">{t('researcher_table_last_assessment')}</th>
+                                <th className="p-3 text-center">{t('height')}</th>
+                                <th className="p-3 text-center">{t('weight')}</th>
+                                <th className="p-3">{t('participant_dob')}</th>
                                 <th className="p-3 text-center" title="Força de Preensão (kgf)">{t('researcher_table_grip')}</th>
                                 <th className="p-3 text-center" title="Equilíbrio (s)">{t('researcher_table_balance')}</th>
-                                <th className="p-3 text-center" title="Flexibilidade (cm)">{t('researcher_table_flexibility')}</th>
                                 <th className="p-3 text-center" title="Índice de Massa Corporal">{t('researcher_table_bmi')}</th>
                                 <th className="p-3 text-center">Ações</th>
                             </tr>
@@ -382,13 +407,14 @@ const ResearcherDashboard: React.FC = () => {
                                         <td className="p-3">{p.name}</td>
                                         <td className="p-3">{getSexLabel(p.sex)}</td>
                                         <td className="p-3">{age}</td>
-                                        <td className="p-3">{p.site}</td>
                                         <td className="p-3 text-center">{p.sessions_completed}</td>
                                         <td className="p-3 text-center">{formatNumber(adherence, {maximumFractionDigits: 0})}%</td>
                                         <td className="p-3">{latestAssessment ? formatDate(new Date(latestAssessment.date), { day: '2-digit', month: '2-digit', year: 'numeric'}) : '-'}</td>
+                                        <td className="p-3 text-center">{latestAssessment ? latestAssessment.data.height_cm : '-'}</td>
+                                        <td className="p-3 text-center">{latestAssessment ? latestAssessment.data.weight_kg : '-'}</td>
+                                        <td className="p-3">{formatDate(new Date(p.birth_date || '1950-01-01'), { day: '2-digit', month: '2-digit', year: 'numeric' })}</td>
                                         <td className="p-3 text-center">{latestAssessment ? latestAssessment.data.grip_kgf : '-'}</td>
                                         <td className="p-3 text-center">{latestAssessment ? latestAssessment.data.balance_s : '-'}</td>
-                                        <td className="p-3 text-center">{latestAssessment ? latestAssessment.data.back_scratch_cm : '-'}</td>
                                         <td className="p-3 text-center">{latestAssessment ? formatNumber(latestAssessment.data.bmi, {maximumFractionDigits: 1}) : '-'}</td>
                                         <td className="p-3 text-center">
                                             <Button
