@@ -261,4 +261,5 @@ export const pt: I18nKeys = {
   site_label: 'Polo',
   birth_date_password_hint: 'Esta data será usada como senha de acesso do participante.',
   enrollment_save_and_return: 'Salvar e Voltar ao Painel',
+  register_assessment: 'Registrar Avaliação',
 };

@@ -259,6 +259,7 @@ export const es = {
   site_label: 'Sede',
   birth_date_password_hint: 'Esta fecha se usará como contraseña de acceso del participante.',
   enrollment_save_and_return: 'Guardar y Volver al Panel',
+  register_assessment: 'Registrar Evaluación',
 };
 
 export type I18nKeys = typeof es;

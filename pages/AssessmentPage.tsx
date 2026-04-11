@@ -1,6 +1,6 @@
 
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { useLocalization } from '../context/LocalizationContext';
 import { useParticipantData } from '../context/ParticipantDataContext';
 import { useUserRole } from '../context/UserRoleContext';
@@ -47,9 +47,15 @@ const CalculatedField: React.FC<{label: string, value: string | number}> = ({lab
 
 const AssessmentPage: React.FC = () => {
     const navigate = useNavigate();
+    const location = useLocation();
     const { t, formatNumber } = useLocalization();
     const { participants, updateParticipant } = useParticipantData();
     const { participantId } = useUserRole();
+
+    // When navigated from ResearcherParticipantView, a participantId is passed via
+    // router state so the researcher can register an assessment for a specific participant.
+    const preselectedId: string | undefined = (location.state as any)?.participantId;
+    const effectiveParticipantId = preselectedId ?? participantId;
 
     const [formData, setFormData] = useState<FormData>({
         grip_kgf: '', balance_s: '', back_scratch_cm: '', weight_kg: '', height_cm: '', calf_circum_cm: ''
@@ -84,9 +90,9 @@ const AssessmentPage: React.FC = () => {
     };
     
     const handleSubmit = () => {
-        if (!participantId) return;
+        if (!effectiveParticipantId) return;
 
-        const participant = participants.find(p => p.study_id === participantId);
+        const participant = participants.find(p => p.study_id === effectiveParticipantId);
         if (!participant) return;
 
         const assessmentData: Assessment = {
@@ -117,10 +123,14 @@ const AssessmentPage: React.FC = () => {
             participantUpdate.training_plan = generateTrainingPlan(assessmentData);
         }
         
-        updateParticipant(participantId, participantUpdate);
-        
+        updateParticipant(effectiveParticipantId, participantUpdate);
+
         alert(t('assessment_saved_success'));
-        navigate('/assessment/summary');
+        if (preselectedId) {
+            navigate(`/researcher/participant/${preselectedId}`);
+        } else {
+            navigate('/assessment/summary');
+        }
     }
 
     const isFormValid = Object.values(formData).every(value => typeof value === 'string' && value.trim() !== '');

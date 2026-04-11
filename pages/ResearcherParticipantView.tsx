@@ -81,8 +81,8 @@ const ResearcherParticipantView: React.FC = () => {
       <Header />
       <main className="p-4 sm:p-6 md:p-8">
 
-        {/* Back button + read-only badge */}
-        <div className="flex items-center justify-between mb-6">
+        {/* Top bar: back button | action buttons | read-only badge */}
+        <div className="flex items-center justify-between mb-6 gap-3 flex-wrap">
           <Button
             variant="ghost"
             onClick={() => navigate('/dashboard')}
@@ -91,10 +91,19 @@ const ResearcherParticipantView: React.FC = () => {
             <ChevronLeft size={18} />
             {t('back_to_dashboard')}
           </Button>
-          <span className="flex items-center gap-1.5 text-xs font-bold text-slate-500 bg-slate-100 px-3 py-1.5 rounded-full uppercase tracking-wider">
-            <Shield size={12} />
-            {t('readonly_badge')}
-          </span>
+          <div className="flex items-center gap-3">
+            <Button
+              variant="secondary"
+              className="py-2 px-4 text-base"
+              onClick={() => navigate('/assessment/new', { state: { participantId: participant.study_id } })}
+            >
+              {t('register_assessment')}
+            </Button>
+            <span className="flex items-center gap-1.5 text-xs font-bold text-slate-500 bg-slate-100 px-3 py-1.5 rounded-full uppercase tracking-wider">
+              <Shield size={12} />
+              {t('readonly_badge')}
+            </span>
+          </div>
         </div>
 
         <div className="space-y-8">
