@@ -140,15 +140,15 @@ const ParticipantDashboard: React.FC = () => {
                             <p className="text-xl text-slate-600 my-4">{t('training_complete')}</p>
                         ) : nextSessionPlan ? (
                             <>
-                                <h3 className="text-2xl font-bold text-primary-dark">{t('next_session_info_with_level', { 
-                                    sessionNumber: nextSessionIndex + 1, 
+                                <h3 className="text-2xl font-bold text-primary-dark">{t('next_session_info_with_level', {
+                                    sessionNumber: nextSessionIndex + 1,
                                     sessionType: t(trainingPrograms[nextSessionPlan.sessionType].titleKey),
                                     level: nextSessionPlan.level
                                 })}</h3>
-                                <p className="text-slate-600 my-2">Seu plano de treino personalizado selecionou esta sessão para focar nas suas metas.</p>
+                                <p className="text-slate-600 my-2">{t('next_session_personalized_hint')}</p>
                             </>
                         ) : (
-                            <p className="text-slate-600 my-4">Complete sua primeira avaliação para gerar seu plano de treino personalizado.</p>
+                            <p className="text-slate-600 my-4">{t('awaiting_first_assessment')}</p>
                         )}
                     </div>
                     <Button 
@@ -178,7 +178,7 @@ const ParticipantDashboard: React.FC = () => {
                     </div>
                      <Card title={t('my_training_plan_title')} className="flex flex-col">
                         <div className="flex-grow">
-                            <p className="text-slate-600 mb-4">Veja a sequência completa de 24 sessões elaborada para você.</p>
+                            <p className="text-slate-600 mb-4">{t('my_training_plan_desc')}</p>
                         </div>
                         <Button onClick={() => navigate('/training-plan')} variant="ghost" className="w-full border-2 border-primary">
                             {t('view_full_plan')}
@@ -187,50 +187,38 @@ const ParticipantDashboard: React.FC = () => {
                 </div>
             </div>
 
-            <div className="grid md:grid-cols-3 gap-8">
-                <Card className="md:col-span-2">
-                    <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-4 gap-4">
-                        <h2 className="text-2xl font-bold text-primary-dark">{t('my_progress_title')}</h2>
-                        {chartData.length > 0 && (
-                            <select 
-                                id="metric-select-progress"
-                                value={selectedMetric} 
-                                onChange={(e) => setSelectedMetric(e.target.value as keyof Assessment)}
-                                className="p-2 rounded-md border-slate-300 border bg-white text-slate-700 shadow-sm"
-                                aria-label={t('select_metric')}
-                            >
-                                {metrics.map(metric => (
-                                    <option key={metric} value={metric}>{t(metricTranslationKeys[metric] as any)}</option>
-                                ))}
-                            </select>
-                        )}
-                    </div>
-                    {chartData.length > 0 ? (
-                        <>
-                            <ResponsiveContainer width="100%" height={300}>
-                                <LineChart data={chartData}>
-                                    <CartesianGrid strokeDasharray="3 3" />
-                                    <XAxis dataKey="date" />
-                                    <YAxis />
-                                    <Tooltip content={<CustomTooltip firstAssessment={firstAssessment} selectedMetricKey={selectedMetric} t={t} formatNumber={formatNumber} />} />
-                                    <Legend />
-                                    <Line type="monotone" dataKey="value" name={t(metricTranslationKeys[selectedMetric] as any)} stroke="#005f73" strokeWidth={3} />
-                                </LineChart>
-                            </ResponsiveContainer>
-                        </>
-                    ) : (
-                        <p className="text-slate-600">{t('no_assessments_yet')}</p>
+            <Card>
+                <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-4 gap-4">
+                    <h2 className="text-2xl font-bold text-primary-dark">{t('my_progress_title')}</h2>
+                    {chartData.length > 0 && (
+                        <select
+                            id="metric-select-progress"
+                            value={selectedMetric}
+                            onChange={(e) => setSelectedMetric(e.target.value as keyof Assessment)}
+                            className="p-2 rounded-md border-slate-300 border bg-white text-slate-700 shadow-sm"
+                            aria-label={t('select_metric')}
+                        >
+                            {metrics.map(metric => (
+                                <option key={metric} value={metric}>{t(metricTranslationKeys[metric] as any)}</option>
+                            ))}
+                        </select>
                     )}
-                </Card>
-                <Card title={t('my_assessments_title')} className="flex flex-col">
-                    <div className="flex-grow">
-                        <p className="text-slate-600 mb-4">{t('my_assessments_desc')}</p>
-                    </div>
-                    <Button onClick={() => navigate('/assessment/new')} variant="ghost" className="w-full border-2 border-primary">
-                        {t('new_assessment')}
-                    </Button>
-                </Card>
-            </div>
+                </div>
+                {chartData.length > 0 ? (
+                    <ResponsiveContainer width="100%" height={300}>
+                        <LineChart data={chartData}>
+                            <CartesianGrid strokeDasharray="3 3" />
+                            <XAxis dataKey="date" />
+                            <YAxis />
+                            <Tooltip content={<CustomTooltip firstAssessment={firstAssessment} selectedMetricKey={selectedMetric} t={t} formatNumber={formatNumber} />} />
+                            <Legend />
+                            <Line type="monotone" dataKey="value" name={t(metricTranslationKeys[selectedMetric] as any)} stroke="#005f73" strokeWidth={3} />
+                        </LineChart>
+                    </ResponsiveContainer>
+                ) : (
+                    <p className="text-slate-600">{t('no_assessments_yet')}</p>
+                )}
+            </Card>
         </div>
     );
 };

@@ -68,8 +68,11 @@ const App: React.FC = () => {
 // Roles that are considered "logged in" for the purpose of the home redirect.
 const AUTHENTICATED_ROLES = [UserRole.PARTICIPANT, UserRole.RESEARCHER, UserRole.ADMIN];
 
-// Roles allowed on participant-only routes.
+// Roles allowed on participant-only routes (training execution).
 const PARTICIPANT_ROLES = [UserRole.PARTICIPANT, UserRole.ADMIN];
+
+// Roles allowed to create/view clinical assessments.
+const RESEARCHER_ROLES = [UserRole.RESEARCHER, UserRole.ADMIN];
 
 // Roles allowed on routes shared between participants and researchers.
 const ALL_AUTHENTICATED = [UserRole.PARTICIPANT, UserRole.RESEARCHER, UserRole.ADMIN];
@@ -111,10 +114,11 @@ const AppRouter: React.FC = () => {
             </RouteGuard>
           }
         />
+        {/* Researcher-only routes — participants are redirected away */}
         <Route
           path="/assessment/new"
           element={
-            <RouteGuard allowedRoles={PARTICIPANT_ROLES}>
+            <RouteGuard allowedRoles={RESEARCHER_ROLES}>
               <AssessmentPage />
             </RouteGuard>
           }
@@ -122,7 +126,7 @@ const AppRouter: React.FC = () => {
         <Route
           path="/assessment/summary"
           element={
-            <RouteGuard allowedRoles={PARTICIPANT_ROLES}>
+            <RouteGuard allowedRoles={RESEARCHER_ROLES}>
               <AssessmentSummaryPage />
             </RouteGuard>
           }

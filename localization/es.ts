@@ -68,7 +68,7 @@ export const es = {
   my_assessments_title: 'Mis Evaluaciones',
   my_assessments_desc: 'Realice una nueva evaluación para seguir su progreso.',
   my_progress_title: 'Mi Progreso',
-  no_assessments_yet: 'Realice su primera evaluación para ver su progreso.',
+  no_assessments_yet: 'Las evaluaciones serán registradas por el investigador y aparecerán aquí.',
   back_button: 'Volver',
   continue_to_dashboard: 'Continuar al Panel',
   assessment_summary_title: 'Resumen de la Evaluación',
@@ -182,7 +182,7 @@ export const es = {
   incident_reported: 'Gracias por reportarlo. Un investigador se pondrá en contacto pronto.',
   start_workout: 'Comenzar Entrenamiento',
   my_training_plan_title: 'Mi Plan de Entrenamiento',
-  training_plan_not_generated: 'Plan de entrenamiento aún no generado. Complete su primera evaluación.',
+  training_plan_not_generated: 'Plan de entrenamiento aún no generado. Aguarde la evaluación con el investigador.',
   training_plan_desc: 'Este es su plan de 8 semanas, personalizado en base a su evaluación.',
   day: 'Día',
   level: 'Nivel',
@@ -231,6 +231,9 @@ export const es = {
   login_error: 'Código o contraseña incorrectos. Verifique los datos e inténtelo de nuevo.',
   login_new_participant: '¿Todavía no tiene cuenta?',
   login_enroll_link: 'Iniciar registro como nuevo participante',
+  awaiting_first_assessment: 'Su investigador realizará la evaluación física y a continuación se generará el plan de entrenamiento personalizado.',
+  next_session_personalized_hint: 'Su plan de entrenamiento personalizado seleccionó esta sesión para centrarse en sus objetivos.',
+  my_training_plan_desc: 'Vea la secuencia completa de 24 sesiones elaborada para usted.',
 };
 
 export type I18nKeys = typeof es;
