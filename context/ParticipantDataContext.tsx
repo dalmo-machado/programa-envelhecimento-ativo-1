@@ -79,15 +79,17 @@ export const ParticipantDataProvider: React.FC<{ children: ReactNode }> = ({ chi
 
     supa.loadAllParticipants()
       .then(async (data) => {
-        if (data.length === 0) {
-          // First run: seed DB with mock participants
-          console.info('[Supabase] DB is empty. Migrating mock data...');
-          await supa.migrateParticipants(mockParticipants);
-          // After migration persist training plans for mock participants
-          mockParticipants.forEach(p => {
+        // Incremental migration: insert any mock participant not yet in the DB
+        const existingIds = new Set(data.map(p => p.study_id));
+        const missing = mockParticipants.filter(p => !existingIds.has(p.study_id));
+        if (missing.length > 0) {
+          console.info('[Supabase] Migrating missing mock participants:', missing.map(p => p.study_id));
+          await supa.migrateParticipants(missing);
+          missing.forEach(p => {
             if (p.training_plan?.length > 0) saveTrainingPlan(p.study_id, p.training_plan);
           });
-          data = mockParticipants.map(p => ({ ...p, training_plan: [] }));
+          // Merge newly migrated participants into the loaded list
+          data = [...data, ...missing.map(p => ({ ...p, training_plan: [] }))];
         }
 
         // Restore training_plan from localStorage for each participant
