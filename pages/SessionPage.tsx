@@ -7,6 +7,7 @@ import { useUserRole } from '../context/UserRoleContext';
 import { trainingPrograms } from '../services/trainingData';
 import { getRandomPreSessionMessage, getRandomPostSessionMessage } from '../utils/gamification';
 import { I18nKeys } from '../localization/es';
+import { IncidentReport } from '../types';
 import Card from '../components/ui/Card';
 import Button from '../components/ui/Button';
 import Header from '../components/Header';
@@ -65,7 +66,22 @@ const SessionPage: React.FC = () => {
 
   const handleFinish = () => {
     navigate('/dashboard');
-  }
+  };
+
+  const handleReportIncident = () => {
+    setIncidentReported(true);
+    if (participant) {
+      const newIncident: IncidentReport = {
+        id: `${Date.now()}-${Math.random().toString(36).slice(2, 7)}`,
+        session_index: sessionIndex,
+        reported_date: new Date().toISOString(),
+        reviewed: false,
+      };
+      updateParticipant(participant.study_id, {
+        incidents: [...(participant.incidents || []), newIncident],
+      });
+    }
+  };
 
   const exercises = program.exercises;
   const currentExercise = exercises[currentExerciseIndex];
@@ -202,9 +218,9 @@ const SessionPage: React.FC = () => {
                 
                 {incidentReported === null ? (
                     <div className="flex flex-col gap-4 w-full">
-                        <Button 
-                            onClick={() => setIncidentReported(true)} 
-                            variant="secondary" 
+                        <Button
+                            onClick={handleReportIncident}
+                            variant="secondary"
                             className="w-full border-2 border-amber-500 text-amber-700 bg-amber-50 hover:bg-amber-100"
                         >
                             {t('incident_yes')}

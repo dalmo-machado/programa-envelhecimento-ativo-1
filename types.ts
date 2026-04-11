@@ -35,6 +35,13 @@ export interface PersonalizedSession {
   level: 1 | 2 | 3;
 }
 
+export interface IncidentReport {
+  id: string;
+  session_index: number;
+  reported_date: string; // ISO string
+  reviewed: boolean;
+}
+
 export interface Participant {
   study_id: string;
   name: string;
@@ -46,4 +53,5 @@ export interface Participant {
   assessments: AssessmentRecord[];
   sessions_completed: number;
   training_plan: PersonalizedSession[];
+  incidents: IncidentReport[];
 }

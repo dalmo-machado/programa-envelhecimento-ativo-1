@@ -226,7 +226,12 @@ const ParticipantDashboard: React.FC = () => {
 const ResearcherDashboard: React.FC = () => {
     const { t, formatDate, formatNumber } = useLocalization();
     const { participants } = useParticipantData();
-    const { setRole, setParticipantId } = useUserRole();
+    const navigate = useNavigate();
+
+    const unreviewedAlerts = participants.reduce(
+        (sum, p) => sum + (p.incidents || []).filter(inc => !inc.reviewed).length,
+        0
+    );
 
     const handleExport = () => {
         const headers = [
@@ -281,7 +286,30 @@ const ResearcherDashboard: React.FC = () => {
 
     return (
         <div className="space-y-8">
-            <h1 className="text-4xl font-bold text-primary-dark">{t('dashboard_researcher_title')}</h1>
+            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+                <h1 className="text-4xl font-bold text-primary-dark">{t('dashboard_researcher_title')}</h1>
+                <div className="flex gap-3">
+                    <Button
+                        variant="ghost"
+                        className="border-2 border-primary text-base py-2 px-4"
+                        onClick={() => navigate('/consent')}
+                    >
+                        + {t('new_participant')}
+                    </Button>
+                    <Button
+                        variant="ghost"
+                        className={`border-2 text-base py-2 px-4 flex items-center gap-2 ${unreviewedAlerts > 0 ? 'border-amber-500 text-amber-700' : 'border-slate-300 text-slate-600'}`}
+                        onClick={() => navigate('/researcher/alerts')}
+                    >
+                        {t('alerts_title')}
+                        {unreviewedAlerts > 0 && (
+                            <span className="bg-amber-500 text-white text-xs font-bold px-2 py-0.5 rounded-full">
+                                {unreviewedAlerts}
+                            </span>
+                        )}
+                    </Button>
+                </div>
+            </div>
             <Card>
                 <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-4 gap-4">
                     <h2 className="text-2xl font-bold text-primary-dark">{t('participants')}</h2>
@@ -340,15 +368,12 @@ const ResearcherDashboard: React.FC = () => {
                                         <td className="p-3 text-center">{latestAssessment ? latestAssessment.data.back_scratch_cm : '-'}</td>
                                         <td className="p-3 text-center">{latestAssessment ? formatNumber(latestAssessment.data.bmi, {maximumFractionDigits: 1}) : '-'}</td>
                                         <td className="p-3 text-center">
-                                            <Button 
-                                                variant="ghost" 
+                                            <Button
+                                                variant="ghost"
                                                 className="text-primary text-sm py-1 px-3"
-                                                onClick={() => {
-                                                    setRole(UserRole.PARTICIPANT);
-                                                    setParticipantId(p.study_id);
-                                                }}
+                                                onClick={() => navigate(`/researcher/participant/${p.study_id}`)}
                                             >
-                                                Ver Painel
+                                                {t('view_participant_panel')}
                                             </Button>
                                         </td>
                                     </tr>

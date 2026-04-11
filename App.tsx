@@ -14,6 +14,8 @@ import ConsentPage from './pages/ConsentPage';
 import ScreeningPage from './pages/ScreeningPage';
 import AssessmentSummaryPage from './pages/AssessmentSummaryPage';
 import TrainingPlanPage from './pages/TrainingPlanPage';
+import ResearcherParticipantView from './pages/ResearcherParticipantView';
+import AlertsPage from './pages/AlertsPage';
 import { pt } from './localization/pt';
 import { es, I18nKeys } from './localization/es';
 
@@ -92,8 +94,24 @@ const AppRouter: React.FC = () => {
               : <LoginPage />
           }
         />
-        <Route path="/consent" element={<ConsentPage />} />
-        <Route path="/screening" element={<ScreeningPage />} />
+
+        {/* Enrollment flow — researcher/admin only */}
+        <Route
+          path="/consent"
+          element={
+            <RouteGuard allowedRoles={RESEARCHER_ROLES}>
+              <ConsentPage />
+            </RouteGuard>
+          }
+        />
+        <Route
+          path="/screening"
+          element={
+            <RouteGuard allowedRoles={RESEARCHER_ROLES}>
+              <ScreeningPage />
+            </RouteGuard>
+          }
+        />
 
         {/* Shared: participants and researchers */}
         <Route
@@ -114,7 +132,23 @@ const AppRouter: React.FC = () => {
             </RouteGuard>
           }
         />
-        {/* Researcher-only routes — participants are redirected away */}
+        {/* Researcher-only routes */}
+        <Route
+          path="/researcher/participant/:id"
+          element={
+            <RouteGuard allowedRoles={RESEARCHER_ROLES}>
+              <ResearcherParticipantView />
+            </RouteGuard>
+          }
+        />
+        <Route
+          path="/researcher/alerts"
+          element={
+            <RouteGuard allowedRoles={RESEARCHER_ROLES}>
+              <AlertsPage />
+            </RouteGuard>
+          }
+        />
         <Route
           path="/assessment/new"
           element={

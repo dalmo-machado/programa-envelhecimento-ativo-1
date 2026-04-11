@@ -191,19 +191,6 @@ const LoginPage: React.FC = () => {
             {t('login_submit')}
           </Button>
         </form>
-
-        {/* New participant enrollment */}
-        <div className="mt-8 pt-6 border-t border-slate-200 text-center">
-          <p className="text-sm text-slate-500 mb-3">{t('login_new_participant')}</p>
-          <Button
-            type="button"
-            variant="ghost"
-            onClick={() => navigate('/consent')}
-            className="w-full border-2 border-primary"
-          >
-            {t('login_enroll_link')}
-          </Button>
-        </div>
       </Card>
     </div>
   );

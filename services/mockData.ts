@@ -20,12 +20,13 @@ export const newParticipant: Participant = {
   name: 'Novo Participante',
   sex: 'M',
   birth_date: '1950-01-01',
-  site: 'Brazil', 
+  site: 'Brazil',
   language: Language.PT_BR,
   consent_date: new Date().toISOString(),
   sessions_completed: 0,
   assessments: [],
   training_plan: [],
+  incidents: [],
 };
 
 export const mockParticipants: Participant[] = [
@@ -55,6 +56,7 @@ export const mockParticipants: Participant[] = [
         },
     ],
     training_plan: samplePlan,
+    incidents: [],
   },
   {
     study_id: 'BR-002',
@@ -75,6 +77,7 @@ export const mockParticipants: Participant[] = [
         },
     ],
     training_plan: samplePlan,
+    incidents: [],
   },
   {
     study_id: 'ES-001',
@@ -102,5 +105,6 @@ export const mockParticipants: Participant[] = [
         },
     ],
     training_plan: samplePlan,
+    incidents: [],
   },
 ];
