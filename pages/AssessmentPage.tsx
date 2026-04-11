@@ -126,11 +126,7 @@ const AssessmentPage: React.FC = () => {
         updateParticipant(effectiveParticipantId, participantUpdate);
 
         alert(t('assessment_saved_success'));
-        if (preselectedId) {
-            navigate(`/researcher/participant/${preselectedId}`);
-        } else {
-            navigate('/assessment/summary');
-        }
+        navigate('/assessment/summary', preselectedId ? { state: { participantId: preselectedId } } : undefined);
     }
 
     const isFormValid = Object.values(formData).every(value => typeof value === 'string' && value.trim() !== '');

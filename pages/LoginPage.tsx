@@ -69,7 +69,7 @@ const LoginPage: React.FC = () => {
       p => p.study_id.toUpperCase() === normalizedCode
     );
 
-    if (participant && normalizeDateInput(password) === participant.birth_date) {
+    if (participant && normalizeDateInput(password) === normalizeDateInput(participant.birth_date)) {
       setRole(UserRole.PARTICIPANT);
       setParticipantId(participant.study_id);
       navigate('/dashboard', { replace: true });

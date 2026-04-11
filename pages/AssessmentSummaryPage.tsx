@@ -1,5 +1,5 @@
 import React from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { useLocalization } from '../context/LocalizationContext';
 import { useParticipantData } from '../context/ParticipantDataContext';
 import { useUserRole } from '../context/UserRoleContext';
@@ -58,11 +58,20 @@ interface ResultDisplay {
 
 const AssessmentSummaryPage: React.FC = () => {
   const navigate = useNavigate();
+  const location = useLocation();
   const { t, formatNumber } = useLocalization();
   const { participants } = useParticipantData();
   const { participantId } = useUserRole();
 
-  const participant = participants.find(p => p.study_id === participantId);
+  // If the assessment was registered by a researcher for a specific participant,
+  // the participantId is forwarded via router state so we can return there.
+  const preselectedId: string | undefined = (location.state as any)?.participantId;
+  const returnPath = preselectedId
+    ? `/researcher/participant/${preselectedId}`
+    : '/dashboard';
+  const effectiveParticipantId = preselectedId ?? participantId;
+
+  const participant = participants.find(p => p.study_id === effectiveParticipantId);
   const lastAssessment = participant?.assessments?.[participant.assessments.length - 1];
 
   if (!lastAssessment) {
@@ -112,7 +121,7 @@ const AssessmentSummaryPage: React.FC = () => {
             ))}
           </div>
 
-          <Button onClick={() => navigate('/dashboard')} className="w-full mt-10">
+          <Button onClick={() => navigate(returnPath)} className="w-full mt-10">
             {t('continue_to_dashboard')}
           </Button>
         </Card>
