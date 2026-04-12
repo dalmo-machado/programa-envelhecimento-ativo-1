@@ -385,9 +385,9 @@ const ResearcherDashboard: React.FC = () => {
                                 <th className="p-3 text-center">{t('height')}</th>
                                 <th className="p-3 text-center">{t('weight')}</th>
                                 <th className="p-3">{t('participant_dob')}</th>
-                                <th className="p-3 text-center" title="Força de Preensão (kgf)">{t('researcher_table_grip')}</th>
-                                <th className="p-3 text-center" title="Equilíbrio (s)">{t('researcher_table_balance')}</th>
-                                <th className="p-3 text-center" title="Índice de Massa Corporal">{t('researcher_table_bmi')}</th>
+                                <th className="p-3 text-center" title={t('handgrip_strength')}>{t('researcher_table_grip')}</th>
+                                <th className="p-3 text-center" title={t('balance')}>{t('researcher_table_balance')}</th>
+                                <th className="p-3 text-center" title={t('bmi')}>{t('researcher_table_bmi')}</th>
                                 <th className="p-3 text-center">{t('table_col_actions' as any)}</th>
                             </tr>
                         </thead>

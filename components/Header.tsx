@@ -54,7 +54,7 @@ const Header: React.FC = () => {
                     <div 
                         className="flex items-center space-x-3 cursor-pointer hover:opacity-80 transition-opacity"
                         onClick={handleHomeClick}
-                        title="Início / Reiniciar"
+                        title={t('home_tooltip' as any)}
                         role="button"
                         tabIndex={0}
                     >
@@ -86,11 +86,11 @@ const Header: React.FC = () => {
             {showConfirm && (
                 <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-[9999] p-4">
                     <div className="bg-white rounded-xl p-6 max-w-md w-full shadow-xl text-slate-800">
-                        <h3 className="text-xl font-bold text-slate-800 mb-4">Encerrar Sessão</h3>
+                        <h3 className="text-xl font-bold text-slate-800 mb-4">{t('end_session_title' as any)}</h3>
                         <p className="text-slate-600 mb-6">{t('confirm_end_session' as any)}</p>
                         <div className="flex justify-end space-x-3">
-                            <Button variant="secondary" onClick={handleCancelEndSession}>Cancelar</Button>
-                            <Button onClick={handleConfirmEndSession}>Sim, encerrar</Button>
+                            <Button variant="secondary" onClick={handleCancelEndSession}>{t('cancel' as any)}</Button>
+                            <Button onClick={handleConfirmEndSession}>{t('confirm_end_session_yes' as any)}</Button>
                         </div>
                     </div>
                 </div>
@@ -99,11 +99,11 @@ const Header: React.FC = () => {
             {showResetConfirm && (
                 <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-[9999] p-4">
                     <div className="bg-white rounded-xl p-6 max-w-md w-full shadow-xl text-slate-800">
-                        <h3 className="text-xl font-bold text-red-600 mb-4">Atenção: Zerar Dados</h3>
+                        <h3 className="text-xl font-bold text-red-600 mb-4">{t('reset_data_title' as any)}</h3>
                         <p className="text-slate-600 mb-6">{t('confirm_reset_all' as any)}</p>
                         <div className="flex justify-end space-x-3">
-                            <Button variant="secondary" onClick={handleCancelResetAll}>Não, apenas sair</Button>
-                            <Button className="bg-red-600 hover:bg-red-700 text-white" onClick={handleConfirmResetAll}>Sim, zerar tudo</Button>
+                            <Button variant="secondary" onClick={handleCancelResetAll}>{t('reset_data_no' as any)}</Button>
+                            <Button className="bg-red-600 hover:bg-red-700 text-white" onClick={handleConfirmResetAll}>{t('reset_data_yes' as any)}</Button>
                         </div>
                     </div>
                 </div>

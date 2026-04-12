@@ -300,6 +300,16 @@ export const es = {
   six_min_walk: 'TC6 — Caminata 6 Minutos (m)',
   six_min_walk_predicted: 'Distancia Prevista (m)',
   six_min_walk_percent: 'Porcentaje de lo Previsto (%)',
+  // Header modals
+  home_tooltip: 'Inicio / Reiniciar',
+  end_session_title: 'Cerrar Sesión',
+  cancel: 'Cancelar',
+  confirm_end_session_yes: 'Sí, cerrar',
+  reset_data_title: 'Atención: Borrar Datos',
+  reset_data_no: 'No, solo salir',
+  reset_data_yes: 'Sí, borrar todo',
+  // Screening
+  study_id_placeholder: 'Ej: ES-004',
 };
 
 export type I18nKeys = typeof es;

@@ -302,4 +302,14 @@ export const pt: I18nKeys = {
   six_min_walk: 'TC6 — Caminhada 6 Minutos (m)',
   six_min_walk_predicted: 'Distância Prevista (m)',
   six_min_walk_percent: 'Percentual do Previsto (%)',
+  // Header modals
+  home_tooltip: 'Início / Reiniciar',
+  end_session_title: 'Encerrar Sessão',
+  cancel: 'Cancelar',
+  confirm_end_session_yes: 'Sim, encerrar',
+  reset_data_title: 'Atenção: Zerar Dados',
+  reset_data_no: 'Não, apenas sair',
+  reset_data_yes: 'Sim, zerar tudo',
+  // Screening
+  study_id_placeholder: 'Ex: BR-004',
 };

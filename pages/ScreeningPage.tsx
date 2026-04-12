@@ -136,7 +136,7 @@ const ScreeningPage: React.FC = () => {
                                     value={formData.study_id}
                                     onChange={e => setFormData({ ...formData, study_id: e.target.value })}
                                     className="w-full p-3 border border-slate-300 rounded-md focus:ring-primary focus:border-primary"
-                                    placeholder="Ex: BR-004"
+                                    placeholder={t('study_id_placeholder' as any)}
                                 />
                                 <p className="text-xs text-slate-400 mt-1">{t('study_id_hint')}</p>
                             </div>
@@ -152,7 +152,7 @@ const ScreeningPage: React.FC = () => {
                                         value={formData.name}
                                         onChange={e => setFormData({ ...formData, name: e.target.value })}
                                         className="w-full p-3 border border-slate-300 rounded-md focus:ring-primary focus:border-primary"
-                                        placeholder="Nome completo"
+                                        placeholder={t('full_name_placeholder' as any)}
                                     />
                                 </div>
 
