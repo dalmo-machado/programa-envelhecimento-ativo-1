@@ -299,7 +299,7 @@ export const es = {
   up_and_go: 'Levantarse y Caminar (s)',
   six_min_walk: 'TC6 — Caminata 6 Minutos (m)',
   six_min_walk_predicted: 'Distancia Prevista (m)',
-  six_min_walk_percent: 'Porcentaje de lo Previsto (%)',
+  six_min_walk_percent: 'TC6 — Porcentaje de lo Previsto (%)',
   // Country labels (site field)
   country_brazil: 'Brasil',
   country_spain: 'España',

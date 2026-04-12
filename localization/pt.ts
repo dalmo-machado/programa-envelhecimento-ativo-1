@@ -301,7 +301,7 @@ export const pt: I18nKeys = {
   up_and_go: 'Levantar e Caminhar (s)',
   six_min_walk: 'TC6 — Caminhada 6 Minutos (m)',
   six_min_walk_predicted: 'Distância Prevista (m)',
-  six_min_walk_percent: 'Percentual do Previsto (%)',
+  six_min_walk_percent: 'TC6 — Percentual do Previsto (%)',
   // Country labels (site field)
   country_brazil: 'Brasil',
   country_spain: 'Espanha',
