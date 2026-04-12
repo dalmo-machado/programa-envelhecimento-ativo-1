@@ -302,6 +302,12 @@ export const pt: I18nKeys = {
   six_min_walk: 'TC6 — Caminhada 6 Minutos (m)',
   six_min_walk_predicted: 'Distância Prevista (m)',
   six_min_walk_percent: 'Percentual do Previsto (%)',
+  // Country labels (site field)
+  country_brazil: 'Brasil',
+  country_spain: 'Espanha',
+  // Table headers — TC6
+  researcher_table_tc6: 'TC6 (m)',
+  researcher_table_tc6_percent: 'TC6 — % Previsto',
   // Header modals
   home_tooltip: 'Início / Reiniciar',
   end_session_title: 'Encerrar Sessão',

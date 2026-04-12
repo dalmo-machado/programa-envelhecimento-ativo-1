@@ -100,6 +100,12 @@ const ResearcherParticipantView: React.FC = () => {
     return t('sex_other' as any);
   };
 
+  const getSiteLabel = (site: string) => {
+    if (site === 'Brazil' || site === 'Brasil' || site === 'BR') return t('country_brazil' as any);
+    if (site === 'Spain' || site === 'España' || site === 'ES') return t('country_spain' as any);
+    return site;
+  };
+
   const chartData = participant.assessments.map(a => ({
     date: formatDate(new Date(a.date), { month: 'short', day: 'numeric' }),
     value: a.data[selectedMetric],
@@ -143,7 +149,7 @@ const ResearcherParticipantView: React.FC = () => {
           <div>
             <h1 className="text-4xl font-bold text-primary-dark">{participant.name}</h1>
             <p className="text-lg text-slate-600 mt-1">
-              {participant.study_id} • {age} {t('years_old' as any)} • {getSexLabel(participant.sex)} • {participant.site}
+              {participant.study_id} • {age} {t('years_old' as any)} • {getSexLabel(participant.sex)} • {getSiteLabel(participant.site)}
             </p>
           </div>
 
@@ -232,6 +238,8 @@ const ResearcherParticipantView: React.FC = () => {
                       <th className="p-3 text-center">{t('researcher_table_flexibility')}</th>
                       <th className="p-3 text-center">{t('researcher_table_bmi')}</th>
                       <th className="p-3 text-center">{t('weight')}</th>
+                      <th className="p-3 text-center">{t('researcher_table_tc6' as any)}</th>
+                      <th className="p-3 text-center">{t('researcher_table_tc6_percent' as any)}</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-slate-200">
@@ -245,6 +253,12 @@ const ResearcherParticipantView: React.FC = () => {
                         <td className="p-3 text-center">{assessment.data.back_scratch_cm}</td>
                         <td className="p-3 text-center">{formatNumber(assessment.data.bmi, { maximumFractionDigits: 1 })}</td>
                         <td className="p-3 text-center">{assessment.data.weight_kg}</td>
+                        <td className="p-3 text-center">{assessment.data.six_min_walk_meters ?? '—'}</td>
+                        <td className="p-3 text-center">
+                          {assessment.data.six_min_walk_percent != null
+                            ? formatNumber(assessment.data.six_min_walk_percent, { maximumFractionDigits: 1 }) + ' %'
+                            : '—'}
+                        </td>
                       </tr>
                     ))}
                   </tbody>

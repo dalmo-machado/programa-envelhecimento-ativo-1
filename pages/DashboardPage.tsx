@@ -64,7 +64,6 @@ const metricTranslationKeys: Partial<Record<keyof Assessment, string>> = {
     cc_bmi_index: 'cc_bmi_index',
     cintura_cm: 'waist_circumference',
     quadril_cm: 'hip_circumference',
-    six_min_walk_predicted: 'six_min_walk_predicted',
 };
 
 const CustomTooltip = ({ active, payload, label, firstAssessment, selectedMetricKey, t, formatNumber }: any) => {
