@@ -316,6 +316,7 @@ export const pt: I18nKeys = {
   reset_data_title: 'Atenção: Zerar Dados',
   reset_data_no: 'Não, apenas sair',
   reset_data_yes: 'Sim, zerar tudo',
+  login_loading: 'Carregando dados...',
   // Screening
   study_id_placeholder: 'Ex: BR-004',
   // Session history table (researcher view)

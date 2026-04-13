@@ -82,6 +82,8 @@ function extractLegacyTrainingPlans() {
 
 interface ParticipantDataContextType {
   participants: Participant[];
+  /** True while the initial Supabase fetch is in flight. Login should wait for this to be false. */
+  isLoading: boolean;
   updateParticipant: (participantId: string, updatedData: Partial<Participant>) => void;
   addParticipant: (participant: Participant) => void;
 }
@@ -97,6 +99,9 @@ export const ParticipantDataProvider: React.FC<{ children: ReactNode }> = ({ chi
     } catch { /* ignore */ }
     return mockParticipants;
   });
+
+  // True while the initial Supabase fetch is in flight
+  const [isLoading, setIsLoading] = useState(true);
 
   // Tracks whether Supabase loaded successfully
   const supabaseReady = useRef(false);
@@ -142,11 +147,13 @@ export const ParticipantDataProvider: React.FC<{ children: ReactNode }> = ({ chi
         setParticipants(withPlans);
         localStorage.setItem('participantsData', JSON.stringify(withPlans));
         supabaseReady.current = true;
+        setIsLoading(false);
         console.info('[Supabase] Loaded', withPlans.length, 'participant(s).');
       })
       .catch(err => {
         console.warn('[Supabase] Load failed — using localStorage fallback.', err);
         // State already has localStorage data from useState initializer; nothing to do.
+        setIsLoading(false);
       });
   }, []);
 
@@ -211,8 +218,8 @@ export const ParticipantDataProvider: React.FC<{ children: ReactNode }> = ({ chi
   };
 
   const value = useMemo(
-    () => ({ participants, updateParticipant, addParticipant }),
-    [participants],
+    () => ({ participants, isLoading, updateParticipant, addParticipant }),
+    [participants, isLoading],
   );
 
   return (

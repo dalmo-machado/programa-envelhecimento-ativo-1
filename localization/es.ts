@@ -314,6 +314,7 @@ export const es = {
   reset_data_title: 'Atención: Borrar Datos',
   reset_data_no: 'No, solo salir',
   reset_data_yes: 'Sí, borrar todo',
+  login_loading: 'Cargando datos...',
   // Screening
   study_id_placeholder: 'Ej: ES-004',
   // Session history table (researcher view)

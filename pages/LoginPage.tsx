@@ -28,7 +28,7 @@ const LoginPage: React.FC = () => {
   const { language, setLanguage, t } = useLocalization();
   const navigate = useNavigate();
   const { setRole, setParticipantId } = useUserRole();
-  const { participants } = useParticipantData();
+  const { participants, isLoading } = useParticipantData();
 
   const [code, setCode] = useState('');
   const [password, setPassword] = useState('');
@@ -186,9 +186,9 @@ const LoginPage: React.FC = () => {
           <Button
             type="submit"
             className="w-full py-3 text-lg"
-            disabled={!code.trim() || !password.trim()}
+            disabled={!code.trim() || !password.trim() || isLoading}
           >
-            {t('login_submit')}
+            {isLoading ? t('login_loading' as any) : t('login_submit')}
           </Button>
         </form>
       </Card>
