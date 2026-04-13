@@ -7,7 +7,7 @@ import { useUserRole } from '../context/UserRoleContext';
 import { trainingPrograms } from '../services/trainingData';
 import { getRandomPreSessionMessage, getRandomPostSessionMessage } from '../utils/gamification';
 import { I18nKeys } from '../localization/es';
-import { IncidentReport } from '../types';
+import { IncidentReport, SessionLog } from '../types';
 import Card from '../components/ui/Card';
 import Button from '../components/ui/Button';
 import Header from '../components/Header';
@@ -28,6 +28,7 @@ const SessionPage: React.FC = () => {
   const [preMessage, setPreMessage] = useState<keyof I18nKeys>('motivational_pre_session');
   const [postMessage, setPostMessage] = useState<keyof I18nKeys>('motivational_post_session');
   const [incidentReported, setIncidentReported] = useState<boolean | null>(null);
+  const [sessionStart] = useState<string>(() => new Date().toISOString());
 
   useEffect(() => {
     setPreMessage(getRandomPreSessionMessage());
@@ -56,9 +57,22 @@ const SessionPage: React.FC = () => {
 
   const handleCompleteSession = () => {
     if (!difficulty || !participant) return;
-    
+
+    const sessionEnd = new Date().toISOString();
+    const durationMs = new Date(sessionEnd).getTime() - new Date(sessionStart).getTime();
+    const duration_min = Math.round(durationMs / 60000 * 10) / 10;
+
+    const newLog: SessionLog = {
+      session_index: sessionIndex,
+      session_start: sessionStart,
+      session_end: sessionEnd,
+      duration_min,
+      completed: true,
+    };
+
     updateParticipant(participant.study_id, {
-        sessions_completed: participant.sessions_completed + 1,
+      sessions_completed: participant.sessions_completed + 1,
+      session_logs: [...(participant.session_logs ?? []), newLog],
     });
 
     setSessionState('incident');
@@ -123,10 +137,10 @@ const SessionPage: React.FC = () => {
                 <h2 className="text-3xl font-bold text-slate-800 mb-6 text-center">{t(currentExercise.nameKey)}</h2>
                 
                 <div className="w-full max-w-2xl">
-                    <img 
-                      src={currentExercise.illustrationUrl} 
-                      alt={t(currentExercise.nameKey)} 
-                      className="w-full h-64 md:h-80 object-cover rounded-xl shadow-md mb-6 bg-primary-light" 
+                    <img
+                      src={currentExercise.illustrationUrl}
+                      alt={t(currentExercise.nameKey)}
+                      className="block w-full max-h-80 object-contain rounded-xl shadow-md mb-6 bg-primary-light"
                     />
 
                     <div className="flex gap-4 mb-6">

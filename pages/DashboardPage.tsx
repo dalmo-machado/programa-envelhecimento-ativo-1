@@ -290,6 +290,8 @@ const ResearcherDashboard: React.FC = () => {
             "balance_s", "back_scratch_cm",
             // Station 3
             "six_min_walk_meters", "six_min_walk_predicted", "six_min_walk_percent",
+            // Session activity
+            "avg_session_duration_min", "total_active_min",
         ];
 
         const csvRows = [headers.join(',')];
@@ -298,10 +300,18 @@ const ResearcherDashboard: React.FC = () => {
 
         participants.forEach(p => {
             const adherence = (p.sessions_completed / 24) * 100;
+            const logs = p.session_logs ?? [];
+            const totalActive = logs.reduce((sum, l) => sum + l.duration_min, 0);
+            const avgDuration = logs.length > 0
+                ? (totalActive / logs.length).toFixed(1)
+                : '';
+            const totalActiveStr = logs.length > 0 ? totalActive.toFixed(1) : '';
+
             if (p.assessments.length === 0) {
                 const row = [p.study_id, p.name, p.sex, p.birth_date, p.site, p.sessions_completed, adherence.toFixed(2),
                     'N/A', 'N/A', 'N/A', 'N/A', 'N/A', 'N/A', 'N/A', 'N/A', 'N/A', 'N/A',
-                    'N/A', 'N/A', 'N/A', 'N/A', 'N/A', 'N/A', 'N/A', 'N/A', 'N/A', 'N/A', 'N/A'];
+                    'N/A', 'N/A', 'N/A', 'N/A', 'N/A', 'N/A', 'N/A', 'N/A', 'N/A', 'N/A', 'N/A',
+                    avgDuration, totalActiveStr];
                 csvRows.push(row.join(','));
             } else {
                 p.assessments.forEach(assessment => {
@@ -321,6 +331,8 @@ const ResearcherDashboard: React.FC = () => {
                         na(d.six_min_walk_meters),
                         d.six_min_walk_predicted !== undefined ? d.six_min_walk_predicted.toFixed(1) : '',
                         d.six_min_walk_percent !== undefined ? d.six_min_walk_percent.toFixed(1) : '',
+                        // Session activity
+                        avgDuration, totalActiveStr,
                     ];
                     csvRows.push(row.join(','));
                 });

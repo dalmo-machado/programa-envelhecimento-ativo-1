@@ -32,23 +32,32 @@ function loadTrainingPlan(participantId: string): PersonalizedSession[] {
  *   per-participant localStorage key for browsers that haven't synced yet.
  */
 function mergeLocalData(supabaseParticipants: Participant[]): Participant[] {
-  let localSessionsMap = new Map<string, number>();
+  type LocalSnapshot = { sessions_completed: number; session_logs: Participant['session_logs'] };
+  let localMap = new Map<string, LocalSnapshot>();
   try {
     const raw = localStorage.getItem('participantsData');
     if (raw) {
       const localData: Participant[] = JSON.parse(raw);
-      localData.forEach(p => localSessionsMap.set(p.study_id, p.sessions_completed ?? 0));
+      localData.forEach(p => localMap.set(p.study_id, {
+        sessions_completed: p.sessions_completed ?? 0,
+        session_logs: p.session_logs ?? [],
+      }));
     }
   } catch { /* ignore */ }
 
   return supabaseParticipants.map(p => {
-    const localSessions = localSessionsMap.get(p.study_id) ?? 0;
+    const local = localMap.get(p.study_id);
+    const localSessions = local?.sessions_completed ?? 0;
+    const localLogs = local?.session_logs ?? [];
+    const supabaseLogs = p.session_logs ?? [];
     const localPlan = loadTrainingPlan(p.study_id);
     const effectivePlan = (p.training_plan ?? []).length > 0 ? p.training_plan : localPlan;
     return {
       ...p,
       sessions_completed: Math.max(p.sessions_completed, localSessions),
       training_plan: effectivePlan,
+      // Take whichever source has more log entries to prevent race-condition regression
+      session_logs: supabaseLogs.length >= localLogs.length ? supabaseLogs : localLogs,
     };
   });
 }

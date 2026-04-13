@@ -316,6 +316,16 @@ export const es = {
   reset_data_yes: 'Sí, borrar todo',
   // Screening
   study_id_placeholder: 'Ej: ES-004',
+  // Session history table (researcher view)
+  session_history_title: 'Historial de Sesiones',
+  session_history_col_session: 'Sesión',
+  session_history_col_date: 'Fecha',
+  session_history_col_start: 'Inicio',
+  session_history_col_end: 'Fin',
+  session_history_col_duration: 'Duración (min)',
+  session_history_col_completed: 'Completada',
+  session_history_completed_yes: 'Sí',
+  session_history_completed_no: 'No',
 };
 
 export type I18nKeys = typeof es;

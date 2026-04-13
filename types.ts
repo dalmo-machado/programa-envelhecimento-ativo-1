@@ -60,6 +60,14 @@ export interface IncidentReport {
   action_taken?: string;
 }
 
+export interface SessionLog {
+  session_index: number;
+  session_start: string;  // ISO timestamp
+  session_end: string;    // ISO timestamp
+  duration_min: number;   // rounded to 1 decimal place
+  completed: boolean;
+}
+
 export interface Participant {
   study_id: string;
   name: string;
@@ -72,4 +80,5 @@ export interface Participant {
   sessions_completed: number;
   training_plan: PersonalizedSession[];
   incidents: IncidentReport[];
+  session_logs?: SessionLog[];
 }

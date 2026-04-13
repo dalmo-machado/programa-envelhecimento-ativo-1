@@ -318,4 +318,14 @@ export const pt: I18nKeys = {
   reset_data_yes: 'Sim, zerar tudo',
   // Screening
   study_id_placeholder: 'Ex: BR-004',
+  // Session history table (researcher view)
+  session_history_title: 'Histórico de Sessões',
+  session_history_col_session: 'Sessão',
+  session_history_col_date: 'Data',
+  session_history_col_start: 'Início',
+  session_history_col_end: 'Fim',
+  session_history_col_duration: 'Duração (min)',
+  session_history_col_completed: 'Concluída',
+  session_history_completed_yes: 'Sim',
+  session_history_completed_no: 'Não',
 };

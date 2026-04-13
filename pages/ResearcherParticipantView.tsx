@@ -267,6 +267,50 @@ const ResearcherParticipantView: React.FC = () => {
             </Card>
           )}
 
+          {/* Session history */}
+          {(participant.session_logs ?? []).length > 0 && (
+            <Card title={t('session_history_title' as any)}>
+              <div className="overflow-x-auto">
+                <table className="w-full text-left text-sm whitespace-nowrap">
+                  <thead className="bg-slate-100 text-slate-600 uppercase">
+                    <tr>
+                      <th className="p-3">{t('session_history_col_session' as any)}</th>
+                      <th className="p-3">{t('session_history_col_date' as any)}</th>
+                      <th className="p-3">{t('session_history_col_start' as any)}</th>
+                      <th className="p-3">{t('session_history_col_end' as any)}</th>
+                      <th className="p-3 text-center">{t('session_history_col_duration' as any)}</th>
+                      <th className="p-3 text-center">{t('session_history_col_completed' as any)}</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-slate-200">
+                    {(participant.session_logs ?? []).map((log, i) => {
+                      const startDate = new Date(log.session_start);
+                      const endDate = new Date(log.session_end);
+                      const formatTime = (d: Date) =>
+                        d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+                      return (
+                        <tr key={i} className="hover:bg-slate-50">
+                          <td className="p-3 font-semibold text-primary-dark">{log.session_index + 1}</td>
+                          <td className="p-3">
+                            {formatDate(startDate, { day: '2-digit', month: '2-digit', year: 'numeric' })}
+                          </td>
+                          <td className="p-3">{formatTime(startDate)}</td>
+                          <td className="p-3">{formatTime(endDate)}</td>
+                          <td className="p-3 text-center">{formatNumber(log.duration_min, { maximumFractionDigits: 1 })}</td>
+                          <td className="p-3 text-center">
+                            {log.completed
+                              ? t('session_history_completed_yes' as any)
+                              : t('session_history_completed_no' as any)}
+                          </td>
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                </table>
+              </div>
+            </Card>
+          )}
+
           {/* Training plan grid — cards are clickable */}
           {participant.training_plan.length > 0 && (
             <Card title={t('my_training_plan_title')}>

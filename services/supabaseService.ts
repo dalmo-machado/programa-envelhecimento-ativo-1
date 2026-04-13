@@ -18,7 +18,7 @@
  */
 
 import { supabase } from '../lib/supabase';
-import { Assessment, AssessmentRecord, IncidentReport, Language, Participant } from '../types';
+import { Assessment, AssessmentRecord, IncidentReport, Language, Participant, SessionLog } from '../types';
 
 // ─────────────────────────────────────────────
 //  Row-type helpers
@@ -113,6 +113,7 @@ function participantToDb(p: Participant): Record<string, unknown> {
     consent_date: p.consent_date,
     sessions_completed: p.sessions_completed,
     training_plan: p.training_plan,
+    session_logs: p.session_logs ?? [],
   };
 }
 
@@ -154,6 +155,7 @@ export async function loadAllParticipants(): Promise<Participant[]> {
       assessments,
       incidents,
       training_plan: Array.isArray(row.training_plan) ? row.training_plan : [],
+      session_logs: Array.isArray(row.session_logs) ? (row.session_logs as SessionLog[]) : [],
     };
   });
 
@@ -229,6 +231,17 @@ export async function syncUpdate(
           .then(({ error }) => { if (error) throw error; }),
       );
     }
+  }
+
+  // ── Session logs (append-only; sync when new entries are added) ─────────────
+  if (changes.session_logs && changes.session_logs.length > (old.session_logs?.length ?? 0)) {
+    ops.push(
+      supabase
+        .from('participants')
+        .update({ session_logs: changes.session_logs })
+        .eq('study_id', participantId)
+        .then(({ error }) => { if (error) throw error; }),
+    );
   }
 
   // ── Training plan (written on first assessment; syncs across devices) ────────
