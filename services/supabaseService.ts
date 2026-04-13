@@ -12,7 +12,6 @@
  *   six_min_walk_percent_predicted ↔ six_min_walk_percent
  *
  * Fields not in DB:
- *   training_plan  → localStorage only
  *   whoqol_total   → not stored in Supabase
  *   six_min_walk_predicted → calculated, not stored
  *   moment         → not tracked by app (default null)
@@ -113,6 +112,7 @@ function participantToDb(p: Participant): Record<string, unknown> {
     language: p.language,
     consent_date: p.consent_date,
     sessions_completed: p.sessions_completed,
+    training_plan: p.training_plan,
   };
 }
 
@@ -153,7 +153,7 @@ export async function loadAllParticipants(): Promise<Participant[]> {
       sessions_completed: row.sessions_completed ?? 0,
       assessments,
       incidents,
-      training_plan: [], // merged from localStorage by caller
+      training_plan: Array.isArray(row.training_plan) ? row.training_plan : [],
     };
   });
 
@@ -229,6 +229,17 @@ export async function syncUpdate(
           .then(({ error }) => { if (error) throw error; }),
       );
     }
+  }
+
+  // ── Training plan (written on first assessment; syncs across devices) ────────
+  if (changes.training_plan && changes.training_plan.length > 0) {
+    ops.push(
+      supabase
+        .from('participants')
+        .update({ training_plan: changes.training_plan })
+        .eq('study_id', participantId)
+        .then(({ error }) => { if (error) throw error; }),
+    );
   }
 
   // ── Incidents (upsert all — handles new + reviewed updates) ───────────────

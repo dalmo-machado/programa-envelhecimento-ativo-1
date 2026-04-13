@@ -3,10 +3,11 @@ import React, { createContext, useState, useContext, useMemo, useEffect, useRef,
 import { Participant, PersonalizedSession } from '../types';
 import { mockParticipants } from '../services/mockData';
 import * as supa from '../services/supabaseService';
+import { generateTrainingPlan } from '../services/trainingPlanner';
 
 // ─────────────────────────────────────────────
 //  Training-plan localStorage helpers
-//  (training_plan is not stored in Supabase)
+//  (also stored in Supabase; localStorage used as cache / offline fallback)
 // ─────────────────────────────────────────────
 
 const TP_KEY = (id: string) => `trainingPlan_${id}`;
@@ -23,14 +24,33 @@ function loadTrainingPlan(participantId: string): PersonalizedSession[] {
   return [];
 }
 
-/** Merge training_plan (from localStorage) into a participant array coming from Supabase. */
-function mergeTrainingPlans(participants: Participant[]): Participant[] {
-  return participants.map(p => ({
-    ...p,
-    training_plan: loadTrainingPlan(p.study_id).length > 0
-      ? loadTrainingPlan(p.study_id)
-      : p.training_plan,
-  }));
+/**
+ * Merge localStorage data into a Supabase-loaded participant array.
+ * - sessions_completed: take MAX to prevent regression from the race condition
+ *   where updates made before supabaseReady was set were never synced.
+ * - training_plan: prefer Supabase (now authoritative); fall back to the
+ *   per-participant localStorage key for browsers that haven't synced yet.
+ */
+function mergeLocalData(supabaseParticipants: Participant[]): Participant[] {
+  let localSessionsMap = new Map<string, number>();
+  try {
+    const raw = localStorage.getItem('participantsData');
+    if (raw) {
+      const localData: Participant[] = JSON.parse(raw);
+      localData.forEach(p => localSessionsMap.set(p.study_id, p.sessions_completed ?? 0));
+    }
+  } catch { /* ignore */ }
+
+  return supabaseParticipants.map(p => {
+    const localSessions = localSessionsMap.get(p.study_id) ?? 0;
+    const localPlan = loadTrainingPlan(p.study_id);
+    const effectivePlan = (p.training_plan ?? []).length > 0 ? p.training_plan : localPlan;
+    return {
+      ...p,
+      sessions_completed: Math.max(p.sessions_completed, localSessions),
+      training_plan: effectivePlan,
+    };
+  });
 }
 
 /** One-time extraction: pull training plans from the old monolithic localStorage blob. */
@@ -92,12 +112,28 @@ export const ParticipantDataProvider: React.FC<{ children: ReactNode }> = ({ chi
           data = [...data, ...missing.map(p => ({ ...p, training_plan: [] }))];
         }
 
-        // Restore training_plan from localStorage for each participant
-        const merged = mergeTrainingPlans(data);
-        setParticipants(merged);
-        localStorage.setItem('participantsData', JSON.stringify(merged));
+        // Merge sessions_completed (MAX) and training_plan (Supabase > localStorage)
+        const merged = mergeLocalData(data);
+
+        // Safety fallback: regenerate training plan for participants who have
+        // assessments but no plan (e.g., plan was saved only on researcher's browser).
+        const withPlans = merged.map(p => {
+          if ((p.training_plan ?? []).length === 0 && p.assessments.length > 0) {
+            const plan = generateTrainingPlan(p.assessments[0].data);
+            saveTrainingPlan(p.study_id, plan);
+            // Sync the regenerated plan to Supabase so all devices benefit.
+            supa.syncUpdate(p.study_id, p, { training_plan: plan }).catch(err =>
+              console.warn('[Supabase] auto-regenerate training_plan sync failed:', err),
+            );
+            return { ...p, training_plan: plan };
+          }
+          return p;
+        });
+
+        setParticipants(withPlans);
+        localStorage.setItem('participantsData', JSON.stringify(withPlans));
         supabaseReady.current = true;
-        console.info('[Supabase] Loaded', merged.length, 'participant(s).');
+        console.info('[Supabase] Loaded', withPlans.length, 'participant(s).');
       })
       .catch(err => {
         console.warn('[Supabase] Load failed — using localStorage fallback.', err);
