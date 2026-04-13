@@ -137,11 +137,15 @@ const SessionPage: React.FC = () => {
                 <h2 className="text-3xl font-bold text-slate-800 mb-6 text-center">{t(currentExercise.nameKey)}</h2>
                 
                 <div className="w-full max-w-2xl">
-                    <img
-                      src={currentExercise.illustrationUrl}
-                      alt={t(currentExercise.nameKey)}
-                      className="block w-full max-h-80 object-contain rounded-xl shadow-md mb-6 bg-primary-light"
-                    />
+                    <div className="flex items-center justify-center w-full mb-6">
+                      <img
+                        src={currentExercise.illustrationUrl}
+                        alt={t(currentExercise.nameKey)}
+                        className="w-auto h-auto max-w-full object-contain rounded-xl shadow-md"
+                        style={{ maxHeight: '280px' }}
+                        onError={(e) => { e.currentTarget.style.display = 'none'; }}
+                      />
+                    </div>
 
                     <div className="flex gap-4 mb-6">
                         {exerciseDuration.params.sets ? (
