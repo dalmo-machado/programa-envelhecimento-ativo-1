@@ -62,12 +62,19 @@ const ScreeningPage: React.FC = () => {
         const study_id = formData.study_id.trim() ||
             `${formData.site === 'Spain' ? 'ES' : 'BR'}-${Math.floor(Math.random() * 9000) + 1000}`;
 
+        // Normalise birth_date to YYYY-MM-DD via string manipulation only.
+        // Using new Date() would shift the date by the browser's UTC offset.
+        const rawBirthDate = formData.birth_date.trim();
+        const isoDate = /^\d{2}\/\d{2}\/\d{4}$/.test(rawBirthDate)
+          ? (() => { const [d, m, y] = rawBirthDate.split('/'); return `${y}-${m}-${d}`; })()
+          : rawBirthDate; // already YYYY-MM-DD when coming from <input type="date">
+
         const participantToSave = {
             ...newParticipant,
             study_id,
             name: formData.name,
             sex: formData.sex as 'M' | 'F' | 'Other',
-            birth_date: formData.birth_date,
+            birth_date: isoDate,
             site: formData.site as 'Brazil' | 'Spain',
             language: formData.site === 'Spain' ? Language.ES_ES : Language.PT_BR,
             consent_date: new Date().toISOString(),
