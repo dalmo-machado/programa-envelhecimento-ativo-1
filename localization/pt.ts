@@ -317,6 +317,7 @@ export const pt: I18nKeys = {
   reset_data_no: 'Não, apenas sair',
   reset_data_yes: 'Sim, zerar tudo',
   login_loading: 'Carregando dados...',
+  login_connection_error: 'Não foi possível conectar ao servidor. Verifique sua conexão e tente novamente.',
   // Screening
   study_id_placeholder: 'Ex: BR-004',
   // Session history table (researcher view)

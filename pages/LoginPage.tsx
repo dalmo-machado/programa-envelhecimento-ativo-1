@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useLocalization } from '../context/LocalizationContext';
 import { useUserRole } from '../context/UserRoleContext';
@@ -28,11 +28,50 @@ const LoginPage: React.FC = () => {
   const { language, setLanguage, t } = useLocalization();
   const navigate = useNavigate();
   const { setRole, setParticipantId } = useUserRole();
-  const { participants, isLoading } = useParticipantData();
+  const { participants, isLoading, supabaseLoadFailed } = useParticipantData();
 
   const [code, setCode] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
+  // Stores credentials submitted while Supabase was still loading, for deferred validation.
+  const [pendingLogin, setPendingLogin] = useState<{ code: string; pwd: string } | null>(null);
+
+  // When Supabase finishes loading and there's a deferred login, execute it now.
+  useEffect(() => {
+    if (isLoading || !pendingLogin) return;
+    const { code: pendingCode, pwd: pendingPwd } = pendingLogin;
+    setPendingLogin(null);
+    attemptParticipantLogin(pendingCode, pendingPwd);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isLoading, pendingLogin]);
+
+  // 5-second safety timeout: if Supabase hasn't loaded yet, show connection error.
+  useEffect(() => {
+    if (!pendingLogin) return;
+    const id = setTimeout(() => {
+      setPendingLogin(null);
+      setError(t('login_connection_error' as any));
+    }, 5000);
+    return () => clearTimeout(id);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [pendingLogin]);
+
+  const attemptParticipantLogin = (normalizedCode: string, pwd: string) => {
+    const participant = participants.find(
+      p => p.study_id.toUpperCase() === normalizedCode
+    );
+    if (participant && normalizeDateInput(pwd) === normalizeDateInput(participant.birth_date)) {
+      setRole(UserRole.PARTICIPANT);
+      setParticipantId(participant.study_id);
+      navigate('/dashboard', { replace: true });
+    } else if (!participant && supabaseLoadFailed) {
+      // Participant not found because Supabase failed — don't blame the user's credentials.
+      setError(t('login_connection_error' as any));
+    } else {
+      // Intentionally generic: do not reveal whether code or password was wrong.
+      setError(t('login_error'));
+    }
+  };
 
   const handleLogin = (e: React.FormEvent) => {
     e.preventDefault();
@@ -40,7 +79,7 @@ const LoginPage: React.FC = () => {
 
     const normalizedCode = code.trim().toUpperCase();
 
-    // --- Researcher authentication ---
+    // --- Researcher authentication (does not depend on Supabase data) ---
     if (normalizedCode === RESEARCHER_CODE) {
       // VITE_RESEARCHER_PASSWORD is a build-time env var embedded in the JS bundle.
       // It is not secret from anyone who inspects the bundle, but it does prevent
@@ -64,19 +103,13 @@ const LoginPage: React.FC = () => {
     }
 
     // --- Participant authentication ---
-    // Code: study_id (case-insensitive). Password: birth_date.
-    const participant = participants.find(
-      p => p.study_id.toUpperCase() === normalizedCode
-    );
-
-    if (participant && normalizeDateInput(password) === normalizeDateInput(participant.birth_date)) {
-      setRole(UserRole.PARTICIPANT);
-      setParticipantId(participant.study_id);
-      navigate('/dashboard', { replace: true });
-    } else {
-      // Intentionally generic: do not reveal whether the code or the password was wrong.
-      setError(t('login_error'));
+    if (isLoading) {
+      // Supabase still loading: queue credentials and wait (5s timeout guards against hang).
+      setPendingLogin({ code: normalizedCode, pwd: password });
+      return;
     }
+
+    attemptParticipantLogin(normalizedCode, password);
   };
 
   return (
@@ -186,9 +219,13 @@ const LoginPage: React.FC = () => {
           <Button
             type="submit"
             className="w-full py-3 text-lg"
-            disabled={!code.trim() || !password.trim() || isLoading}
+            disabled={!code.trim() || !password.trim() || !!pendingLogin}
           >
-            {isLoading ? t('login_loading' as any) : t('login_submit')}
+            {isLoading
+              ? t('login_loading' as any)
+              : pendingLogin
+              ? t('login_loading' as any)
+              : t('login_submit')}
           </Button>
         </form>
       </Card>
