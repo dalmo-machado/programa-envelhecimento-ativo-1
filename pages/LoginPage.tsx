@@ -57,9 +57,18 @@ const LoginPage: React.FC = () => {
   }, [pendingLogin]);
 
   const attemptParticipantLogin = (normalizedCode: string, pwd: string) => {
+    console.log('[LOGIN DEBUG] participants count:', participants.length);
+    console.log('[LOGIN DEBUG] participants IDs:', participants.map(p => p.study_id));
+    console.log('[LOGIN DEBUG] isLoading:', isLoading);
+    console.log('[LOGIN DEBUG] supabaseLoadFailed:', supabaseLoadFailed);
+    console.log('[LOGIN DEBUG] looking for:', normalizedCode);
     const participant = participants.find(
       p => p.study_id.toUpperCase() === normalizedCode
     );
+    console.log('[LOGIN DEBUG] found:', participant);
+    console.log('[LOGIN DEBUG] birth_date stored:', participant?.birth_date);
+    console.log('[LOGIN DEBUG] pwd normalized:', normalizeDateInput(pwd));
+    console.log('[LOGIN DEBUG] birth_date normalized:', participant ? normalizeDateInput(participant.birth_date) : 'n/a');
     if (participant && normalizeDateInput(pwd) === normalizeDateInput(participant.birth_date)) {
       setRole(UserRole.PARTICIPANT);
       setParticipantId(participant.study_id);
@@ -78,6 +87,7 @@ const LoginPage: React.FC = () => {
     setError('');
 
     const normalizedCode = code.trim().toUpperCase();
+    console.log('[LOGIN DEBUG] handleLogin called, isLoading:', isLoading, 'participants:', participants.length);
 
     // --- Researcher authentication (does not depend on Supabase data) ---
     if (normalizedCode === RESEARCHER_CODE) {
