@@ -12,22 +12,24 @@ import Card from '../components/ui/Card';
 const RESEARCHER_CODE = 'RESEARCHER';
 
 /**
- * Extracts only digits from a string, then normalises DDMMYYYY → YYYY-MM-DD
- * so that "17061957", "17/06/1957", "17-06-1957" all compare equal to the
- * ISO-stored "1957-06-17".
+ * Normalises a birth-date string to YYYYMMDD for password comparison.
  *
- * Digit extraction removes separators so the user can type with or without them.
- * The 8-digit branch converts DDMMYYYY to YYYYMMDD to match the stored format.
+ * Accepts any separator (or none). For 8-digit strings:
+ *   - First digit > '3'  →  already YYYYMMDD (e.g. 19570618) → use as-is
+ *   - First digit ≤ '3'  →  DDMMYYYY (e.g. 18061957) → reorder to YYYYMMDD
+ *
+ * This lets participants type "18061957" or "19570618" and both match the
+ * ISO-stored "1957-06-18".
  *
  * Security note: using birth_date as password is acceptable for a closed clinical
  * research tool. For a public-facing application a proper backend auth system is required.
  */
-const toDigits = (s: string): string => s.replace(/\D/g, '');
-
 const normaliseBirthDate = (s: string): string => {
-  const d = toDigits(s);
-  // DDMMYYYY (8 digits) → YYYYMMDD to match toDigits of stored "YYYY-MM-DD"
-  if (d.length === 8) return `${d.slice(4)}${d.slice(2, 4)}${d.slice(0, 2)}`;
+  const d = (s || '').replace(/\D/g, '');
+  if (d.length === 8 && d[0] <= '3') {
+    // DDMMYYYY → YYYYMMDD
+    return `${d.slice(4)}${d.slice(2, 4)}${d.slice(0, 2)}`;
+  }
   return d;
 };
 

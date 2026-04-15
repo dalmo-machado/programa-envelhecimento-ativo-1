@@ -227,9 +227,9 @@ export const pt: I18nKeys = {
   login_access_code: 'Código de acesso',
   login_access_code_placeholder: 'Ex: BR-001',
   login_password: 'Senha',
-  login_password_placeholder: '29061959',
-  // TCLE/manual: instrução atualizada — senha agora é a data de nascimento sem separadores (ex: 29061959)
-  login_password_hint: 'Participantes: informe sua data de nascimento sem separadores (ex: 29061959)',
+  login_password_placeholder: '18061957',
+  // TCLE/manual: instrução atualizada — aceita DDMMAAAA ou AAAAMMDD sem separadores
+  login_password_hint: 'Informe sua data de nascimento: DDMMAAAA ou AAAAMMDD (ex: 18061957 ou 19570618)',
   login_submit: 'Entrar',
   login_error: 'Código ou senha inválidos. Verifique os dados e tente novamente.',
   login_new_participant: 'Ainda não tem cadastro?',
