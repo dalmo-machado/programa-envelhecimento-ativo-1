@@ -222,7 +222,7 @@ export const pt: I18nKeys = {
   researcher_table_sex: 'Sexo',
   researcher_table_age: 'Idade',
   confirm_end_session: 'Deseja encerrar a sessão atual e voltar ao início?',
-  confirm_reset_all: 'ATENÇÃO: Deseja também ZERAR TODOS OS DADOS (apagar todos os participantes e avaliações) para reiniciar o programa do zero?',
+  confirm_reset_all: 'Esta ação apagará permanentemente todos os participantes e avaliações. Não pode ser desfeita.',
   login_subtitle: 'Acesse o programa com seu código e senha.',
   login_access_code: 'Código de acesso',
   login_access_code_placeholder: 'Ex: BR-001',
@@ -316,7 +316,7 @@ export const pt: I18nKeys = {
   confirm_end_session_yes: 'Sim, encerrar',
   reset_data_title: 'Atenção: Zerar Dados',
   reset_data_no: 'Não, apenas sair',
-  reset_data_yes: 'Reiniciar Programa',
+  reset_data_yes: 'Apagar Todos os Dados',
   login_loading: 'Carregando dados...',
   login_connection_error: 'Não foi possível conectar ao servidor. Verifique sua conexão e tente novamente.',
   // Screening

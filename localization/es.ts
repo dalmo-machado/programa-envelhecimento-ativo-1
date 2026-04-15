@@ -220,7 +220,7 @@ export const es = {
   researcher_table_sex: 'Sexo',
   researcher_table_age: 'Edad',
   confirm_end_session: '¿Desea finalizar la sesión actual y volver al inicio?',
-  confirm_reset_all: 'ATENCIÓN: ¿Desea también BORRAR TODOS LOS DATOS (eliminar todos los participantes y evaluaciones) para reiniciar el programa desde cero?',
+  confirm_reset_all: 'Esta acción eliminará permanentemente todos los participantes y evaluaciones. No se puede deshacer.',
   login_subtitle: 'Acceda al programa con su código y contraseña.',
   login_access_code: 'Código de acceso',
   login_access_code_placeholder: 'Ej: ES-001',
@@ -314,7 +314,7 @@ export const es = {
   confirm_end_session_yes: 'Sí, cerrar',
   reset_data_title: 'Atención: Borrar Datos',
   reset_data_no: 'No, solo salir',
-  reset_data_yes: 'Reiniciar Programa',
+  reset_data_yes: 'Borrar Todos los Datos',
   login_loading: 'Cargando datos...',
   login_connection_error: 'No se pudo conectar al servidor. Verifique su conexión e inténtelo de nuevo.',
   // Screening
