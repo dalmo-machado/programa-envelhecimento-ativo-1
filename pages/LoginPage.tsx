@@ -12,16 +12,23 @@ import Card from '../components/ui/Card';
 const RESEARCHER_CODE = 'RESEARCHER';
 
 /**
- * Normalizes date input to YYYY-MM-DD for comparison with stored birth_date.
- * Accepts both "DD/MM/YYYY" (what the user types) and "YYYY-MM-DD" (stored format).
+ * Extracts only digits from a string, then normalises DDMMYYYY → YYYY-MM-DD
+ * so that "17061957", "17/06/1957", "17-06-1957" all compare equal to the
+ * ISO-stored "1957-06-17".
+ *
+ * Digit extraction removes separators so the user can type with or without them.
+ * The 8-digit branch converts DDMMYYYY to YYYYMMDD to match the stored format.
  *
  * Security note: using birth_date as password is acceptable for a closed clinical
  * research tool. For a public-facing application a proper backend auth system is required.
  */
-const normalizeDateInput = (input: string): string => {
-  const match = input.trim().match(/^(\d{2})\/(\d{2})\/(\d{4})$/);
-  if (match) return `${match[3]}-${match[2]}-${match[1]}`;
-  return input.trim();
+const toDigits = (s: string): string => s.replace(/\D/g, '');
+
+const normaliseBirthDate = (s: string): string => {
+  const d = toDigits(s);
+  // DDMMYYYY (8 digits) → YYYYMMDD to match toDigits of stored "YYYY-MM-DD"
+  if (d.length === 8) return `${d.slice(4)}${d.slice(2, 4)}${d.slice(0, 2)}`;
+  return d;
 };
 
 const LoginPage: React.FC = () => {
@@ -62,7 +69,7 @@ const LoginPage: React.FC = () => {
     const participant = participants.find(
       p => p.study_id.toUpperCase() === normalizedCode
     );
-    if (participant && normalizeDateInput(pwd) === normalizeDateInput(participant.birth_date)) {
+    if (participant && normaliseBirthDate(pwd) === normaliseBirthDate(participant.birth_date)) {
       setRole(UserRole.PARTICIPANT);
       setParticipantId(participant.study_id);
       navigate('/dashboard', { replace: true });
