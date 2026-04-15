@@ -227,7 +227,7 @@ export const pt: I18nKeys = {
   login_access_code: 'Código de acesso',
   login_access_code_placeholder: 'Ex: BR-001',
   login_password: 'Senha',
-  login_password_placeholder: '18061957',
+  login_password_placeholder: '19570618',
   login_password_hint: 'Informe sua data de nascimento no formato AAAAMMDD (ex: 19570618)',
   login_submit: 'Entrar',
   login_error: 'Código ou senha inválidos. Verifique os dados e tente novamente.',

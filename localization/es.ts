@@ -225,7 +225,7 @@ export const es = {
   login_access_code: 'Código de acceso',
   login_access_code_placeholder: 'Ej: ES-001',
   login_password: 'Contraseña',
-  login_password_placeholder: '18061957',
+  login_password_placeholder: '19570618',
   login_password_hint: 'Ingrese su fecha de nacimiento en formato AAAAMMDD (ej: 19570618)',
   login_submit: 'Entrar',
   login_error: 'Código o contraseña incorrectos. Verifique los datos e inténtelo de nuevo.',
