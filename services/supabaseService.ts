@@ -272,6 +272,24 @@ export async function syncUpdate(
 }
 
 /**
+ * Delete ALL study data (assessments, incidents, sessions, then participants).
+ * Child tables are cleared first to respect FK → participants.study_id.
+ */
+export async function deleteAllData(): Promise<void> {
+  const [sRes, aRes, iRes] = await Promise.all([
+    supabase.from('sessions').delete().neq('participant_id', ''),
+    supabase.from('assessments').delete().neq('participant_id', ''),
+    supabase.from('incidents').delete().neq('participant_id', ''),
+  ]);
+  if (sRes.error) throw sRes.error;
+  if (aRes.error) throw aRes.error;
+  if (iRes.error) throw iRes.error;
+
+  const { error } = await supabase.from('participants').delete().neq('study_id', '');
+  if (error) throw error;
+}
+
+/**
  * Bulk-insert mock participants when the DB is empty on first run.
  */
 export async function migrateParticipants(participants: Participant[]): Promise<void> {
