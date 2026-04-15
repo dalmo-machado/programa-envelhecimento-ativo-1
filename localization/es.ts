@@ -225,8 +225,9 @@ export const es = {
   login_access_code: 'Código de acceso',
   login_access_code_placeholder: 'Ej: ES-001',
   login_password: 'Contraseña',
-  login_password_placeholder: 'DD/MM/AAAA',
-  login_password_hint: 'Participantes: su fecha de nacimiento en formato DD/MM/AAAA.',
+  login_password_placeholder: '29061959',
+  // TCLE/manual: instrucción actualizada — la contraseña es la fecha de nacimiento sin separadores (ej: 29061959)
+  login_password_hint: 'Participantes: su fecha de nacimiento sin separadores (ej: 29061959)',
   login_submit: 'Entrar',
   login_error: 'Código o contraseña incorrectos. Verifique los datos e inténtelo de nuevo.',
   login_new_participant: '¿Todavía no tiene cuenta?',
@@ -313,7 +314,7 @@ export const es = {
   confirm_end_session_yes: 'Sí, cerrar',
   reset_data_title: 'Atención: Borrar Datos',
   reset_data_no: 'No, solo salir',
-  reset_data_yes: 'Sí, borrar todo',
+  reset_data_yes: 'Reiniciar Programa',
   login_loading: 'Cargando datos...',
   login_connection_error: 'No se pudo conectar al servidor. Verifique su conexión e inténtelo de nuevo.',
   // Screening
@@ -328,6 +329,11 @@ export const es = {
   session_history_col_completed: 'Completada',
   session_history_completed_yes: 'Sí',
   session_history_completed_no: 'No',
+  // Final reset confirmation modal
+  reset_final_title: 'Confirmación Final — Acción Irreversible',
+  reset_final_warning: 'ATENCIÓN: Esta acción eliminará TODOS los participantes y evaluaciones de Supabase y no se puede deshacer.',
+  reset_final_type_hint: 'Escriba CONFIRMAR para habilitar el botón de eliminación:',
+  reset_final_button: 'Borrar Todo y Reiniciar',
 };
 
 export type I18nKeys = typeof es;

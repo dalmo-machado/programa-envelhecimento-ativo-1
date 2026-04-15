@@ -227,8 +227,9 @@ export const pt: I18nKeys = {
   login_access_code: 'Código de acesso',
   login_access_code_placeholder: 'Ex: BR-001',
   login_password: 'Senha',
-  login_password_placeholder: 'DD/MM/AAAA',
-  login_password_hint: 'Participantes: informe sua data de nascimento no formato DD/MM/AAAA.',
+  login_password_placeholder: '29061959',
+  // TCLE/manual: instrução atualizada — senha agora é a data de nascimento sem separadores (ex: 29061959)
+  login_password_hint: 'Participantes: informe sua data de nascimento sem separadores (ex: 29061959)',
   login_submit: 'Entrar',
   login_error: 'Código ou senha inválidos. Verifique os dados e tente novamente.',
   login_new_participant: 'Ainda não tem cadastro?',
@@ -315,7 +316,7 @@ export const pt: I18nKeys = {
   confirm_end_session_yes: 'Sim, encerrar',
   reset_data_title: 'Atenção: Zerar Dados',
   reset_data_no: 'Não, apenas sair',
-  reset_data_yes: 'Sim, zerar tudo',
+  reset_data_yes: 'Reiniciar Programa',
   login_loading: 'Carregando dados...',
   login_connection_error: 'Não foi possível conectar ao servidor. Verifique sua conexão e tente novamente.',
   // Screening
@@ -330,4 +331,9 @@ export const pt: I18nKeys = {
   session_history_col_completed: 'Concluída',
   session_history_completed_yes: 'Sim',
   session_history_completed_no: 'Não',
+  // Final reset confirmation modal
+  reset_final_title: 'Confirmação Final — Ação Irreversível',
+  reset_final_warning: 'ATENÇÃO: Esta ação apagará TODOS os participantes e avaliações do Supabase e não pode ser desfeita.',
+  reset_final_type_hint: 'Digite CONFIRMAR para habilitar o botão de exclusão:',
+  reset_final_button: 'Apagar Tudo e Reiniciar',
 };
