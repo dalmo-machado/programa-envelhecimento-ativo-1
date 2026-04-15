@@ -226,8 +226,7 @@ export const es = {
   login_access_code_placeholder: 'Ej: ES-001',
   login_password: 'Contraseña',
   login_password_placeholder: '18061957',
-  // TCLE/manual: instrucción actualizada — aceita DDMMAAAA o AAAAMMDD sin separadores
-  login_password_hint: 'Ingrese su fecha de nacimiento: DDMMAAAA o AAAAMMDD (ej: 18061957 o 19570618)',
+  login_password_hint: 'Ingrese su fecha de nacimiento en formato AAAAMMDD (ej: 19570618)',
   login_submit: 'Entrar',
   login_error: 'Código o contraseña incorrectos. Verifique los datos e inténtelo de nuevo.',
   login_new_participant: '¿Todavía no tiene cuenta?',
