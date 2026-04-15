@@ -6,7 +6,6 @@ import { useLocalization } from '../context/LocalizationContext';
 import { UserRole } from '../types';
 import { Home } from 'lucide-react';
 import Button from './ui/Button';
-import { deleteAllData } from '../services/supabaseService';
 
 const Header: React.FC = () => {
     const { role, setRole, setParticipantId } = useUserRole();
@@ -14,10 +13,6 @@ const Header: React.FC = () => {
     const navigate = useNavigate();
     const [showConfirm, setShowConfirm] = useState(false);
     const [showResetConfirm, setShowResetConfirm] = useState(false);
-    const [showFinalConfirm, setShowFinalConfirm] = useState(false);
-    const [confirmText, setConfirmText] = useState('');
-    const [isDeleting, setIsDeleting] = useState(false);
-    const [deleteError, setDeleteError] = useState<string | null>(null);
 
     // Only researchers and admins may switch their active view.
     // Participants must not be able to self-elevate to researcher.
@@ -41,9 +36,8 @@ const Header: React.FC = () => {
     };
 
     const handleConfirmResetAll = () => {
-        setShowResetConfirm(false);
-        setConfirmText('');
-        setShowFinalConfirm(true);
+        localStorage.clear();
+        window.location.href = '/';
     };
 
     const handleCancelResetAll = () => {
@@ -51,26 +45,6 @@ const Header: React.FC = () => {
         setRole(UserRole.NONE);
         setParticipantId(null);
         navigate('/');
-    };
-
-    const handleExecuteReset = async () => {
-        setIsDeleting(true);
-        setDeleteError(null);
-        try {
-            await deleteAllData();
-            localStorage.clear();
-            window.location.href = '/';
-        } catch (err) {
-            setIsDeleting(false);
-            setDeleteError(err instanceof Error ? err.message : 'Erro ao apagar dados no servidor.');
-        }
-    };
-
-    const handleCancelFinalConfirm = () => {
-        if (isDeleting) return;
-        setShowFinalConfirm(false);
-        setConfirmText('');
-        setDeleteError(null);
     };
 
     return (
@@ -130,39 +104,6 @@ const Header: React.FC = () => {
                         <div className="flex justify-end space-x-3">
                             <Button variant="secondary" onClick={handleCancelResetAll}>{t('reset_data_no' as any)}</Button>
                             <Button className="bg-red-600 hover:bg-red-700 text-white" onClick={handleConfirmResetAll}>{t('reset_data_yes' as any)}</Button>
-                        </div>
-                    </div>
-                </div>
-            )}
-
-            {showFinalConfirm && (
-                <div className="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-[9999] p-4">
-                    <div className="bg-white rounded-xl p-6 max-w-md w-full shadow-xl text-slate-800">
-                        <h3 className="text-xl font-bold text-red-600 mb-4">{t('reset_final_title' as any)}</h3>
-                        <div className="bg-red-50 border border-red-300 rounded-md p-4 mb-5">
-                            <p className="text-red-700 font-semibold text-sm">{t('reset_final_warning' as any)}</p>
-                        </div>
-                        <p className="text-slate-600 text-sm mb-2">{t('reset_final_type_hint' as any)}</p>
-                        <input
-                            type="text"
-                            value={confirmText}
-                            onChange={e => setConfirmText(e.target.value)}
-                            className="w-full p-3 border-2 border-slate-300 rounded-md focus:border-red-500 focus:outline-none font-mono text-slate-800 mb-5"
-                            placeholder="CONFIRMAR"
-                            autoComplete="off"
-                            spellCheck={false}
-                            disabled={isDeleting}
-                        />
-                        {deleteError && (
-                            <p className="text-red-600 text-sm mb-4 bg-red-50 border border-red-200 rounded p-2">{deleteError}</p>
-                        )}
-                        <div className="flex justify-end space-x-3">
-                            <Button variant="secondary" onClick={handleCancelFinalConfirm} disabled={isDeleting}>{t('cancel' as any)}</Button>
-                            <Button
-                                className="bg-red-600 hover:bg-red-700 text-white disabled:opacity-40 disabled:cursor-not-allowed"
-                                onClick={handleExecuteReset}
-                                disabled={confirmText !== 'CONFIRMAR' || isDeleting}
-                            >{isDeleting ? 'Apagando...' : t('reset_final_button' as any)}</Button>
                         </div>
                     </div>
                 </div>
