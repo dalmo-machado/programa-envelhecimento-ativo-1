@@ -133,14 +133,14 @@ const ParticipantDashboard: React.FC = () => {
     const firstAssessment = participant.assessments[0];
     const currentBelt = getCurrentBelt(participant.sessions_completed);
 
-    const birthDate = new Date(participant.birth_date || '1950-01-01');
+    const birthDate = new Date((participant.birth_date || '1950-01-01') + 'T12:00:00Z');
     const today = new Date();
-    let age = today.getFullYear() - birthDate.getFullYear();
-    const m = today.getMonth() - birthDate.getMonth();
-    if (m < 0 || (m === 0 && today.getDate() < birthDate.getDate())) {
+    let age = today.getFullYear() - birthDate.getUTCFullYear();
+    const m = today.getMonth() - birthDate.getUTCMonth();
+    if (m < 0 || (m === 0 && today.getDate() < birthDate.getUTCDate())) {
         age--;
     }
-    const isBirthday = today.getMonth() === birthDate.getMonth() && today.getDate() === birthDate.getDate();
+    const isBirthday = today.getMonth() === birthDate.getUTCMonth() && today.getDate() === birthDate.getUTCDate();
 
     const getSexLabel = (sex: string) => {
         if (sex === 'M') return t('sex_m' as any);
@@ -407,11 +407,11 @@ const ResearcherDashboard: React.FC = () => {
                                 const latestAssessment = p.assessments.length > 0 ? p.assessments[p.assessments.length - 1] : null;
                                 const adherence = (p.sessions_completed / 24) * 100;
                                 
-                                const birthDate = new Date(p.birth_date || '1950-01-01');
+                                const birthDate = new Date((p.birth_date || '1950-01-01') + 'T12:00:00Z');
                                 const today = new Date();
-                                let age = today.getFullYear() - birthDate.getFullYear();
-                                const m = today.getMonth() - birthDate.getMonth();
-                                if (m < 0 || (m === 0 && today.getDate() < birthDate.getDate())) {
+                                let age = today.getFullYear() - birthDate.getUTCFullYear();
+                                const m = today.getMonth() - birthDate.getUTCMonth();
+                                if (m < 0 || (m === 0 && today.getDate() < birthDate.getUTCDate())) {
                                     age--;
                                 }
 
@@ -432,7 +432,7 @@ const ResearcherDashboard: React.FC = () => {
                                         <td className="p-3">{latestAssessment ? formatDate(new Date(latestAssessment.date), { day: '2-digit', month: '2-digit', year: 'numeric'}) : '-'}</td>
                                         <td className="p-3 text-center">{latestAssessment ? latestAssessment.data.height_cm : '-'}</td>
                                         <td className="p-3 text-center">{latestAssessment ? latestAssessment.data.weight_kg : '-'}</td>
-                                        <td className="p-3">{formatDate(new Date(p.birth_date || '1950-01-01'), { day: '2-digit', month: '2-digit', year: 'numeric' })}</td>
+                                        <td className="p-3">{formatDate(new Date((p.birth_date || '1950-01-01') + 'T12:00:00Z'), { day: '2-digit', month: '2-digit', year: 'numeric' })}</td>
                                         <td className="p-3 text-center">{latestAssessment ? latestAssessment.data.grip_kgf : '-'}</td>
                                         <td className="p-3 text-center">{latestAssessment ? latestAssessment.data.balance_s : '-'}</td>
                                         <td className="p-3 text-center">{latestAssessment ? formatNumber(latestAssessment.data.bmi, {maximumFractionDigits: 1}) : '-'}</td>

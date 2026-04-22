@@ -88,7 +88,7 @@ const ResearcherParticipantView: React.FC = () => {
   const adherence = (participant.sessions_completed / totalSessions) * 100;
   const currentBelt = getCurrentBelt(participant.sessions_completed);
 
-  const birthDate = new Date(participant.birth_date || '1950-01-01');
+  const birthDate = new Date((participant.birth_date || '1950-01-01') + 'T12:00:00Z');
   const today = new Date();
   let age = today.getFullYear() - birthDate.getFullYear();
   const m = today.getMonth() - birthDate.getMonth();
