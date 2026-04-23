@@ -4,7 +4,7 @@ import { AlertTriangle, Award } from 'lucide-react';
 import { useLocalization } from '../context/LocalizationContext';
 import { useParticipantData } from '../context/ParticipantDataContext';
 import { useUserRole } from '../context/UserRoleContext';
-import { trainingPrograms } from '../services/trainingData';
+import { trainingPrograms, warmupExercises, cooldownExercises } from '../services/trainingData';
 import { getRandomPreSessionMessage, getRandomPostSessionMessage } from '../utils/gamification';
 import { I18nKeys } from '../localization/es';
 import { IncidentReport, SessionLog } from '../types';
@@ -25,7 +25,7 @@ const SessionPage: React.FC = () => {
   const [difficulty, setDifficulty] = useState<Difficulty | null>(null);
   const [wellnessScore, setWellnessScore] = useState<number | null>(null);
   const [currentExerciseIndex, setCurrentExerciseIndex] = useState(0);
-  const [sessionState, setSessionState] = useState<'pre' | 'active' | 'incident' | 'post'>('pre');
+  const [sessionState, setSessionState] = useState<'pre' | 'warmup' | 'active' | 'cooldown' | 'incident' | 'post'>('pre');
   const [preMessage, setPreMessage] = useState<keyof I18nKeys>('motivational_pre_session');
   const [postMessage, setPostMessage] = useState<keyof I18nKeys>('motivational_post_session');
   const [incidentReported, setIncidentReported] = useState<boolean | null>(null);
@@ -77,7 +77,7 @@ const SessionPage: React.FC = () => {
       session_logs: [...(participant.session_logs ?? []), newLog],
     });
 
-    setSessionState('incident');
+    setSessionState('cooldown');
   }
 
   const handleFinish = () => {
@@ -127,7 +127,7 @@ const SessionPage: React.FC = () => {
                 </div>
                 <h2 className="text-3xl font-bold text-slate-800 mb-4">{t('ready_to_start' as any)}</h2>
                 <p className="text-xl text-slate-600 mb-10 max-w-lg">{t(preMessage)}</p>
-                <Button onClick={() => setSessionState('active')} className="text-lg px-8 py-4">
+                <Button onClick={() => setSessionState('warmup')} className="text-lg px-8 py-4">
                     {t('start_workout')}
                 </Button>
             </div>
@@ -252,6 +252,54 @@ const SessionPage: React.FC = () => {
             </>
           )}
 
+
+          {sessionState === 'warmup' && (
+            <div>
+              <div className="mb-4 p-3 bg-orange-50 border border-orange-200 rounded-xl text-center">
+                <p className="text-sm font-bold text-orange-700 uppercase tracking-wider">{t('warmup_phase_label' as any)}</p>
+                <p className="text-orange-600 text-sm">{t('warmup_phase_desc' as any)}</p>
+              </div>
+              {warmupExercises.map((ex, idx) => (
+                <div key={idx} className="mb-4 bg-white border border-slate-200 rounded-xl p-4 shadow-sm">
+                  <div className="flex items-center gap-4">
+                    <img src={ex.illustrationUrl} alt={t(ex.nameKey)} className="w-16 h-16 object-contain rounded-lg" onError={(e) => { e.currentTarget.style.display = 'none'; }} />
+                    <div className="flex-1">
+                      <p className="font-bold text-slate-800">{t(ex.nameKey)}</p>
+                      <p className="text-primary-dark font-semibold">{t(ex.levels[sessionLevel - 1].key, ex.levels[sessionLevel - 1].params)}</p>
+                      <p className="text-sm text-slate-500 mt-1">{t(ex.instructionKey)}</p>
+                    </div>
+                  </div>
+                </div>
+              ))}
+              <Button onClick={() => setSessionState('active')} className="w-full mt-4">
+                {t('start_main_activity' as any)}
+              </Button>
+            </div>
+          )}
+
+          {sessionState === 'cooldown' && (
+            <div>
+              <div className="mb-4 p-3 bg-blue-50 border border-blue-200 rounded-xl text-center">
+                <p className="text-sm font-bold text-blue-700 uppercase tracking-wider">{t('cooldown_phase_label' as any)}</p>
+                <p className="text-blue-600 text-sm">{t('cooldown_phase_desc' as any)}</p>
+              </div>
+              {cooldownExercises.map((ex, idx) => (
+                <div key={idx} className="mb-4 bg-white border border-slate-200 rounded-xl p-4 shadow-sm">
+                  <div className="flex items-center gap-4">
+                    <img src={ex.illustrationUrl} alt={t(ex.nameKey)} className="w-16 h-16 object-contain rounded-lg" onError={(e) => { e.currentTarget.style.display = 'none'; }} />
+                    <div className="flex-1">
+                      <p className="font-bold text-slate-800">{t(ex.nameKey)}</p>
+                      <p className="text-primary-dark font-semibold">{t(ex.levels[sessionLevel - 1].key, ex.levels[sessionLevel - 1].params)}</p>
+                      <p className="text-sm text-slate-500 mt-1">{t(ex.instructionKey)}</p>
+                    </div>
+                  </div>
+                </div>
+              ))}
+              <Button onClick={() => setSessionState('incident')} className="w-full mt-4">
+                {t('finish_cooldown' as any)}
+              </Button>
+            </div>
+          )}
           {sessionState === 'incident' && (
             <div className="flex flex-col items-center justify-center py-8 text-center max-w-lg mx-auto">
                 <div className="w-20 h-20 bg-amber-100 rounded-full flex items-center justify-center mb-6">

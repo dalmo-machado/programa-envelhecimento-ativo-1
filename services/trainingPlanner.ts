@@ -42,7 +42,8 @@ export const generateTrainingPlan = (assessment: Assessment): PersonalizedSessio
     }
 
     // 3. Build the 24-session plan with progression
-    const baseSchedule: SessionKey[] = ['strength', 'balance', 'flexibility', 'cardio', 'posture'];
+    // PRO-Training: força e cardio dominantes (OMS: 2-3x/semana multicomponente)
+    const baseSchedule: SessionKey[] = ['strength', 'cardio', 'strength', 'balance', 'cardio', 'flexibility'];
     let currentLevel = startingLevel;
 
     for (let i = 0; i < TOTAL_SESSIONS; i++) {

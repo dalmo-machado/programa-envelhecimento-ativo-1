@@ -23,6 +23,91 @@ export interface TrainingProgram {
 
 export type SessionKey = 'strength' | 'balance' | 'flexibility' | 'cardio' | 'posture';
 
+
+// ── Aquecimento / Calentamiento (PRO-Training Table 2: Warm-Up) ──────────────
+export const warmupExercises: Exercise[] = [
+  {
+    nameKey: 'exercise_marching_in_place',
+    instructionKey: 'instruction_marching_in_place',
+    safetyKey: 'safety_marching_in_place',
+    levels: [
+      { key: 'duration_minutes', params: { count: 2 } },
+      { key: 'duration_minutes', params: { count: 3 } },
+      { key: 'duration_minutes', params: { count: 4 } },
+    ],
+    illustrationUrl: '/images/marching_in_place.png',
+  },
+  {
+    nameKey: 'exercise_arm_circles',
+    instructionKey: 'instruction_arm_circles',
+    safetyKey: 'safety_arm_circles',
+    levels: [
+      { key: 'duration_seconds', params: { count: 30 } },
+      { key: 'duration_seconds', params: { count: 45 } },
+      { key: 'duration_minutes', params: { count: 1 } },
+    ],
+    illustrationUrl: '/images/arm_circles.png',
+  },
+  {
+    nameKey: 'exercise_heel_raises',
+    instructionKey: 'instruction_heel_raises',
+    safetyKey: 'safety_heel_raises',
+    levels: [
+      { key: 'duration_reps_sets', params: { count: 10, sets: 1 } },
+      { key: 'duration_reps_sets', params: { count: 12, sets: 1 } },
+      { key: 'duration_reps_sets', params: { count: 15, sets: 1 } },
+    ],
+    illustrationUrl: '/images/heel_raises.png',
+  },
+];
+
+// ── Desaquecimento / Vuelta a la calma (PRO-Training Table 2: Cool-Down) ─────
+export const cooldownExercises: Exercise[] = [
+  {
+    nameKey: 'exercise_hamstring_stretch',
+    instructionKey: 'instruction_hamstring_stretch',
+    safetyKey: 'safety_hamstring_stretch',
+    levels: [
+      { key: 'duration_seconds_per_leg', params: { count: 20 } },
+      { key: 'duration_seconds_per_leg', params: { count: 30 } },
+      { key: 'duration_seconds_per_leg', params: { count: 45 } },
+    ],
+    illustrationUrl: '/images/hamstring_stretch.png',
+  },
+  {
+    nameKey: 'exercise_calf_stretch',
+    instructionKey: 'instruction_calf_stretch',
+    safetyKey: 'safety_calf_stretch',
+    levels: [
+      { key: 'duration_seconds_per_leg', params: { count: 20 } },
+      { key: 'duration_seconds_per_leg', params: { count: 30 } },
+      { key: 'duration_seconds_per_leg', params: { count: 45 } },
+    ],
+    illustrationUrl: '/images/calf_stretch.png',
+  },
+  {
+    nameKey: 'exercise_shoulder_stretch',
+    instructionKey: 'instruction_shoulder_stretch',
+    safetyKey: 'safety_shoulder_stretch',
+    levels: [
+      { key: 'duration_seconds_per_arm', params: { count: 20 } },
+      { key: 'duration_seconds_per_arm', params: { count: 30 } },
+      { key: 'duration_seconds_per_arm', params: { count: 45 } },
+    ],
+    illustrationUrl: '/images/shoulder_stretch.png',
+  },
+  {
+    nameKey: 'exercise_chest_stretch',
+    instructionKey: 'instruction_chest_stretch',
+    safetyKey: 'safety_chest_stretch',
+    levels: [
+      { key: 'duration_seconds', params: { count: 20 } },
+      { key: 'duration_seconds', params: { count: 30 } },
+      { key: 'duration_seconds', params: { count: 45 } },
+    ],
+    illustrationUrl: '/images/chest_stretch.png',
+  },
+];
 export const trainingPrograms: Record<SessionKey, TrainingProgram> = {
   strength: {
     titleKey: 'session_type_strength',
