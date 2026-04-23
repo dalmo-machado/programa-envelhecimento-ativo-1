@@ -23,6 +23,7 @@ const SessionPage: React.FC = () => {
   const { participantId } = useUserRole();
 
   const [difficulty, setDifficulty] = useState<Difficulty | null>(null);
+  const [wellnessScore, setWellnessScore] = useState<number | null>(null);
   const [currentExerciseIndex, setCurrentExerciseIndex] = useState(0);
   const [sessionState, setSessionState] = useState<'pre' | 'active' | 'incident' | 'post'>('pre');
   const [preMessage, setPreMessage] = useState<keyof I18nKeys>('motivational_pre_session');
@@ -192,6 +193,30 @@ const SessionPage: React.FC = () => {
                 <div className="mt-10 pt-6 border-t">
                   <div className="bg-green-50 border border-green-200 rounded-xl p-6 mb-8 text-center">
                       <p className="text-lg font-bold text-green-800">{t(postMessage)}</p>
+                  </div>
+                  <div className="mb-8">
+                    <h3 className="text-xl font-bold text-primary mb-4">Como voce se sentiu hoje?</h3>
+                    <div className="flex justify-center gap-3">
+                      {[
+                        { score: 1, emoji: '😞' },
+                        { score: 2, emoji: '😟' },
+                        { score: 3, emoji: '😐' },
+                        { score: 4, emoji: '🙂' },
+                        { score: 5, emoji: '😄' },
+                      ].map(({ score, emoji }) => (
+                        <button
+                          key={score}
+                          onClick={() => setWellnessScore(score)}
+                          className={`text-4xl p-3 rounded-xl border-2 transition-all ${
+                            wellnessScore === score
+                              ? 'border-teal-500 bg-teal-50 scale-110 shadow-md'
+                              : 'border-gray-200 bg-white hover:border-teal-300 hover:bg-teal-50'
+                          }`}
+                        >
+                          {emoji}
+                        </button>
+                      ))}
+                    </div>
                   </div>
                   <h3 className="text-xl font-bold text-primary mb-4">{t('difficulty_feedback')}</h3>
                   <div className="flex flex-col sm:flex-row gap-4 mb-8">
