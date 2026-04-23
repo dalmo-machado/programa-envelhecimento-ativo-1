@@ -215,6 +215,7 @@ export async function syncUpdate(
           participant_id: participantId,
           session_index: changes.sessions_completed - 1,
           completed_at: new Date().toISOString(),
+          wellness_score: (changes.session_logs ?? []).at(-1)?.wellness_score ?? null,
         })
         .then(({ error }) => { if (error) console.warn('[Supabase] sessions insert:', error); }),
     );

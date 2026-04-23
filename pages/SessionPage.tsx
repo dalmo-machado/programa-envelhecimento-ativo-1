@@ -69,6 +69,7 @@ const SessionPage: React.FC = () => {
       session_end: sessionEnd,
       duration_min,
       completed: true,
+      wellness_score: wellnessScore ?? null,
     };
 
     updateParticipant(participant.study_id, {
