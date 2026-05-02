@@ -6,6 +6,7 @@ import { useLocalization } from '../context/LocalizationContext';
 import { UserRole } from '../types';
 import { Home } from 'lucide-react';
 import Button from './ui/Button';
+import { supabase } from '../lib/supabase';
 
 const Header: React.FC = () => {
     const { role, setRole, setParticipantId } = useUserRole();
@@ -13,6 +14,8 @@ const Header: React.FC = () => {
     const navigate = useNavigate();
     const [showConfirm, setShowConfirm] = useState(false);
     const [showResetConfirm, setShowResetConfirm] = useState(false);
+    const [isResetting, setIsResetting] = useState(false);
+    const [resetError, setResetError] = useState<string | null>(null);
 
     // Only researchers and admins may switch their active view.
     // Participants must not be able to self-elevate to researcher.
@@ -35,13 +38,40 @@ const Header: React.FC = () => {
         setShowConfirm(false);
     };
 
-    const handleConfirmResetAll = () => {
-        localStorage.clear();
-        window.location.href = '/';
+    // Camada 1: confirmação dupla via UI (modais showConfirm → showResetConfirm)
+    // Camada 2: DELETE real no Supabase antes de limpar localStorage
+    const handleConfirmResetAll = async () => {
+        setIsResetting(true);
+        setResetError(null);
+        try {
+            // Deletar tabelas filhas antes da tabela pai (sem CASCADE nas FKs)
+            const steps: Array<{ table: string; filter: [string, string] }> = [
+                { table: 'sessions',    filter: ['participant_id', ''] },
+                { table: 'assessments', filter: ['participant_id', ''] },
+                { table: 'incidents',   filter: ['participant_id', ''] },
+                { table: 'participants', filter: ['study_id', '']      },
+            ];
+
+            for (const { table, filter } of steps) {
+                const { error } = await (supabase as any)
+                    .from(table)
+                    .delete()
+                    .neq(filter[0], filter[1]);      // neq('campo', '') apaga todas as linhas
+                if (error) throw new Error(`Erro ao apagar tabela "${table}": ${error.message}`);
+            }
+
+            localStorage.clear();
+            window.location.href = '/';
+        } catch (err: any) {
+            console.error('[Header] handleConfirmResetAll:', err);
+            setResetError(err?.message ?? 'Erro desconhecido ao zerar dados.');
+            setIsResetting(false);
+        }
     };
 
     const handleCancelResetAll = () => {
         setShowResetConfirm(false);
+        setResetError(null);
         setRole(UserRole.NONE);
         setParticipantId(null);
         navigate('/');
@@ -100,10 +130,27 @@ const Header: React.FC = () => {
                 <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-[9999] p-4">
                     <div className="bg-white rounded-xl p-6 max-w-md w-full shadow-xl text-slate-800">
                         <h3 className="text-xl font-bold text-red-600 mb-4">{t('reset_data_title' as any)}</h3>
-                        <p className="text-slate-600 mb-6">{t('confirm_reset_all' as any)}</p>
+                        <p className="text-slate-600 mb-4">{t('confirm_reset_all' as any)}</p>
+                        {resetError && (
+                            <p className="text-sm text-red-600 bg-red-50 border border-red-200 rounded-lg p-3 mb-4">
+                                ⚠️ {resetError}
+                            </p>
+                        )}
                         <div className="flex justify-end space-x-3">
-                            <Button variant="secondary" onClick={handleCancelResetAll}>{t('reset_data_no' as any)}</Button>
-                            <Button className="bg-red-600 hover:bg-red-700 text-white" onClick={handleConfirmResetAll}>{t('reset_data_yes' as any)}</Button>
+                            <Button
+                                variant="secondary"
+                                onClick={handleCancelResetAll}
+                                disabled={isResetting}
+                            >
+                                {t('reset_data_no' as any)}
+                            </Button>
+                            <Button
+                                className="bg-red-600 hover:bg-red-700 text-white disabled:opacity-60"
+                                onClick={handleConfirmResetAll}
+                                disabled={isResetting}
+                            >
+                                {isResetting ? '⏳ Apagando...' : t('reset_data_yes' as any)}
+                            </Button>
                         </div>
                     </div>
                 </div>
