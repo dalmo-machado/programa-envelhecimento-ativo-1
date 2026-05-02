@@ -60,12 +60,19 @@ export interface IncidentReport {
   action_taken?: string;
 }
 
+export interface ExerciseRpe {
+  exercise_index: number;  // position in the session's exercise list
+  rpe: 1 | 2 | 3;         // 1=Leve (≤4/10), 2=Moderado (5–6/10), 3=Intenso (≥7/10)
+}
+
 export interface SessionLog {
   session_index: number;
   session_start: string;  // ISO timestamp
   session_end: string;    // ISO timestamp
   duration_min: number;   // rounded to 1 decimal place
   completed: boolean;
+  wellness_score?: number | null;   // 1–5 emoji scale (added with wellness feature)
+  exercise_rpe?: ExerciseRpe[];     // per-exercise RPE (Asier Phase 1)
 }
 
 export interface Participant {

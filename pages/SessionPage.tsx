@@ -7,7 +7,7 @@ import { useUserRole } from '../context/UserRoleContext';
 import { trainingPrograms, warmupExercises, cooldownExercises } from '../services/trainingData';
 import { getRandomPreSessionMessage, getRandomPostSessionMessage } from '../utils/gamification';
 import { I18nKeys } from '../localization/es';
-import { IncidentReport, SessionLog } from '../types';
+import { ExerciseRpe, IncidentReport, SessionLog } from '../types';
 import Card from '../components/ui/Card';
 import Button from '../components/ui/Button';
 import Header from '../components/Header';
@@ -30,6 +30,9 @@ const SessionPage: React.FC = () => {
   const [postMessage, setPostMessage] = useState<keyof I18nKeys>('motivational_post_session');
   const [incidentReported, setIncidentReported] = useState<boolean | null>(null);
   const [sessionStart] = useState<string>(() => new Date().toISOString());
+  // Asier Phase 1 — per-exercise RPE
+  const [exerciseRpeRatings, setExerciseRpeRatings] = useState<ExerciseRpe[]>([]);
+  const [showRpePicker, setShowRpePicker] = useState(false);
 
   useEffect(() => {
     setPreMessage(getRandomPreSessionMessage());
@@ -56,6 +59,17 @@ const SessionPage: React.FC = () => {
     );
   }
 
+  // Asier Phase 1 — RPE picker handlers
+  const handleNextWithRpe = () => {
+    setShowRpePicker(true);
+  };
+
+  const handleRpeSelected = (rpe: 1 | 2 | 3) => {
+    setExerciseRpeRatings(prev => [...prev, { exercise_index: currentExerciseIndex, rpe }]);
+    setShowRpePicker(false);
+    setCurrentExerciseIndex(i => i + 1);
+  };
+
   const handleCompleteSession = () => {
     if (!difficulty || !participant) return;
 
@@ -70,6 +84,7 @@ const SessionPage: React.FC = () => {
       duration_min,
       completed: true,
       wellness_score: wellnessScore ?? null,
+      exercise_rpe: exerciseRpeRatings.length > 0 ? exerciseRpeRatings : undefined,
     };
 
     updateParticipant(participant.study_id, {
@@ -180,13 +195,55 @@ const SessionPage: React.FC = () => {
                             <p className="text-amber-900">{t(currentExercise.safetyKey)}</p>
                         </div>
                     </div>
+
+                    {/* Asier Phase 1 — load recommendation + RPE zone */}
+                    <div className="flex gap-3 mt-4">
+                      {currentExercise.loadRec && (
+                        <div className="flex-1 bg-blue-50 border border-blue-200 rounded-xl p-4 shadow-sm">
+                          <p className="text-xs font-bold text-blue-700 uppercase tracking-wider mb-1">{t('load_rec_label' as any)}</p>
+                          <p className="text-blue-900 font-semibold text-sm">{currentExercise.loadRec[sessionLevel - 1]}</p>
+                        </div>
+                      )}
+                      {currentExercise.rpeZone && (
+                        <div className="flex-1 bg-violet-50 border border-violet-200 rounded-xl p-4 shadow-sm">
+                          <p className="text-xs font-bold text-violet-700 uppercase tracking-wider mb-1">{t('rpe_zone_label' as any)}</p>
+                          <p className="text-violet-900 font-semibold">RPE {currentExercise.rpeZone[0]}–{currentExercise.rpeZone[1]}/10</p>
+                          <p className="text-violet-600 text-xs mt-1">{t('rpe_talk_test' as any)}</p>
+                        </div>
+                      )}
+                    </div>
                 </div>
               </div>
-              
+
+              {/* RPE Picker modal (shown when clicking Next) */}
+              {showRpePicker && (
+                <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-[9999] p-4">
+                  <div className="bg-white rounded-xl p-6 max-w-sm w-full shadow-xl text-slate-800">
+                    <h3 className="text-lg font-bold text-slate-800 mb-5 text-center">{t('rpe_picker_title' as any)}</h3>
+                    <div className="flex flex-col gap-3">
+                      {([
+                        { rpe: 1 as const, label: t('rpe_light' as any), desc: t('rpe_light_desc' as any), cls: 'border-green-300 bg-green-50 hover:bg-green-100 text-green-800' },
+                        { rpe: 2 as const, label: t('rpe_moderate' as any), desc: t('rpe_moderate_desc' as any), cls: 'border-yellow-300 bg-yellow-50 hover:bg-yellow-100 text-yellow-800' },
+                        { rpe: 3 as const, label: t('rpe_hard' as any), desc: t('rpe_hard_desc' as any), cls: 'border-red-300 bg-red-50 hover:bg-red-100 text-red-800' },
+                      ]).map(({ rpe, label, desc, cls }) => (
+                        <button
+                          key={rpe}
+                          onClick={() => handleRpeSelected(rpe)}
+                          className={`w-full border-2 rounded-xl p-4 text-left transition-all ${cls}`}
+                        >
+                          <p className="font-bold text-base">{label}</p>
+                          <p className="text-xs opacity-80">{desc}</p>
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              )}
+
               {!isLastExercise && (
                  <div className="flex justify-between mt-8">
                     <Button onClick={() => setCurrentExerciseIndex(i => Math.max(0, i - 1))} disabled={currentExerciseIndex === 0} variant="ghost">{t('previous')}</Button>
-                    <Button onClick={() => setCurrentExerciseIndex(i => Math.min(exercises.length - 1, i + 1))} variant="secondary">{t('next')}</Button>
+                    <Button onClick={handleNextWithRpe} variant="secondary">{t('next')}</Button>
                 </div>
               )}
 

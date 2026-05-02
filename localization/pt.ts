@@ -336,6 +336,17 @@ export const pt: I18nKeys = {
   session_history_col_completed: 'Concluída',
   session_history_completed_yes: 'Sim',
   session_history_completed_no: 'Não',
+  // RPE por exercício (Asier Fase 1)
+  rpe_zone_label: 'Esforço esperado',
+  load_rec_label: 'Carga sugerida',
+  rpe_talk_test: 'Você deve conseguir falar frases curtas durante o exercício',
+  rpe_picker_title: 'Como foi o esforço nesse exercício?',
+  rpe_light: '🟢 Leve',
+  rpe_moderate: '🟡 Moderado',
+  rpe_hard: '🔴 Intenso',
+  rpe_light_desc: 'RPE ≤ 4 — Muito fácil',
+  rpe_moderate_desc: 'RPE 5–6 — Na zona ideal',
+  rpe_hard_desc: 'RPE ≥ 7 — Muito difícil',
   // Final reset confirmation modal
   reset_final_title: 'Confirmação Final — Ação Irreversível',
   reset_final_warning: 'ATENÇÃO: Esta ação apagará TODOS os participantes e avaliações do Supabase e não pode ser desfeita.',
