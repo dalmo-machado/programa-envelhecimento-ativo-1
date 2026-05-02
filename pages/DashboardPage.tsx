@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 import { Award } from 'lucide-react';
@@ -8,6 +8,7 @@ import { useParticipantData } from '../context/ParticipantDataContext';
 import { UserRole, Assessment } from '../types';
 import { trainingPrograms } from '../services/trainingData';
 import { getCurrentBelt } from '../utils/gamification';
+import { restoreFromBackup, BackupData } from '../services/supabaseService';
 import Card from '../components/ui/Card';
 import Button from '../components/ui/Button';
 import Header from '../components/Header';
@@ -271,6 +272,48 @@ const ResearcherDashboard: React.FC = () => {
     const { t, formatDate, formatNumber } = useLocalization();
     const { participants } = useParticipantData();
     const navigate = useNavigate();
+    const fileInputRef = useRef<HTMLInputElement>(null);
+    const [isRestoring, setIsRestoring] = useState(false);
+    const [restoreStatus, setRestoreStatus] = useState<{ type: 'success' | 'error'; message: string } | null>(null);
+
+    const handleRestoreClick = () => {
+        setRestoreStatus(null);
+        fileInputRef.current?.click();
+    };
+
+    const handleFileSelected = async (e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0];
+        if (!file) return;
+        // Reset input so the same file can be selected again if needed
+        e.target.value = '';
+
+        setIsRestoring(true);
+        setRestoreStatus(null);
+        try {
+            const text = await file.text();
+            const backup: BackupData = JSON.parse(text);
+            if (!backup.participants || !Array.isArray(backup.participants)) {
+                throw new Error('Arquivo inválido: não contém lista de participantes.');
+            }
+            const result = await restoreFromBackup(backup);
+            if (result.errors.length > 0) {
+                setRestoreStatus({
+                    type: 'error',
+                    message: `Restaurados ${result.restored} participante(s) com ${result.errors.length} erro(s):\n${result.errors.slice(0, 5).join('\n')}`,
+                });
+            } else {
+                setRestoreStatus({
+                    type: 'success',
+                    message: `✅ ${result.restored} participante(s) restaurado(s) com sucesso. Recarregando...`,
+                });
+                setTimeout(() => window.location.reload(), 1500);
+            }
+        } catch (err: any) {
+            setRestoreStatus({ type: 'error', message: `Erro ao ler arquivo: ${err.message}` });
+        } finally {
+            setIsRestoring(false);
+        }
+    };
 
     const unreviewedAlerts = participants.reduce(
         (sum, p) => sum + (p.incidents || []).filter(inc => !inc.reviewed).length,
@@ -353,9 +396,18 @@ const ResearcherDashboard: React.FC = () => {
 
     return (
         <div className="space-y-8">
+            {/* Input oculto para seleção do arquivo de backup */}
+            <input
+                ref={fileInputRef}
+                type="file"
+                accept=".json"
+                className="hidden"
+                onChange={handleFileSelected}
+            />
+
             <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
                 <h1 className="text-4xl font-bold text-primary-dark">{t('dashboard_researcher_title')}</h1>
-                <div className="flex gap-3">
+                <div className="flex gap-3 flex-wrap">
                     <Button
                         variant="ghost"
                         className="border-2 border-primary text-base py-2 px-4"
@@ -375,8 +427,27 @@ const ResearcherDashboard: React.FC = () => {
                             </span>
                         )}
                     </Button>
+                    <Button
+                        variant="ghost"
+                        className="border-2 border-slate-400 text-slate-600 hover:border-primary hover:text-primary text-base py-2 px-4 disabled:opacity-50"
+                        onClick={handleRestoreClick}
+                        disabled={isRestoring}
+                    >
+                        {isRestoring ? '⏳ Restaurando...' : '↩ Restaurar Backup'}
+                    </Button>
                 </div>
             </div>
+
+            {/* Feedback de restauração */}
+            {restoreStatus && (
+                <div className={`rounded-lg p-4 text-sm whitespace-pre-line border ${
+                    restoreStatus.type === 'success'
+                        ? 'bg-green-50 border-green-300 text-green-800'
+                        : 'bg-red-50 border-red-300 text-red-800'
+                }`}>
+                    {restoreStatus.message}
+                </div>
+            )}
             <Card>
                 <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-4 gap-4">
                     <h2 className="text-2xl font-bold text-primary-dark">{t('participants')}</h2>

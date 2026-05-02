@@ -272,6 +272,82 @@ export async function syncUpdate(
   await Promise.all(ops);
 }
 
+// ─────────────────────────────────────────────
+//  Backup / Restore
+// ─────────────────────────────────────────────
+
+export interface BackupData {
+  version: number;       // schema version — currently 1
+  exported_at: string;   // ISO timestamp
+  participants: Participant[];
+}
+
+export interface RestoreResult {
+  restored: number;
+  errors: string[];
+}
+
+/**
+ * Restore a full backup into Supabase.
+ * Designed to run after a full wipe (no conflicts expected).
+ * Uses insert (not upsert) for child tables — if rows already exist the
+ * error is caught per-participant and reported without aborting the rest.
+ */
+export async function restoreFromBackup(backup: BackupData): Promise<RestoreResult> {
+  if (backup.version !== 1) {
+    return { restored: 0, errors: [`Versão de backup não suportada: ${backup.version}`] };
+  }
+
+  const errors: string[] = [];
+  let restored = 0;
+
+  for (const p of backup.participants) {
+    try {
+      // 1. Participant row (upsert — safe to re-run)
+      const { error: pErr } = await supabase
+        .from('participants')
+        .upsert(participantToDb(p), { onConflict: 'study_id' });
+      if (pErr) throw new Error(`participants: ${pErr.message}`);
+
+      // 2. Assessments (insert; run after wipe so no conflicts)
+      for (const record of p.assessments) {
+        const { error: aErr } = await supabase
+          .from('assessments')
+          .insert(assessmentToDb(record, p.study_id));
+        if (aErr) errors.push(`assessments[${p.study_id}/${record.date}]: ${aErr.message}`);
+      }
+
+      // 3. Sessions — rebuild from session_logs
+      const logs = p.session_logs ?? [];
+      for (const log of logs) {
+        const { error: sErr } = await supabase
+          .from('sessions')
+          .insert({
+            participant_id: p.study_id,
+            session_index: log.session_index,
+            completed_at: log.session_end ?? log.session_start,
+            wellness_score: (log as any).wellness_score ?? null,
+          });
+        if (sErr) errors.push(`sessions[${p.study_id}/${log.session_index}]: ${sErr.message}`);
+      }
+
+      // 4. Incidents
+      for (const incident of p.incidents) {
+        const { error: iErr } = await supabase
+          .from('incidents')
+          .insert(incidentToDb(incident, p.study_id));
+        if (iErr) errors.push(`incidents[${p.study_id}/${incident.id}]: ${iErr.message}`);
+      }
+
+      restored++;
+    } catch (err: any) {
+      errors.push(`participant[${p.study_id}]: ${err.message}`);
+    }
+  }
+
+  return { restored, errors };
+}
+
 /**
  * Bulk-insert mock participants when the DB is empty on first run.
  */

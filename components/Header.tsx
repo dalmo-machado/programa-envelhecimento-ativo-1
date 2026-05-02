@@ -7,6 +7,7 @@ import { UserRole } from '../types';
 import { Home } from 'lucide-react';
 import Button from './ui/Button';
 import { supabase } from '../lib/supabase';
+import { loadAllParticipants, BackupData } from '../services/supabaseService';
 
 const Header: React.FC = () => {
     const { role, setRole, setParticipantId } = useUserRole();
@@ -39,25 +40,43 @@ const Header: React.FC = () => {
     };
 
     // Camada 1: confirmação dupla via UI (modais showConfirm → showResetConfirm)
-    // Camada 2: DELETE real no Supabase antes de limpar localStorage
+    // Camada 2: backup JSON automático + DELETE real no Supabase
     const handleConfirmResetAll = async () => {
         setIsResetting(true);
         setResetError(null);
         try {
-            // Deletar tabelas filhas antes da tabela pai (sem CASCADE nas FKs)
-            const steps: Array<{ table: string; filter: [string, string] }> = [
-                { table: 'sessions',    filter: ['participant_id', ''] },
-                { table: 'assessments', filter: ['participant_id', ''] },
-                { table: 'incidents',   filter: ['participant_id', ''] },
-                { table: 'participants', filter: ['study_id', '']      },
-            ];
+            // 2a — Exportar backup antes de qualquer delete
+            const allParticipants = await loadAllParticipants();
+            const backup: BackupData = {
+                version: 1,
+                exported_at: new Date().toISOString(),
+                participants: allParticipants,
+            };
+            const json = JSON.stringify(backup, null, 2);
+            const blob = new Blob([json], { type: 'application/json;charset=utf-8;' });
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement('a');
+            link.href = url;
+            const ts = new Date().toISOString().replace(/[:.]/g, '-').slice(0, 19);
+            link.download = `agecare_backup_${ts}.json`;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            URL.revokeObjectURL(url);
 
+            // 2b — DELETE sequencial (tabelas filhas antes da tabela pai)
+            const steps: Array<{ table: string; filter: [string, string] }> = [
+                { table: 'sessions',     filter: ['participant_id', ''] },
+                { table: 'assessments',  filter: ['participant_id', ''] },
+                { table: 'incidents',    filter: ['participant_id', ''] },
+                { table: 'participants', filter: ['study_id',        ''] },
+            ];
             for (const { table, filter } of steps) {
                 const { error } = await (supabase as any)
                     .from(table)
                     .delete()
-                    .neq(filter[0], filter[1]);      // neq('campo', '') apaga todas as linhas
-                if (error) throw new Error(`Erro ao apagar tabela "${table}": ${error.message}`);
+                    .neq(filter[0], filter[1]);
+                if (error) throw new Error(`Erro ao apagar "${table}": ${error.message}`);
             }
 
             localStorage.clear();
