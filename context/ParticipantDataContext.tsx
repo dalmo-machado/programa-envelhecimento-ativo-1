@@ -133,10 +133,19 @@ export const ParticipantDataProvider: React.FC<{ children: ReactNode }> = ({ chi
         // Merge sessions_completed (MAX) and training_plan (Supabase > localStorage)
         const merged = mergeLocalData(data);
 
+        // Valid session types for the current PRO-Training protocol
+        const VALID_SESSION_TYPES = new Set(['session1', 'session2', 'session3']);
+        const needsRegeneration = (p: typeof merged[0]) => {
+          if ((p.training_plan ?? []).length === 0) return p.assessments.length > 0;
+          // Regenerate if the plan still uses old single-component session types
+          const firstType = p.training_plan[0]?.sessionType as string;
+          return !VALID_SESSION_TYPES.has(firstType);
+        };
+
         // Safety fallback: regenerate training plan for participants who have
-        // assessments but no plan (e.g., plan was saved only on researcher's browser).
+        // assessments but no plan, OR whose plan uses the old session-type format.
         const withPlans = merged.map(p => {
-          if ((p.training_plan ?? []).length === 0 && p.assessments.length > 0) {
+          if (needsRegeneration(p) && p.assessments.length > 0) {
             const plan = generateTrainingPlan(p.assessments[0].data);
             saveTrainingPlan(p.study_id, plan);
             // Sync the regenerated plan to Supabase so all devices benefit.
