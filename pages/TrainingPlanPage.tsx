@@ -73,7 +73,7 @@ const TrainingPlanPage: React.FC = () => {
                       >
                         <p className="font-bold text-slate-500">{t('day')} {sessionIndex + 1}</p>
                         <p className="text-xl font-bold text-primary-dark mt-1">
-                          {t(trainingPrograms[session.sessionType].titleKey)}
+                          {t((trainingPrograms[session.sessionType]?.titleKey) ?? 'session_type_session1' as any)}
                         </p>
                         <p className="text-md text-slate-600">{t('level')} {session.level}</p>
                         {isCompleted && <p className="text-xs font-bold text-green-600 mt-2">{t('completed')}</p>}

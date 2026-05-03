@@ -181,7 +181,7 @@ const ParticipantDashboard: React.FC = () => {
                             <>
                                 <h3 className="text-2xl font-bold text-primary-dark">{t('next_session_info_with_level', {
                                     sessionNumber: nextSessionIndex + 1,
-                                    sessionType: t(trainingPrograms[nextSessionPlan.sessionType].titleKey),
+                                    sessionType: t((trainingPrograms[nextSessionPlan.sessionType]?.titleKey) ?? 'session_type_session1' as any),
                                     level: nextSessionPlan.level
                                 })}</h3>
                                 <p className="text-slate-600 my-2">{t('next_session_personalized_hint')}</p>

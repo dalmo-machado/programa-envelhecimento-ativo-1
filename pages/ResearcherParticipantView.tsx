@@ -332,7 +332,7 @@ const ResearcherParticipantView: React.FC = () => {
                       }`}
                     >
                       <p className="font-bold">{i + 1}</p>
-                      <p className="truncate">{t(trainingPrograms[session.sessionType].titleKey)}</p>
+                      <p className="truncate">{t((trainingPrograms[session.sessionType]?.titleKey) ?? 'session_type_session1' as any)}</p>
                       <p>{t('level_abbr' as any)} {session.level}</p>
                     </button>
                   );
