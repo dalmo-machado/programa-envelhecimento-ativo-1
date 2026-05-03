@@ -272,9 +272,9 @@ const SessionPage: React.FC = () => {
               {warmupExercises.map((ex, idx) => (
                 <div key={idx} className="mb-4 bg-white border border-slate-200 rounded-xl p-4 shadow-sm">
                   <div className="flex items-center gap-4">
-                    <img src={ex.illustrationUrl} alt={t(ex.nameKey)} className="w-16 h-16 object-contain rounded-lg" onError={(e) => { e.currentTarget.style.display = 'none'; }} />
+                    <img src={ex.illustrationUrl} alt={t(ex.nameKey)} className="w-24 h-24 object-contain rounded-lg flex-shrink-0" onError={(e) => { e.currentTarget.style.display = 'none'; }} />
                     <div className="flex-1">
-                      <p className="font-bold text-slate-800">{t(ex.nameKey)}</p>
+                      <p className="font-bold text-slate-800 text-lg">{t(ex.nameKey)}</p>
                       <p className="text-primary-dark font-semibold">{t(ex.levels[sessionLevel - 1].key, ex.levels[sessionLevel - 1].params)}</p>
                       <p className="text-sm text-slate-500 mt-1">{t(ex.instructionKey)}</p>
                     </div>
@@ -296,9 +296,9 @@ const SessionPage: React.FC = () => {
               {cooldownExercises.map((ex, idx) => (
                 <div key={idx} className="mb-4 bg-white border border-slate-200 rounded-xl p-4 shadow-sm">
                   <div className="flex items-center gap-4">
-                    <img src={ex.illustrationUrl} alt={t(ex.nameKey)} className="w-16 h-16 object-contain rounded-lg" onError={(e) => { e.currentTarget.style.display = 'none'; }} />
+                    <img src={ex.illustrationUrl} alt={t(ex.nameKey)} className="w-24 h-24 object-contain rounded-lg flex-shrink-0" onError={(e) => { e.currentTarget.style.display = 'none'; }} />
                     <div className="flex-1">
-                      <p className="font-bold text-slate-800">{t(ex.nameKey)}</p>
+                      <p className="font-bold text-slate-800 text-lg">{t(ex.nameKey)}</p>
                       <p className="text-primary-dark font-semibold">{t(ex.levels[sessionLevel - 1].key, ex.levels[sessionLevel - 1].params)}</p>
                       <p className="text-sm text-slate-500 mt-1">{t(ex.instructionKey)}</p>
                     </div>
