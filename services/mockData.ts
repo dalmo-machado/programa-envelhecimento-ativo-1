@@ -4,15 +4,21 @@ import { SessionKey } from './trainingData';
 
 // A sample pre-generated plan. In a real scenario, this would be empty
 // until the first assessment is completed.
-const samplePlan: PersonalizedSession[] = [ 
-    { sessionType: 'balance', level: 1 }, { sessionType: 'strength', level: 1 }, { sessionType: 'flexibility', level: 1 }, 
-    { sessionType: 'balance', level: 1 }, { sessionType: 'strength', level: 1 }, { sessionType: 'cardio', level: 1 }, 
-    { sessionType: 'balance', level: 2 }, { sessionType: 'strength', level: 2 }, { sessionType: 'posture', level: 1 }, 
-    { sessionType: 'flexibility', level: 1 }, { sessionType: 'balance', level: 2 }, { sessionType: 'strength', level: 2 }, 
-    { sessionType: 'cardio', level: 2 }, { sessionType: 'balance', level: 2 }, { sessionType: 'strength', level: 2 }, 
-    { sessionType: 'posture', level: 2 }, { sessionType: 'balance', level: 3 }, { sessionType: 'strength', level: 3 }, 
-    { sessionType: 'flexibility', level: 2 }, { sessionType: 'cardio', level: 2 }, { sessionType: 'balance', level: 3 }, 
-    { sessionType: 'strength', level: 3 }, { sessionType: 'posture', level: 2 }, { sessionType: 'flexibility', level: 2 }
+// Plano de 24 sessões: 3 sessões/semana × 8 semanas por nível × 3 níveis
+// Rotação A→B→C dentro de cada nível (8 semanas = ~24 sessões)
+const samplePlan: PersonalizedSession[] = [
+  // Nível 1 (semanas 1–8, ~24 sessões)
+  { sessionType: 'session1', level: 1 }, { sessionType: 'session2', level: 1 }, { sessionType: 'session3', level: 1 },
+  { sessionType: 'session1', level: 1 }, { sessionType: 'session2', level: 1 }, { sessionType: 'session3', level: 1 },
+  { sessionType: 'session1', level: 1 }, { sessionType: 'session2', level: 1 },
+  // Nível 2 (semanas 9–16)
+  { sessionType: 'session1', level: 2 }, { sessionType: 'session2', level: 2 }, { sessionType: 'session3', level: 2 },
+  { sessionType: 'session1', level: 2 }, { sessionType: 'session2', level: 2 }, { sessionType: 'session3', level: 2 },
+  { sessionType: 'session1', level: 2 }, { sessionType: 'session2', level: 2 },
+  // Nível 3 (semanas 17–24)
+  { sessionType: 'session1', level: 3 }, { sessionType: 'session2', level: 3 }, { sessionType: 'session3', level: 3 },
+  { sessionType: 'session1', level: 3 }, { sessionType: 'session2', level: 3 }, { sessionType: 'session3', level: 3 },
+  { sessionType: 'session1', level: 3 }, { sessionType: 'session2', level: 3 },
 ];
 
 export const newParticipant: Participant = {

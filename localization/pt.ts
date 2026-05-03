@@ -87,11 +87,9 @@ export const pt: I18nKeys = {
   duration_seconds_per_arm: '{count}s por braço',
   duration_steps: '{count} passos',
   duration_per_side: '{count} por lado',
-  session_type_strength: 'Força',
-  session_type_balance: 'Equilíbrio',
-  session_type_flexibility: 'Flexibilidade',
-  session_type_cardio: 'Cardiorrespiratório',
-  session_type_posture: 'Postural',
+  session_type_session1: 'Sessão A — Multicomponente',
+  session_type_session2: 'Sessão B — Multicomponente',
+  session_type_session3: 'Sessão C — Multicomponente',
   exercise_marching_in_place: 'Marcha estacionária',
   exercise_arm_circles: 'Círculos com os braços',
   exercise_sit_to_stand: 'Sentar e levantar',
@@ -393,4 +391,70 @@ export const pt: I18nKeys = {
   reset_final_warning: 'ATENÇÃO: Esta ação apagará TODOS os participantes e avaliações do Supabase e não pode ser desfeita.',
   reset_final_type_hint: 'Digite CONFIRMAR para habilitar o botão de exclusão:',
   reset_final_button: 'Apagar Tudo e Reiniciar',
+
+  // ── PP exercícios existentes sem i18n ────────────────────────────────────
+  exercise_skipping: 'Simulação de pular corda',
+  instruction_skipping: 'Em pé, simule pular uma corda imaginária: salte levemente sobre os pés alternando ou em conjunto, movendo os braços em círculo ao lado do corpo. Mantenha um ritmo constante.',
+  safety_skipping: 'Use calçado com amortecimento. Reduza a altura do salto ou faça apenas o movimento dos braços se sentir desconforto nas articulações.',
+
+  exercise_sumo_deadlift_band: 'Levantamento terra sumo com faixa',
+  instruction_sumo_deadlift_band: 'Em pé com os pés mais afastados que os ombros e as pontas dos pés voltadas para fora. Pise na faixa elástica e segure as extremidades. Dobre os joelhos e o quadril para descer, depois estenda para voltar a ficar de pé apertando os glúteos no topo.',
+  safety_sumo_deadlift_band: 'Mantenha as costas retas e o peito erguido durante todo o movimento. Não curve a região lombar.',
+
+  exercise_dead_bug: 'Dead Bug (Inseto morto)',
+  instruction_dead_bug: 'Deitado de costas com os braços estendidos para o teto e os joelhos dobrados a 90°. Desça lentamente um braço para trás e a perna oposta em direção ao chão sem tocá-lo. Volte ao centro. Alterne os lados.',
+  safety_dead_bug: 'Mantenha a região lombar apoiada no chão durante todo o movimento. Respire de forma controlada.',
+
+  // ── PP novos exercícios (Sessões A/B/C) ──────────────────────────────────
+  exercise_lunge: 'Afundo (Lunge)',
+  instruction_lunge: 'Em pé, dê um passo longo à frente com o pé direito. Desça o joelho traseiro em direção ao chão até que ambos os joelhos formem ~90°. Volte à posição inicial. Alterne as pernas.',
+  safety_lunge: 'Use uma cadeira como apoio lateral se precisar de equilíbrio. O joelho da frente não deve ultrapassar a ponta do pé.',
+
+  exercise_hip_abduction_band: 'Abdução de quadril com faixa',
+  instruction_hip_abduction_band: 'Em pé, apoiado em uma cadeira, com a faixa elástica ao redor dos tornozelos. Eleve uma perna lateralmente, afastando-a do corpo, mantendo o tronco ereto. Retorne devagar. Alterne as pernas.',
+  safety_hip_abduction_band: 'Mantenha-se firme no apoio. Não eleve a perna além do que o equilíbrio permitir.',
+
+  exercise_glute_bridge_band: 'Ponte de glúteos com faixa',
+  instruction_glute_bridge_band: 'Deitado de costas com joelhos dobrados e a faixa elástica acima dos joelhos. Empurre os joelhos levemente para fora e eleve o quadril do chão formando uma linha reta dos ombros aos joelhos. Desça lentamente.',
+  safety_glute_bridge_band: 'Mantenha os pés bem apoiados no chão. Não curve excessivamente a região lombar.',
+
+  exercise_rowing_with_resistance_band: 'Remada com faixa elástica',
+  instruction_rowing_with_resistance_band: 'Em pé ou sentado, segure as extremidades da faixa elástica fixada à frente na altura do peito. Puxe os cotovelos para trás apertando as escápulas. Retorne lentamente à posição inicial.',
+  safety_rowing_with_resistance_band: 'Mantenha as costas retas durante todo o movimento. Verifique se a faixa está bem fixada antes de começar.',
+
+  exercise_scapular_retraction_band: 'Retração escapular com faixa',
+  instruction_scapular_retraction_band: 'Em pé, segure a faixa elástica pelas duas extremidades com os braços estendidos à frente. Puxe os braços para os lados apertando as escápulas. Mantenha os cotovelos levemente dobrados durante o movimento.',
+  safety_scapular_retraction_band: 'Movimento lento e controlado. Mantenha os ombros afastados das orelhas.',
+
+  exercise_tricep_extension_band: 'Extensão de tríceps com faixa',
+  instruction_tricep_extension_band: 'Em pé, pise na faixa com um pé. Segure a extremidade livre e leve o cotovelo para cima (dobrado ao lado da cabeça). Estenda o braço para cima contraindo o tríceps. Retorne lentamente. Alterne os braços.',
+  safety_tricep_extension_band: 'Mantenha o cotovelo apontando para o teto durante o movimento. Use tensão de faixa adequada.',
+
+  exercise_floor_push_ups: 'Flexão no chão',
+  instruction_floor_push_ups: 'Em posição de prancha, com as mãos apoiadas no chão na largura dos ombros, desça o peito em direção ao chão dobrando os cotovelos. Empurre para cima para retornar. Pode ser feito com os joelhos apoiados se necessário.',
+  safety_floor_push_ups: 'Mantenha o corpo alinhado da cabeça aos calcanhares (ou joelhos). Não bloqueie os cotovelos ao estender.',
+
+  exercise_front_plank: 'Prancha frontal',
+  instruction_front_plank: 'Apoie os antebraços e as pontas dos pés no chão. Mantenha o corpo em linha reta da cabeça aos calcanhares com o abdômen contraído. Respire normalmente enquanto mantém a posição.',
+  safety_front_plank: 'Se for muito difícil, apoie os joelhos. Não deixe o quadril cair nem elevá-lo demais.',
+
+  exercise_side_plank_knee: 'Prancha lateral (joelho apoiado)',
+  instruction_side_plank_knee: 'Deitado de lado, apoie o antebraço no chão e o joelho inferior dobrado como suporte. Eleve o quadril formando uma linha reta do joelho ao ombro. Mantenha a posição. Troque de lado.',
+  safety_side_plank_knee: 'Alinhe o cotovelo abaixo do ombro. Mantenha o abdômen contraído e respire normalmente.',
+
+  exercise_slow_mountain_climber: 'Escalador lento',
+  instruction_slow_mountain_climber: 'Em posição de prancha alta (mãos no chão), leve lentamente um joelho em direção ao peito e volte a estendê-lo. Alterne as pernas de forma controlada, sem elevar o quadril.',
+  safety_slow_mountain_climber: 'Mantenha as costas retas e o abdômen contraído. Mova-se devagar para não perder o equilíbrio.',
+
+  exercise_foot_taps_directions: 'Toques em múltiplas direções',
+  instruction_foot_taps_directions: 'Apoiado em uma cadeira, toque com o pé direito em diferentes direções: à frente, lateral e atrás. Repita com o pé esquerdo. Mantenha o equilíbrio sobre o pé de apoio.',
+  safety_foot_taps_directions: 'Segure bem na cadeira. Comece com amplitudes pequenas e aumente progressivamente.',
+
+  exercise_lateral_shuffle: 'Deslocamento lateral rápido',
+  instruction_lateral_shuffle: 'Com os joelhos levemente dobrados e o tronco levemente inclinado à frente, dê passos rápidos para a direita e depois para a esquerda, arrastando o pé traseiro antes do próximo passo.',
+  safety_lateral_shuffle: 'Limpe o espaço de obstáculos. Use calçado antiderrapante. Reduza a velocidade se sentir instabilidade.',
+
+  exercise_step_touch: 'Toque lateral (Step Touch)',
+  instruction_step_touch: 'Dê um passo para a direita com o pé direito e toque o chão com o pé esquerdo ao lado. Repita para a esquerda. Mantenha um ritmo constante e os braços em movimento sincronizado.',
+  safety_step_touch: 'Verifique o espaço dos lados. Reduza a amplitude do passo se sentir desequilíbrio.',
 };

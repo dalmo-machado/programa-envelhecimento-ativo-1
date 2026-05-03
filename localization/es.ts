@@ -85,11 +85,9 @@ export const es = {
   duration_seconds_per_arm: '{count}s por brazo',
   duration_steps: '{count} pasos',
   duration_per_side: '{count} por lado',
-  session_type_strength: 'Fuerza',
-  session_type_balance: 'Equilibrio',
-  session_type_flexibility: 'Flexibilidad',
-  session_type_cardio: 'Cardiorrespiratorio',
-  session_type_posture: 'Postural',
+  session_type_session1: 'Sesión A — Multicomponente',
+  session_type_session2: 'Sesión B — Multicomponente',
+  session_type_session3: 'Sesión C — Multicomponente',
   exercise_marching_in_place: 'Marcha en el sitio',
   exercise_arm_circles: 'Círculos con los brazos',
   exercise_sit_to_stand: 'Sentarse y levantarse',
@@ -391,6 +389,72 @@ export const es = {
   reset_final_warning: 'ATENCIÓN: Esta acción eliminará TODOS los participantes y evaluaciones de Supabase y no se puede deshacer.',
   reset_final_type_hint: 'Escriba CONFIRMAR para habilitar el botón de eliminación:',
   reset_final_button: 'Borrar Todo y Reiniciar',
+
+  // ── PP ejercicios existentes sin i18n ────────────────────────────────────
+  exercise_skipping: 'Simulación de saltar cuerda',
+  instruction_skipping: 'De pie, simula saltar una cuerda imaginaria: salta levemente sobre los pies alternando o en conjunto, moviendo los brazos en círculo a los lados del cuerpo. Mantén un ritmo constante.',
+  safety_skipping: 'Usa calzado con amortiguación. Reduce la altura del salto o realiza solo el movimiento de brazos si sientes molestias en las articulaciones.',
+
+  exercise_sumo_deadlift_band: 'Peso muerto sumo con banda',
+  instruction_sumo_deadlift_band: 'De pie con los pies más separados que los hombros y las puntas hacia afuera. Pisa la banda elástica y sujeta los extremos. Dobla las rodillas y las caderas para bajar, luego extiende para volver a ponerte de pie apretando los glúteos en la parte superior.',
+  safety_sumo_deadlift_band: 'Mantén la espalda recta y el pecho erguido durante todo el movimiento. No redondees la zona lumbar.',
+
+  exercise_dead_bug: 'Cucaracha muerta (Dead Bug)',
+  instruction_dead_bug: 'Tumbado boca arriba con brazos extendidos hacia el techo y rodillas dobladas a 90°. Baja lentamente un brazo hacia atrás y la pierna opuesta hacia el suelo sin tocarlos. Vuelve al centro. Alterna los lados.',
+  safety_dead_bug: 'Mantén la zona lumbar apoyada en el suelo durante todo el movimiento. Respira de forma controlada.',
+
+  // ── PP nuevos ejercicios (Sesiones A/B/C) ────────────────────────────────
+  exercise_lunge: 'Zancada (Lunge)',
+  instruction_lunge: 'De pie, da un paso largo hacia adelante con el pie derecho. Baja la rodilla trasera hacia el suelo hasta que ambas rodillas formen ~90°. Vuelve a la posición inicial. Alterna las piernas.',
+  safety_lunge: 'Usa una silla como apoyo lateral si necesitas equilibrio. La rodilla delantera no debe sobrepasar la punta del pie.',
+
+  exercise_hip_abduction_band: 'Abducción de cadera con banda',
+  instruction_hip_abduction_band: 'De pie, apoyado en una silla, con la banda elástica alrededor de los tobillos. Eleva lateralmente una pierna alejándola del cuerpo, manteniendo el tronco erguido. Vuelve lentamente. Alterna las piernas.',
+  safety_hip_abduction_band: 'Mantente firme en el apoyo. No eleves la pierna más allá de lo que el equilibrio te permita.',
+
+  exercise_glute_bridge_band: 'Puente de glúteos con banda',
+  instruction_glute_bridge_band: 'Tumbado boca arriba con rodillas dobladas y la banda elástica por encima de las rodillas. Empuja las rodillas hacia afuera y eleva la cadera del suelo formando una línea recta desde los hombros hasta las rodillas. Baja lentamente.',
+  safety_glute_bridge_band: 'Mantén los pies bien apoyados en el suelo. No arquees excesivamente la zona lumbar.',
+
+  exercise_rowing_with_resistance_band: 'Remada con banda elástica',
+  instruction_rowing_with_resistance_band: 'De pie o sentado, sujeta los extremos de la banda elástica anclada al frente a la altura del pecho. Tira de los codos hacia atrás apretando las escápulas. Vuelve lentamente a la posición inicial.',
+  safety_rowing_with_resistance_band: 'Mantén la espalda recta durante todo el movimiento. Verifica que la banda esté bien anclada antes de comenzar.',
+
+  exercise_scapular_retraction_band: 'Retracción escapular con banda',
+  instruction_scapular_retraction_band: 'De pie, sujeta la banda elástica por ambos extremos con los brazos extendidos al frente. Tira de los brazos hacia los lados apretando las escápulas. Mantén los codos ligeramente doblados.',
+  safety_scapular_retraction_band: 'Movimiento lento y controlado. Mantén los hombros alejados de las orejas.',
+
+  exercise_tricep_extension_band: 'Extensión de tríceps con banda',
+  instruction_tricep_extension_band: 'De pie, pisa la banda con un pie. Sujeta el extremo libre y lleva el codo hacia arriba (doblado junto a la cabeza). Extiende el brazo hacia arriba estirando el tríceps. Vuelve lentamente. Alterna los brazos.',
+  safety_tricep_extension_band: 'Mantén el codo apuntando al techo durante el movimiento. Usa una tensión de banda adecuada.',
+
+  exercise_floor_push_ups: 'Flexión en el suelo',
+  instruction_floor_push_ups: 'En posición de plancha, con las manos apoyadas en el suelo a la anchura de los hombros, baja el pecho hacia el suelo doblando los codos. Empuja hacia arriba para volver. Se puede hacer con rodillas apoyadas si es necesario.',
+  safety_floor_push_ups: 'Mantén el cuerpo alineado de cabeza a talones (o rodillas). No bloquees los codos al extender.',
+
+  exercise_front_plank: 'Plancha frontal',
+  instruction_front_plank: 'Apoya los antebrazos y las puntas de los pies en el suelo. Mantén el cuerpo en línea recta de cabeza a talones con el abdomen contraído. Respira con normalidad mientras mantienes la posición.',
+  safety_front_plank: 'Si es demasiado difícil, apoya las rodillas. No dejes caer las caderas ni las eleves demasiado.',
+
+  exercise_side_plank_knee: 'Plancha lateral (rodilla apoyada)',
+  instruction_side_plank_knee: 'Tumbado de lado, apoya el antebrazo en el suelo y la rodilla inferior doblada como apoyo. Eleva la cadera formando una línea recta desde la rodilla hasta el hombro. Mantén la posición. Cambia de lado.',
+  safety_side_plank_knee: 'Alinea el codo bajo el hombro. Mantén el abdomen contraído y respira con normalidad.',
+
+  exercise_slow_mountain_climber: 'Escalador lento',
+  instruction_slow_mountain_climber: 'En posición de plancha alta (manos en el suelo), lleva lentamente una rodilla hacia el pecho y vuelve a extenderla. Alterna las piernas de forma controlada, sin elevar las caderas.',
+  safety_slow_mountain_climber: 'Mantén la espalda recta y el abdomen contraído. Muévete lentamente para no perder el equilibrio.',
+
+  exercise_foot_taps_directions: 'Toques en múltiples direcciones',
+  instruction_foot_taps_directions: 'Apoyado en una silla, toca con el pie derecho en diferentes direcciones: adelante, lateral y atrás. Luego repite con el pie izquierdo. Mantén el equilibrio sobre el pie de apoyo.',
+  safety_foot_taps_directions: 'Sujétate bien a la silla. Empieza con amplitudes pequeñas y auméntalas progresivamente.',
+
+  exercise_lateral_shuffle: 'Desplazamiento lateral',
+  instruction_lateral_shuffle: 'Con las rodillas ligeramente dobladas y el tronco levemente inclinado hacia adelante, da pasos rápidos hacia la derecha y luego hacia la izquierda, arrastrando el pie trasero antes del siguiente paso.',
+  safety_lateral_shuffle: 'Despeja el espacio de obstáculos. Usa calzado antideslizante. Reduce la velocidad si sientes inestabilidad.',
+
+  exercise_step_touch: 'Toque lateral (Step Touch)',
+  instruction_step_touch: 'Da un paso hacia la derecha con el pie derecho y luego toca el suelo con el pie izquierdo a su lado. Repite hacia la izquierda. Mantén un ritmo constante y mueve los brazos de forma sincronizada.',
+  safety_step_touch: 'Comprueba el espacio a los lados. Reduce la amplitud del paso si sientes desequilibrio.',
 };
 
 export type I18nKeys = typeof es;
