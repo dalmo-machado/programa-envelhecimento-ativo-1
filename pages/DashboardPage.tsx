@@ -7,7 +7,7 @@ import { useLocalization } from '../context/LocalizationContext';
 import { useParticipantData } from '../context/ParticipantDataContext';
 import { UserRole, Assessment } from '../types';
 import { trainingPrograms } from '../services/trainingData';
-import { getCurrentBelt } from '../utils/gamification';
+import { getCurrentBelt, getBeltProgress, BeltProgress } from '../utils/gamification';
 import { restoreFromBackup, BackupData } from '../services/supabaseService';
 import Card from '../components/ui/Card';
 import Button from '../components/ui/Button';
@@ -90,6 +90,58 @@ const CustomTooltip = ({ active, payload, label, firstAssessment, selectedMetric
     return null;
 };
 
+const BeltProgressCard: React.FC<{ beltProgress: BeltProgress }> = ({ beltProgress }) => {
+    const { t } = useLocalization();
+
+    if (beltProgress.isMaxBelt) {
+        return (
+            <Card className="flex items-center gap-4 py-1">
+                <div className={`w-14 h-14 rounded-full flex items-center justify-center border-4 shrink-0 ${beltProgress.currentBelt.colorClass}`}>
+                    <Award size={28} />
+                </div>
+                <div>
+                    <p className="text-base font-bold text-slate-800">{t(beltProgress.currentBelt.key)}</p>
+                    <p className="text-base text-yellow-700 font-semibold mt-1">{t('belt_max_reached' as any)}</p>
+                </div>
+            </Card>
+        );
+    }
+
+    return (
+        <Card title={t('belt_progress_title' as any)} className="w-full">
+            <div className="flex items-center gap-3 sm:gap-5 py-1">
+                <div className="flex flex-col items-center gap-1 shrink-0">
+                    <div className={`w-12 h-12 rounded-full flex items-center justify-center border-4 ${beltProgress.currentBelt.colorClass}`}>
+                        <Award size={22} />
+                    </div>
+                    <span className="text-xs font-semibold text-slate-600 text-center leading-tight w-16">{t(beltProgress.currentBelt.key)}</span>
+                </div>
+                <div className="flex-1 min-w-0">
+                    <div className="flex justify-between text-sm text-slate-500 mb-1">
+                        <span className="font-medium">{t('belt_sessions_progress' as any, { done: beltProgress.sessionsInRange, total: beltProgress.sessionsForNextBelt })}</span>
+                        <span>{Math.round(beltProgress.progressPercent)}%</span>
+                    </div>
+                    <div className="w-full bg-slate-200 rounded-full h-5 overflow-hidden">
+                        <div
+                            className={`h-5 rounded-full transition-all duration-700 ${beltProgress.nextBelt!.barColorClass}`}
+                            style={{ width: `${beltProgress.progressPercent}%` }}
+                        />
+                    </div>
+                    <p className="text-xs text-slate-500 mt-1 text-center">
+                        {t('belt_next_label' as any, { belt: t(beltProgress.nextBelt!.key) })}
+                    </p>
+                </div>
+                <div className="flex flex-col items-center gap-1 shrink-0 opacity-40">
+                    <div className={`w-12 h-12 rounded-full flex items-center justify-center border-4 ${beltProgress.nextBelt!.colorClass}`}>
+                        <Award size={22} />
+                    </div>
+                    <span className="text-xs font-semibold text-slate-400 text-center leading-tight w-16">{t(beltProgress.nextBelt!.key)}</span>
+                </div>
+            </div>
+        </Card>
+    );
+};
+
 const ParticipantDashboard: React.FC = () => {
     const { t, formatNumber, formatDate } = useLocalization();
     const navigate = useNavigate();
@@ -133,6 +185,7 @@ const ParticipantDashboard: React.FC = () => {
     
     const firstAssessment = participant.assessments[0];
     const currentBelt = getCurrentBelt(participant.sessions_completed);
+    const beltProgress = getBeltProgress(participant.sessions_completed);
 
     const birthDate = new Date((participant.birth_date || '1950-01-01') + 'T12:00:00Z');
     const today = new Date();
