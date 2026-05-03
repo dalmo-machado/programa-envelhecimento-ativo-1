@@ -30,6 +30,116 @@ export type SessionKey = 'strength' | 'balance' | 'flexibility' | 'cardio' | 'po
 
 // ── Aquecimento / Calentamiento (PRO-Training Table 2: Warm-Up) ──────────────
 export const warmupExercises: Exercise[] = [
+  // --- Mobilidade articular (AQ-01 a AQ-06) ---
+  {
+    nameKey: 'exercise_ankle_circles',
+    instructionKey: 'instruction_ankle_circles',
+    safetyKey: 'safety_ankle_circles',
+    levels: [
+      { key: 'duration_reps', params: { count: 10 } },
+      { key: 'duration_reps', params: { count: 15 } },
+      { key: 'duration_reps', params: { count: 20 } },
+    ],
+    illustrationUrl: '/images/ankle_circles.png',
+    rpeZone: [2, 4],
+  },
+  {
+    nameKey: 'exercise_knee_flexion_extension',
+    instructionKey: 'instruction_knee_flexion_extension',
+    safetyKey: 'safety_knee_flexion_extension',
+    levels: [
+      { key: 'duration_reps_sets', params: { count: 8, sets: 1 } },
+      { key: 'duration_reps_sets', params: { count: 10, sets: 1 } },
+      { key: 'duration_reps_sets', params: { count: 12, sets: 1 } },
+    ],
+    illustrationUrl: '/images/knee_flexion_extension.png',
+    rpeZone: [2, 4],
+  },
+  {
+    nameKey: 'exercise_hip_circles',
+    instructionKey: 'instruction_hip_circles',
+    safetyKey: 'safety_hip_circles',
+    levels: [
+      { key: 'duration_reps', params: { count: 10 } },
+      { key: 'duration_reps', params: { count: 15 } },
+      { key: 'duration_reps', params: { count: 20 } },
+    ],
+    illustrationUrl: '/images/hip_circles.png',
+    rpeZone: [2, 4],
+  },
+  {
+    nameKey: 'exercise_shoulder_circles',
+    instructionKey: 'instruction_shoulder_circles',
+    safetyKey: 'safety_shoulder_circles',
+    levels: [
+      { key: 'duration_reps', params: { count: 10 } },
+      { key: 'duration_reps', params: { count: 15 } },
+      { key: 'duration_reps', params: { count: 20 } },
+    ],
+    illustrationUrl: '/images/shoulder_circles.png',
+    rpeZone: [2, 4],
+  },
+  {
+    nameKey: 'exercise_wrist_circles',
+    instructionKey: 'instruction_wrist_circles',
+    safetyKey: 'safety_wrist_circles',
+    levels: [
+      { key: 'duration_reps', params: { count: 10 } },
+      { key: 'duration_reps', params: { count: 15 } },
+      { key: 'duration_reps', params: { count: 20 } },
+    ],
+    illustrationUrl: '/images/wrist_circles.png',
+    rpeZone: [2, 4],
+  },
+  {
+    nameKey: 'exercise_neck_mobility',
+    instructionKey: 'instruction_neck_mobility',
+    safetyKey: 'safety_neck_mobility',
+    levels: [
+      { key: 'duration_seconds', params: { count: 30 } },
+      { key: 'duration_seconds', params: { count: 45 } },
+      { key: 'duration_seconds', params: { count: 60 } },
+    ],
+    illustrationUrl: '/images/neck_mobility.png',
+    rpeZone: [2, 3],
+  },
+  // --- Ativação dinâmica / cardio leve (AQ-07 a AQ-09 + existentes) ---
+  {
+    nameKey: 'exercise_diagonal_foot_taps',
+    instructionKey: 'instruction_diagonal_foot_taps',
+    safetyKey: 'safety_diagonal_foot_taps',
+    levels: [
+      { key: 'duration_seconds', params: { count: 30 } },
+      { key: 'duration_seconds', params: { count: 45 } },
+      { key: 'duration_seconds', params: { count: 60 } },
+    ],
+    illustrationUrl: '/images/diagonal_foot_taps.png',
+    rpeZone: [3, 5],
+  },
+  {
+    nameKey: 'exercise_lateral_steps',
+    instructionKey: 'instruction_lateral_steps',
+    safetyKey: 'safety_lateral_steps',
+    levels: [
+      { key: 'duration_seconds', params: { count: 30 } },
+      { key: 'duration_seconds', params: { count: 45 } },
+      { key: 'duration_seconds', params: { count: 60 } },
+    ],
+    illustrationUrl: '/images/lateral_steps.png',
+    rpeZone: [3, 5],
+  },
+  {
+    nameKey: 'exercise_v_step',
+    instructionKey: 'instruction_v_step',
+    safetyKey: 'safety_v_step',
+    levels: [
+      { key: 'duration_seconds', params: { count: 30 } },
+      { key: 'duration_seconds', params: { count: 45 } },
+      { key: 'duration_seconds', params: { count: 60 } },
+    ],
+    illustrationUrl: '/images/v_step.png',
+    rpeZone: [3, 5],
+  },
   {
     nameKey: 'exercise_marching_in_place',
     instructionKey: 'instruction_marching_in_place',
@@ -40,6 +150,7 @@ export const warmupExercises: Exercise[] = [
       { key: 'duration_minutes', params: { count: 4 } },
     ],
     illustrationUrl: '/images/marching_in_place.png',
+    rpeZone: [3, 5],
   },
   {
     nameKey: 'exercise_arm_circles',
@@ -51,6 +162,7 @@ export const warmupExercises: Exercise[] = [
       { key: 'duration_minutes', params: { count: 1 } },
     ],
     illustrationUrl: '/images/arm_circles.png',
+    rpeZone: [2, 4],
   },
   {
     nameKey: 'exercise_heel_raises',
@@ -62,11 +174,62 @@ export const warmupExercises: Exercise[] = [
       { key: 'duration_reps_sets', params: { count: 15, sets: 1 } },
     ],
     illustrationUrl: '/images/heel_raises.png',
+    rpeZone: [3, 5],
   },
 ];
 
 // ── Desaquecimento / Vuelta a la calma (PRO-Training Table 2: Cool-Down) ─────
 export const cooldownExercises: Exercise[] = [
+  // --- Novos (DQ-01 a DQ-04) ---
+  {
+    nameKey: 'exercise_glute_stretch',
+    instructionKey: 'instruction_glute_stretch',
+    safetyKey: 'safety_glute_stretch',
+    levels: [
+      { key: 'duration_seconds_per_leg', params: { count: 20 } },
+      { key: 'duration_seconds_per_leg', params: { count: 30 } },
+      { key: 'duration_seconds_per_leg', params: { count: 45 } },
+    ],
+    illustrationUrl: '/images/glute_stretch.png',
+    rpeZone: [2, 4],
+  },
+  {
+    nameKey: 'exercise_quad_stretch',
+    instructionKey: 'instruction_quad_stretch',
+    safetyKey: 'safety_quad_stretch',
+    levels: [
+      { key: 'duration_seconds_per_leg', params: { count: 20 } },
+      { key: 'duration_seconds_per_leg', params: { count: 30 } },
+      { key: 'duration_seconds_per_leg', params: { count: 45 } },
+    ],
+    illustrationUrl: '/images/quad_stretch.png',
+    rpeZone: [2, 4],
+  },
+  {
+    nameKey: 'exercise_back_stretch',
+    instructionKey: 'instruction_back_stretch',
+    safetyKey: 'safety_back_stretch',
+    levels: [
+      { key: 'duration_seconds', params: { count: 20 } },
+      { key: 'duration_seconds', params: { count: 30 } },
+      { key: 'duration_seconds', params: { count: 45 } },
+    ],
+    illustrationUrl: '/images/back_stretch.png',
+    rpeZone: [2, 4],
+  },
+  {
+    nameKey: 'exercise_neck_adductor_stretch',
+    instructionKey: 'instruction_neck_adductor_stretch',
+    safetyKey: 'safety_neck_adductor_stretch',
+    levels: [
+      { key: 'duration_seconds', params: { count: 20 } },
+      { key: 'duration_seconds', params: { count: 30 } },
+      { key: 'duration_seconds', params: { count: 45 } },
+    ],
+    illustrationUrl: '/images/neck_adductor_stretch.png',
+    rpeZone: [2, 4],
+  },
+  // --- Existentes ---
   {
     nameKey: 'exercise_hamstring_stretch',
     instructionKey: 'instruction_hamstring_stretch',
@@ -77,6 +240,7 @@ export const cooldownExercises: Exercise[] = [
       { key: 'duration_seconds_per_leg', params: { count: 45 } },
     ],
     illustrationUrl: '/images/hamstring_stretch.png',
+    rpeZone: [2, 4],
   },
   {
     nameKey: 'exercise_calf_stretch',
@@ -88,6 +252,7 @@ export const cooldownExercises: Exercise[] = [
       { key: 'duration_seconds_per_leg', params: { count: 45 } },
     ],
     illustrationUrl: '/images/calf_stretch.png',
+    rpeZone: [2, 4],
   },
   {
     nameKey: 'exercise_shoulder_stretch',
@@ -99,6 +264,7 @@ export const cooldownExercises: Exercise[] = [
       { key: 'duration_seconds_per_arm', params: { count: 45 } },
     ],
     illustrationUrl: '/images/shoulder_stretch.png',
+    rpeZone: [2, 4],
   },
   {
     nameKey: 'exercise_chest_stretch',
@@ -110,6 +276,7 @@ export const cooldownExercises: Exercise[] = [
       { key: 'duration_seconds', params: { count: 45 } },
     ],
     illustrationUrl: '/images/chest_stretch.png',
+    rpeZone: [2, 4],
   },
 ];
 export const trainingPrograms: Record<SessionKey, TrainingProgram> = {
