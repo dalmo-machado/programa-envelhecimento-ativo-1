@@ -270,14 +270,12 @@ const SessionPage: React.FC = () => {
                 <p className="text-orange-600 text-sm">{t('warmup_phase_desc' as any)}</p>
               </div>
               {warmupExercises.map((ex, idx) => (
-                <div key={idx} className="mb-4 bg-white border border-slate-200 rounded-xl p-4 shadow-sm">
-                  <div className="flex items-center gap-4">
-                    <img src={ex.illustrationUrl} alt={t(ex.nameKey)} className="w-24 h-24 object-contain rounded-lg flex-shrink-0" onError={(e) => { e.currentTarget.style.display = 'none'; }} />
-                    <div className="flex-1">
-                      <p className="font-bold text-slate-800 text-lg">{t(ex.nameKey)}</p>
-                      <p className="text-primary-dark font-semibold">{t(ex.levels[sessionLevel - 1].key, ex.levels[sessionLevel - 1].params)}</p>
-                      <p className="text-sm text-slate-500 mt-1">{t(ex.instructionKey)}</p>
-                    </div>
+                <div key={idx} className="mb-4 bg-white border border-slate-200 rounded-xl overflow-hidden shadow-sm">
+                  <img src={ex.illustrationUrl} alt={t(ex.nameKey)} className="w-full h-48 object-contain bg-slate-50 p-2" onError={(e) => { e.currentTarget.style.display = 'none'; }} />
+                  <div className="p-4">
+                    <p className="font-bold text-slate-800 text-xl">{t(ex.nameKey)}</p>
+                    <p className="text-primary-dark font-semibold text-lg mt-1">{t(ex.levels[sessionLevel - 1].key, ex.levels[sessionLevel - 1].params)}</p>
+                    <p className="text-base text-slate-500 mt-1">{t(ex.instructionKey)}</p>
                   </div>
                 </div>
               ))}
@@ -294,14 +292,12 @@ const SessionPage: React.FC = () => {
                 <p className="text-blue-600 text-sm">{t('cooldown_phase_desc' as any)}</p>
               </div>
               {cooldownExercises.map((ex, idx) => (
-                <div key={idx} className="mb-4 bg-white border border-slate-200 rounded-xl p-4 shadow-sm">
-                  <div className="flex items-center gap-4">
-                    <img src={ex.illustrationUrl} alt={t(ex.nameKey)} className="w-24 h-24 object-contain rounded-lg flex-shrink-0" onError={(e) => { e.currentTarget.style.display = 'none'; }} />
-                    <div className="flex-1">
-                      <p className="font-bold text-slate-800 text-lg">{t(ex.nameKey)}</p>
-                      <p className="text-primary-dark font-semibold">{t(ex.levels[sessionLevel - 1].key, ex.levels[sessionLevel - 1].params)}</p>
-                      <p className="text-sm text-slate-500 mt-1">{t(ex.instructionKey)}</p>
-                    </div>
+                <div key={idx} className="mb-4 bg-white border border-slate-200 rounded-xl overflow-hidden shadow-sm">
+                  <img src={ex.illustrationUrl} alt={t(ex.nameKey)} className="w-full h-48 object-contain bg-slate-50 p-2" onError={(e) => { e.currentTarget.style.display = 'none'; }} />
+                  <div className="p-4">
+                    <p className="font-bold text-slate-800 text-xl">{t(ex.nameKey)}</p>
+                    <p className="text-primary-dark font-semibold text-lg mt-1">{t(ex.levels[sessionLevel - 1].key, ex.levels[sessionLevel - 1].params)}</p>
+                    <p className="text-base text-slate-500 mt-1">{t(ex.instructionKey)}</p>
                   </div>
                 </div>
               ))}
