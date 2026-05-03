@@ -92,7 +92,7 @@ const SessionPage: React.FC = () => {
       session_logs: [...(participant.session_logs ?? []), newLog],
     });
 
-    setSessionState('cooldown');
+    navigate('/dashboard');
   }
 
   const handleFinish = () => {
@@ -118,7 +118,6 @@ const SessionPage: React.FC = () => {
   const currentExercise = exercises[currentExerciseIndex];
   const exerciseDuration = currentExercise.levels[sessionLevel - 1]; // level is 1-based, array is 0-based
   const isLastExercise = currentExerciseIndex === exercises.length - 1;
-  const showFeedback = isLastExercise && difficulty !== null;
 
   return (
     <div className="bg-background min-h-screen">
@@ -247,62 +246,16 @@ const SessionPage: React.FC = () => {
                 </div>
               )}
 
-              {isLastExercise && (
-                <div className="mt-10 pt-6 border-t">
-                  <div className="bg-green-50 border border-green-200 rounded-xl p-6 mb-8 text-center">
-                      <p className="text-lg font-bold text-green-800">{t(postMessage)}</p>
-                  </div>
-                  <div className="mb-8">
-                    <h3 className="text-xl font-bold text-primary mb-4">Como voce se sentiu hoje?</h3>
-                    <div className="flex justify-center gap-3">
-                      {[
-                        { score: 1, emoji: '😞' },
-                        { score: 2, emoji: '😟' },
-                        { score: 3, emoji: '😐' },
-                        { score: 4, emoji: '🙂' },
-                        { score: 5, emoji: '😄' },
-                      ].map(({ score, emoji }) => (
-                        <button
-                          key={score}
-                          onClick={() => setWellnessScore(score)}
-                          className={`text-4xl p-3 rounded-xl border-2 transition-all ${
-                            wellnessScore === score
-                              ? 'border-teal-500 bg-teal-50 scale-110 shadow-md'
-                              : 'border-gray-200 bg-white hover:border-teal-300 hover:bg-teal-50'
-                          }`}
-                        >
-                          {emoji}
-                        </button>
-                      ))}
-                    </div>
-                  </div>
-                  <h3 className="text-xl font-bold text-primary mb-4">{t('difficulty_feedback')}</h3>
-                  <div className="flex flex-col sm:flex-row gap-4 mb-8">
-                      {(['easy', 'adequate', 'hard'] as Difficulty[]).map(level => (
-                        <Button 
-                          key={level}
-                          onClick={() => setDifficulty(level)}
-                          variant={difficulty === level ? 'primary' : 'ghost'}
-                          className="flex-1 border-2 border-primary"
-                        >
-                          {t(level)}
-                        </Button>
-                      ))}
-                  </div>
-                </div>
-              )}
-              
               <div className="mt-8 flex flex-col-reverse sm:flex-row gap-4">
                   <Button onClick={() => navigate(-1)} variant="ghost" className="w-full sm:w-auto">
                     {t('back_button')}
                   </Button>
                   {isLastExercise && (
-                    <Button 
-                      onClick={handleCompleteSession} 
+                    <Button
+                      onClick={() => setSessionState('cooldown')}
                       className="w-full"
-                      disabled={!difficulty}
                     >
-                      {t('complete_session')}
+                      {t('go_to_cooldown' as any)}
                     </Button>
                   )}
               </div>
@@ -357,6 +310,60 @@ const SessionPage: React.FC = () => {
               </Button>
             </div>
           )}
+          {sessionState === 'post' && (
+            <div className="flex flex-col items-center justify-center py-8 text-center max-w-lg mx-auto">
+              <div className="bg-green-50 border border-green-200 rounded-xl p-6 mb-8 w-full">
+                <p className="text-lg font-bold text-green-800">{t(postMessage)}</p>
+              </div>
+              <div className="mb-8 w-full">
+                <h3 className="text-xl font-bold text-primary mb-4">{t('wellness_question' as any)}</h3>
+                <div className="flex justify-center gap-3">
+                  {[
+                    { score: 1, emoji: '😞' },
+                    { score: 2, emoji: '😟' },
+                    { score: 3, emoji: '😐' },
+                    { score: 4, emoji: '🙂' },
+                    { score: 5, emoji: '😄' },
+                  ].map(({ score, emoji }) => (
+                    <button
+                      key={score}
+                      onClick={() => setWellnessScore(score)}
+                      className={`text-4xl p-3 rounded-xl border-2 transition-all ${
+                        wellnessScore === score
+                          ? 'border-teal-500 bg-teal-50 scale-110 shadow-md'
+                          : 'border-gray-200 bg-white hover:border-teal-300 hover:bg-teal-50'
+                      }`}
+                    >
+                      {emoji}
+                    </button>
+                  ))}
+                </div>
+              </div>
+              <div className="w-full mb-8">
+                <h3 className="text-xl font-bold text-primary mb-4">{t('difficulty_feedback')}</h3>
+                <div className="flex flex-col sm:flex-row gap-4">
+                  {(['easy', 'adequate', 'hard'] as Difficulty[]).map(level => (
+                    <Button
+                      key={level}
+                      onClick={() => setDifficulty(level)}
+                      variant={difficulty === level ? 'primary' : 'ghost'}
+                      className="flex-1 border-2 border-primary"
+                    >
+                      {t(level)}
+                    </Button>
+                  ))}
+                </div>
+              </div>
+              <Button
+                onClick={handleCompleteSession}
+                className="w-full"
+                disabled={!difficulty}
+              >
+                {t('complete_session')}
+              </Button>
+            </div>
+          )}
+
           {sessionState === 'incident' && (
             <div className="flex flex-col items-center justify-center py-8 text-center max-w-lg mx-auto">
                 <div className="w-20 h-20 bg-amber-100 rounded-full flex items-center justify-center mb-6">
@@ -374,11 +381,11 @@ const SessionPage: React.FC = () => {
                         >
                             {t('incident_yes')}
                         </Button>
-                        <Button 
+                        <Button
                             onClick={() => {
                                 setIncidentReported(false);
-                                handleFinish();
-                            }} 
+                                setSessionState('post');
+                            }}
                             className="w-full"
                         >
                             {t('incident_no')}
@@ -389,8 +396,8 @@ const SessionPage: React.FC = () => {
                         <div className="bg-amber-50 border border-amber-200 rounded-xl p-6 mb-8">
                             <p className="text-amber-800 font-medium">{t('incident_reported')}</p>
                         </div>
-                        <Button onClick={handleFinish} className="w-full">
-                            {t('back_button')}
+                        <Button onClick={() => setSessionState('post')} className="w-full">
+                            {t('continue')}
                         </Button>
                     </div>
                 )}
