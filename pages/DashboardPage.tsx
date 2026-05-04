@@ -254,13 +254,10 @@ const ParticipantDashboard: React.FC = () => {
                 </Card>
 
                 <div className="lg:col-span-2 flex flex-col gap-8">
-                    <div className="grid sm:grid-cols-3 gap-8">
-                        <Card title={t('current_belt')} className="flex flex-col items-center justify-center text-center">
-                            <div className={`w-20 h-20 rounded-full flex items-center justify-center border-4 mb-2 ${currentBelt.colorClass}`}>
-                                <Award size={40} />
-                            </div>
-                            <h3 className="text-xl font-bold text-slate-800">{t(currentBelt.key)}</h3>
-                        </Card>
+                    <div className="grid grid-cols-2 gap-4 sm:gap-6">
+                        <div className="col-span-2">
+                            <BeltProgressCard beltProgress={beltProgress} />
+                        </div>
                         <Card title={t('sessions_completed')} className="flex flex-col justify-center">
                             <p className="text-5xl font-bold text-secondary">{participant.sessions_completed} <span className="text-2xl text-slate-500">/ {totalSessions}</span></p>
                         </Card>
