@@ -11,6 +11,9 @@ import Card from '../components/ui/Card';
 // The researcher's access code is fixed and public; only the password is secret.
 const RESEARCHER_CODE = 'RESEARCHER';
 
+// The Gestor do Sistema code grants ADMIN-level access.
+const GESTOR_CODE = 'GESTOR';
+
 /**
  * Normalises a birth-date string to YYYYMMDD for password comparison.
  *
@@ -89,6 +92,24 @@ const LoginPage: React.FC = () => {
     setError('');
 
     const normalizedCode = code.trim().toUpperCase();
+
+    // --- Gestor do Sistema authentication (highest privilege, independent of Supabase) ---
+    if (normalizedCode === GESTOR_CODE) {
+      const gestorPassword = import.meta.env.VITE_GESTOR_PASSWORD;
+      if (!gestorPassword) {
+        console.warn(
+          '[Auth] VITE_GESTOR_PASSWORD não está definido. ' +
+          'Adicione essa variável ao .env.local e às variáveis de ambiente do Vercel.'
+        );
+      }
+      if (password === gestorPassword) {
+        setRole(UserRole.ADMIN);
+        navigate('/dashboard', { replace: true });
+      } else {
+        setError(t('login_error'));
+      }
+      return;
+    }
 
     // --- Researcher authentication (does not depend on Supabase data) ---
     if (normalizedCode === RESEARCHER_CODE) {

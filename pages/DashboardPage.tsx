@@ -8,7 +8,8 @@ import { useParticipantData } from '../context/ParticipantDataContext';
 import { UserRole, Assessment } from '../types';
 import { trainingPrograms } from '../services/trainingData';
 import { getCurrentBelt, getBeltProgress, BeltProgress } from '../utils/gamification';
-import { restoreFromBackup, BackupData } from '../services/supabaseService';
+import { restoreFromBackup, BackupData, loadAllParticipants } from '../services/supabaseService';
+import { supabase } from '../lib/supabase';
 import Card from '../components/ui/Card';
 import Button from '../components/ui/Button';
 import Header from '../components/Header';
@@ -20,7 +21,11 @@ const DashboardPage: React.FC = () => {
         <div className="bg-background min-h-screen">
             <Header />
             <main className="p-4 sm:p-6 md:p-8">
-                {role === UserRole.PARTICIPANT ? <ParticipantDashboard /> : <ResearcherDashboard />}
+                {role === UserRole.PARTICIPANT
+                    ? <ParticipantDashboard />
+                    : role === UserRole.ADMIN
+                    ? <ResearcherDashboard gestorMode={true} />
+                    : <ResearcherDashboard />}
             </main>
         </div>
     );
@@ -318,13 +323,65 @@ const ParticipantDashboard: React.FC = () => {
     );
 };
 
-const ResearcherDashboard: React.FC = () => {
+const ResearcherDashboard: React.FC<{ gestorMode?: boolean }> = ({ gestorMode = false }) => {
     const { t, formatDate, formatNumber } = useLocalization();
     const { participants } = useParticipantData();
     const navigate = useNavigate();
     const fileInputRef = useRef<HTMLInputElement>(null);
     const [isRestoring, setIsRestoring] = useState(false);
     const [restoreStatus, setRestoreStatus] = useState<{ type: 'success' | 'error'; message: string } | null>(null);
+
+    // Gestor: Zerar Dados
+    const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+    const [isDeleting, setIsDeleting] = useState(false);
+    const [deleteError, setDeleteError] = useState<string | null>(null);
+
+    const handleConfirmDeleteAll = async () => {
+        setIsDeleting(true);
+        setDeleteError(null);
+        try {
+            // 1 — Exportar backup automático antes de qualquer deleção
+            const allParticipants = await loadAllParticipants();
+            const backup: BackupData = {
+                version: 1,
+                exported_at: new Date().toISOString(),
+                participants: allParticipants,
+            };
+            const json = JSON.stringify(backup, null, 2);
+            const blob = new Blob([json], { type: 'application/json;charset=utf-8;' });
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement('a');
+            link.href = url;
+            const ts = new Date().toISOString().replace(/[:.]/g, '-').slice(0, 19);
+            link.download = `agecare_backup_${ts}.json`;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            URL.revokeObjectURL(url);
+
+            // 2 — DELETE sequencial (tabelas filhas antes da tabela pai)
+            const steps: Array<{ table: string; filter: [string, string] }> = [
+                { table: 'sessions',     filter: ['participant_id', ''] },
+                { table: 'assessments',  filter: ['participant_id', ''] },
+                { table: 'incidents',    filter: ['participant_id', ''] },
+                { table: 'participants', filter: ['study_id',        ''] },
+            ];
+            for (const { table, filter } of steps) {
+                const { error } = await (supabase as any)
+                    .from(table)
+                    .delete()
+                    .neq(filter[0], filter[1]);
+                if (error) throw new Error(`Erro ao apagar "${table}": ${error.message}`);
+            }
+
+            localStorage.clear();
+            window.location.href = '/';
+        } catch (err: any) {
+            console.error('[Gestor] handleConfirmDeleteAll:', err);
+            setDeleteError(err?.message ?? 'Erro desconhecido ao zerar dados.');
+            setIsDeleting(false);
+        }
+    };
 
     const handleRestoreClick = () => {
         setRestoreStatus(null);
@@ -446,6 +503,40 @@ const ResearcherDashboard: React.FC = () => {
 
     return (
         <div className="space-y-8">
+            {/* Modal de confirmação — Zerar Todos os Dados (Gestor apenas) */}
+            {gestorMode && showDeleteConfirm && (
+                <div className="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center z-[9999] p-4">
+                    <div className="bg-white rounded-xl p-6 max-w-md w-full shadow-xl text-slate-800">
+                        <h3 className="text-xl font-bold text-red-600 mb-3">{t('reset_data_title' as any)}</h3>
+                        <p className="text-slate-600 mb-2">{t('confirm_reset_all' as any)}</p>
+                        <p className="text-sm text-slate-500 mb-4">
+                            Um backup JSON será gerado automaticamente antes da exclusão.
+                        </p>
+                        {deleteError && (
+                            <p className="text-sm text-red-600 bg-red-50 border border-red-200 rounded-lg p-3 mb-4">
+                                ⚠️ {deleteError}
+                            </p>
+                        )}
+                        <div className="flex justify-end space-x-3">
+                            <Button
+                                variant="secondary"
+                                onClick={() => { setShowDeleteConfirm(false); setDeleteError(null); }}
+                                disabled={isDeleting}
+                            >
+                                {t('reset_data_no' as any)}
+                            </Button>
+                            <Button
+                                className="bg-red-600 hover:bg-red-700 text-white disabled:opacity-60"
+                                onClick={handleConfirmDeleteAll}
+                                disabled={isDeleting}
+                            >
+                                {isDeleting ? '⏳ Apagando...' : t('reset_data_yes' as any)}
+                            </Button>
+                        </div>
+                    </div>
+                </div>
+            )}
+
             {/* Input oculto para seleção do arquivo de backup */}
             <input
                 ref={fileInputRef}
@@ -456,7 +547,14 @@ const ResearcherDashboard: React.FC = () => {
             />
 
             <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-                <h1 className="text-4xl font-bold text-primary-dark">{t('dashboard_researcher_title')}</h1>
+                <div>
+                    <h1 className="text-4xl font-bold text-primary-dark">{t('dashboard_researcher_title')}</h1>
+                    {gestorMode && (
+                        <span className="inline-block mt-1 text-xs font-bold uppercase tracking-wide bg-primary-dark text-white px-3 py-1 rounded-full">
+                            Gestor do Sistema
+                        </span>
+                    )}
+                </div>
                 <div className="flex gap-3 flex-wrap">
                     <Button
                         variant="ghost"
@@ -485,6 +583,15 @@ const ResearcherDashboard: React.FC = () => {
                     >
                         {isRestoring ? '⏳ Restaurando...' : '↩ Restaurar Backup'}
                     </Button>
+                    {gestorMode && (
+                        <Button
+                            variant="ghost"
+                            className="border-2 border-red-500 text-red-600 hover:bg-red-50 text-base py-2 px-4"
+                            onClick={() => { setDeleteError(null); setShowDeleteConfirm(true); }}
+                        >
+                            🗑 Zerar Dados
+                        </Button>
+                    )}
                 </div>
             </div>
 
