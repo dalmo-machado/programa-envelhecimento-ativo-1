@@ -356,7 +356,7 @@ const ResearcherDashboard: React.FC<{ gestorMode?: boolean }> = ({ gestorMode = 
 
     const handleAddResearcher = async () => {
         if (!newResearcher.code.trim() || !newResearcher.name.trim() || !newResearcher.password) {
-            setAddResearcherError('Código, nome e senha são obrigatórios.');
+            setAddResearcherError(t('researchers_required_error' as any));
             return;
         }
         setAddingResearcher(true);
@@ -558,7 +558,7 @@ const ResearcherDashboard: React.FC<{ gestorMode?: boolean }> = ({ gestorMode = 
                         <h3 className="text-xl font-bold text-red-600 mb-3">{t('reset_data_title' as any)}</h3>
                         <p className="text-slate-600 mb-2">{t('confirm_reset_all' as any)}</p>
                         <p className="text-sm text-slate-500 mb-4">
-                            Um backup JSON será gerado automaticamente antes da exclusão.
+                            {t('delete_backup_note' as any)}
                         </p>
                         {deleteError && (
                             <p className="text-sm text-red-600 bg-red-50 border border-red-200 rounded-lg p-3 mb-4">
@@ -601,7 +601,7 @@ const ResearcherDashboard: React.FC<{ gestorMode?: boolean }> = ({ gestorMode = 
                     <h1 className="text-4xl font-bold text-primary-dark">{t('dashboard_researcher_title')}</h1>
                     {gestorMode && (
                         <span className="inline-block mt-1 text-xs font-bold uppercase tracking-wide bg-primary-dark text-white px-3 py-1 rounded-full">
-                            Gestor do Sistema
+                            {t('gestor_badge' as any)}
                         </span>
                     )}
                 </div>
@@ -651,13 +651,13 @@ const ResearcherDashboard: React.FC<{ gestorMode?: boolean }> = ({ gestorMode = 
             {gestorMode && (
                 <Card>
                     <div className="flex justify-between items-center mb-4">
-                        <h2 className="text-2xl font-bold text-primary-dark">Pesquisadores</h2>
+                        <h2 className="text-2xl font-bold text-primary-dark">{t('researchers_section_title' as any)}</h2>
                         <Button
                             variant="ghost"
                             className="border-2 border-primary text-base py-2 px-4"
                             onClick={() => { setShowAddResearcher(v => !v); setAddResearcherError(null); }}
                         >
-                            {showAddResearcher ? '✕ Cancelar' : '+ Adicionar'}
+                            {showAddResearcher ? t('researchers_cancel_button' as any) : t('researchers_add_button' as any)}
                         </Button>
                     </div>
 
@@ -666,45 +666,45 @@ const ResearcherDashboard: React.FC<{ gestorMode?: boolean }> = ({ gestorMode = 
                         <div className="bg-slate-50 rounded-lg p-4 mb-4 space-y-3 border border-slate-200">
                             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                                 <div>
-                                    <label className="text-sm font-semibold text-slate-700 block mb-1">Código de login *</label>
+                                    <label className="text-sm font-semibold text-slate-700 block mb-1">{t('researchers_code_label' as any)}</label>
                                     <input
                                         type="text"
                                         value={newResearcher.code}
                                         onChange={e => setNewResearcher(v => ({ ...v, code: e.target.value.toUpperCase() }))}
-                                        placeholder="ex: DALMO"
+                                        placeholder={t('researchers_code_placeholder' as any)}
                                         className="w-full p-2 border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-primary focus:outline-none"
                                     />
                                 </div>
                                 <div>
-                                    <label className="text-sm font-semibold text-slate-700 block mb-1">Nome completo *</label>
+                                    <label className="text-sm font-semibold text-slate-700 block mb-1">{t('researchers_name_label' as any)}</label>
                                     <input
                                         type="text"
                                         value={newResearcher.name}
                                         onChange={e => setNewResearcher(v => ({ ...v, name: e.target.value }))}
-                                        placeholder="ex: Dalmo Machado"
+                                        placeholder={t('researchers_name_placeholder' as any)}
                                         className="w-full p-2 border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-primary focus:outline-none"
                                     />
                                 </div>
                                 <div>
-                                    <label className="text-sm font-semibold text-slate-700 block mb-1">Senha *</label>
+                                    <label className="text-sm font-semibold text-slate-700 block mb-1">{t('researchers_password_label' as any)}</label>
                                     <input
                                         type="password"
                                         value={newResearcher.password}
                                         onChange={e => setNewResearcher(v => ({ ...v, password: e.target.value }))}
-                                        placeholder="Senha de acesso"
+                                        placeholder={t('researchers_password_placeholder' as any)}
                                         className="w-full p-2 border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-primary focus:outline-none"
                                     />
                                 </div>
                                 <div>
-                                    <label className="text-sm font-semibold text-slate-700 block mb-1">Centro</label>
+                                    <label className="text-sm font-semibold text-slate-700 block mb-1">{t('researchers_site_label' as any)}</label>
                                     <select
                                         value={newResearcher.site}
                                         onChange={e => setNewResearcher(v => ({ ...v, site: e.target.value }))}
                                         className="w-full p-2 border border-slate-300 rounded-lg text-sm bg-white focus:ring-2 focus:ring-primary focus:outline-none"
                                     >
-                                        <option value="">Todos os centros</option>
-                                        <option value="BR">Brasil (BR)</option>
-                                        <option value="ES">Espanha (ES)</option>
+                                        <option value="">{t('researchers_site_all' as any)}</option>
+                                        <option value="BR">{t('researchers_site_br' as any)}</option>
+                                        <option value="ES">{t('researchers_site_es' as any)}</option>
                                     </select>
                                 </div>
                             </div>
@@ -713,7 +713,7 @@ const ResearcherDashboard: React.FC<{ gestorMode?: boolean }> = ({ gestorMode = 
                             )}
                             <div className="flex justify-end">
                                 <Button onClick={handleAddResearcher} disabled={addingResearcher} className="py-2 px-6">
-                                    {addingResearcher ? '⏳ Salvando...' : 'Salvar Pesquisador'}
+                                    {addingResearcher ? t('researchers_saving' as any) : t('researchers_save_button' as any)}
                                 </Button>
                             </div>
                         </div>
@@ -721,20 +721,20 @@ const ResearcherDashboard: React.FC<{ gestorMode?: boolean }> = ({ gestorMode = 
 
                     {/* Lista de pesquisadores */}
                     {researchersLoading ? (
-                        <p className="text-slate-500 text-sm py-2">Carregando...</p>
+                        <p className="text-slate-500 text-sm py-2">{t('researchers_loading' as any)}</p>
                     ) : researchers.length === 0 ? (
-                        <p className="text-slate-500 text-sm py-2">Nenhum pesquisador cadastrado ainda.</p>
+                        <p className="text-slate-500 text-sm py-2">{t('researchers_empty' as any)}</p>
                     ) : (
                         <div className="overflow-x-auto">
                             <table className="w-full text-left text-sm whitespace-nowrap">
                                 <thead className="bg-slate-100 text-slate-600 uppercase text-xs">
                                     <tr>
-                                        <th className="p-3">Código</th>
-                                        <th className="p-3">Nome</th>
-                                        <th className="p-3">Centro</th>
-                                        <th className="p-3">Cadastrado em</th>
-                                        <th className="p-3 text-center">Status</th>
-                                        <th className="p-3 text-center">Ação</th>
+                                        <th className="p-3">{t('researchers_col_code' as any)}</th>
+                                        <th className="p-3">{t('researchers_col_name' as any)}</th>
+                                        <th className="p-3">{t('researchers_col_site' as any)}</th>
+                                        <th className="p-3">{t('researchers_col_created' as any)}</th>
+                                        <th className="p-3 text-center">{t('researchers_col_status' as any)}</th>
+                                        <th className="p-3 text-center">{t('researchers_col_action' as any)}</th>
                                     </tr>
                                 </thead>
                                 <tbody className="divide-y divide-slate-200">
@@ -746,7 +746,7 @@ const ResearcherDashboard: React.FC<{ gestorMode?: boolean }> = ({ gestorMode = 
                                             <td className="p-3">{formatDate(new Date(r.created_at), { day: '2-digit', month: '2-digit', year: 'numeric' })}</td>
                                             <td className="p-3 text-center">
                                                 <span className={`text-xs font-bold px-2 py-1 rounded-full ${r.active ? 'bg-green-100 text-green-700' : 'bg-slate-200 text-slate-500'}`}>
-                                                    {r.active ? 'Ativo' : 'Inativo'}
+                                                    {r.active ? t('researchers_status_active' as any) : t('researchers_status_inactive' as any)}
                                                 </span>
                                             </td>
                                             <td className="p-3 text-center">
@@ -755,7 +755,7 @@ const ResearcherDashboard: React.FC<{ gestorMode?: boolean }> = ({ gestorMode = 
                                                     className={`text-xs py-1 px-3 border ${r.active ? 'border-red-400 text-red-600 hover:bg-red-50' : 'border-green-500 text-green-700 hover:bg-green-50'}`}
                                                     onClick={() => handleToggleResearcher(r.id, r.active)}
                                                 >
-                                                    {r.active ? 'Desativar' : 'Reativar'}
+                                                    {r.active ? t('researchers_deactivate' as any) : t('researchers_reactivate' as any)}
                                                 </Button>
                                             </td>
                                         </tr>
