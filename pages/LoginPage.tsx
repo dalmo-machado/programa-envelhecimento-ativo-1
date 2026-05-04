@@ -5,6 +5,8 @@ import { useLocalization } from '../context/LocalizationContext';
 import { useUserRole } from '../context/UserRoleContext';
 import { useParticipantData } from '../context/ParticipantDataContext';
 import { Language, UserRole } from '../types';
+import { findResearcherByCode } from '../services/supabaseService';
+import { verifyPassword } from '../utils/auth';
 import Button from '../components/ui/Button';
 import Card from '../components/ui/Card';
 
@@ -45,6 +47,7 @@ const LoginPage: React.FC = () => {
   const [code, setCode] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
+  const [isAuthenticating, setIsAuthenticating] = useState(false);
   // Stores credentials submitted while Supabase was still loading, for deferred validation.
   const [pendingLogin, setPendingLogin] = useState<{ code: string; pwd: string } | null>(null);
 
@@ -87,7 +90,7 @@ const LoginPage: React.FC = () => {
     }
   };
 
-  const handleLogin = (e: React.FormEvent) => {
+  const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
 
@@ -111,20 +114,12 @@ const LoginPage: React.FC = () => {
       return;
     }
 
-    // --- Researcher authentication (does not depend on Supabase data) ---
+    // --- Legacy Researcher authentication via env var (emergency / backward compat) ---
     if (normalizedCode === RESEARCHER_CODE) {
-      // VITE_RESEARCHER_PASSWORD is a build-time env var embedded in the JS bundle.
-      // It is not secret from anyone who inspects the bundle, but it does prevent
-      // accidental access by participants. A real backend is needed for true security.
       const researcherPassword = import.meta.env.VITE_RESEARCHER_PASSWORD;
-
       if (!researcherPassword) {
-        console.warn(
-          '[Auth] VITE_RESEARCHER_PASSWORD não está definido. ' +
-          'Crie um arquivo .env.local com essa variável antes de usar em produção.'
-        );
+        console.warn('[Auth] VITE_RESEARCHER_PASSWORD não está definido.');
       }
-
       if (password === researcherPassword) {
         setRole(UserRole.RESEARCHER);
         navigate('/dashboard', { replace: true });
@@ -133,6 +128,29 @@ const LoginPage: React.FC = () => {
       }
       return;
     }
+
+    // --- DB Researcher authentication (individual researchers registered by Gestor) ---
+    // Any code that isn't GESTOR or RESEARCHER is first checked against the researchers table
+    // before falling through to participant auth.
+    setIsAuthenticating(true);
+    try {
+      const researcher = await findResearcherByCode(normalizedCode);
+      if (researcher) {
+        const isValid = await verifyPassword(password, researcher.password_hash);
+        if (isValid) {
+          setRole(UserRole.RESEARCHER);
+          navigate('/dashboard', { replace: true });
+        } else {
+          setError(t('login_error'));
+        }
+        setIsAuthenticating(false);
+        return;
+      }
+    } catch (err) {
+      // DB lookup failed — fall through to participant auth silently
+      console.warn('[Auth] DB researcher lookup failed:', err);
+    }
+    setIsAuthenticating(false);
 
     // --- Participant authentication ---
     if (isLoading) {
@@ -251,11 +269,9 @@ const LoginPage: React.FC = () => {
           <Button
             type="submit"
             className="w-full py-3 text-lg"
-            disabled={!code.trim() || !password.trim() || !!pendingLogin}
+            disabled={!code.trim() || !password.trim() || !!pendingLogin || isAuthenticating}
           >
-            {isLoading
-              ? t('login_loading' as any)
-              : pendingLogin
+            {isLoading || pendingLogin || isAuthenticating
               ? t('login_loading' as any)
               : t('login_submit')}
           </Button>

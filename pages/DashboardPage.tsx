@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 import { Award } from 'lucide-react';
@@ -8,8 +8,9 @@ import { useParticipantData } from '../context/ParticipantDataContext';
 import { UserRole, Assessment } from '../types';
 import { trainingPrograms } from '../services/trainingData';
 import { getCurrentBelt, getBeltProgress, BeltProgress } from '../utils/gamification';
-import { restoreFromBackup, BackupData, loadAllParticipants } from '../services/supabaseService';
+import { restoreFromBackup, BackupData, loadAllParticipants, ResearcherRecord, loadResearchers, createResearcher, toggleResearcherActive } from '../services/supabaseService';
 import { supabase } from '../lib/supabase';
+import { hashPassword } from '../utils/auth';
 import Card from '../components/ui/Card';
 import Button from '../components/ui/Button';
 import Header from '../components/Header';
@@ -336,6 +337,53 @@ const ResearcherDashboard: React.FC<{ gestorMode?: boolean }> = ({ gestorMode = 
     const [isDeleting, setIsDeleting] = useState(false);
     const [deleteError, setDeleteError] = useState<string | null>(null);
 
+    // Gestor: gerenciamento de pesquisadores
+    const [researchers, setResearchers] = useState<ResearcherRecord[]>([]);
+    const [researchersLoading, setResearchersLoading] = useState(false);
+    const [showAddResearcher, setShowAddResearcher] = useState(false);
+    const [newResearcher, setNewResearcher] = useState({ code: '', name: '', password: '', site: '' });
+    const [addingResearcher, setAddingResearcher] = useState(false);
+    const [addResearcherError, setAddResearcherError] = useState<string | null>(null);
+
+    useEffect(() => {
+        if (!gestorMode) return;
+        setResearchersLoading(true);
+        loadResearchers()
+            .then(setResearchers)
+            .catch(err => console.error('[Gestor] loadResearchers:', err))
+            .finally(() => setResearchersLoading(false));
+    }, [gestorMode]);
+
+    const handleAddResearcher = async () => {
+        if (!newResearcher.code.trim() || !newResearcher.name.trim() || !newResearcher.password) {
+            setAddResearcherError('Código, nome e senha são obrigatórios.');
+            return;
+        }
+        setAddingResearcher(true);
+        setAddResearcherError(null);
+        try {
+            const hash = await hashPassword(newResearcher.password);
+            await createResearcher(newResearcher.code, newResearcher.name, hash, newResearcher.site || null);
+            const updated = await loadResearchers();
+            setResearchers(updated);
+            setNewResearcher({ code: '', name: '', password: '', site: '' });
+            setShowAddResearcher(false);
+        } catch (err: any) {
+            setAddResearcherError(err?.message ?? 'Erro ao cadastrar pesquisador.');
+        } finally {
+            setAddingResearcher(false);
+        }
+    };
+
+    const handleToggleResearcher = async (id: string, currentActive: boolean) => {
+        try {
+            await toggleResearcherActive(id, !currentActive);
+            setResearchers(prev => prev.map(r => r.id === id ? { ...r, active: !currentActive } : r));
+        } catch (err: any) {
+            console.error('[Gestor] toggleResearcher:', err);
+        }
+    };
+
     const handleConfirmDeleteAll = async () => {
         setIsDeleting(true);
         setDeleteError(null);
@@ -537,14 +585,16 @@ const ResearcherDashboard: React.FC<{ gestorMode?: boolean }> = ({ gestorMode = 
                 </div>
             )}
 
-            {/* Input oculto para seleção do arquivo de backup */}
-            <input
-                ref={fileInputRef}
-                type="file"
-                accept=".json"
-                className="hidden"
-                onChange={handleFileSelected}
-            />
+            {/* Input oculto para seleção do arquivo de backup (Gestor apenas) */}
+            {gestorMode && (
+                <input
+                    ref={fileInputRef}
+                    type="file"
+                    accept=".json"
+                    className="hidden"
+                    onChange={handleFileSelected}
+                />
+            )}
 
             <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
                 <div>
@@ -575,28 +625,150 @@ const ResearcherDashboard: React.FC<{ gestorMode?: boolean }> = ({ gestorMode = 
                             </span>
                         )}
                     </Button>
-                    <Button
-                        variant="ghost"
-                        className="border-2 border-slate-400 text-slate-600 hover:border-primary hover:text-primary text-base py-2 px-4 disabled:opacity-50"
-                        onClick={handleRestoreClick}
-                        disabled={isRestoring}
-                    >
-                        {isRestoring ? '⏳ Restaurando...' : '↩ Restaurar Backup'}
-                    </Button>
                     {gestorMode && (
-                        <Button
-                            variant="ghost"
-                            className="border-2 border-red-500 text-red-600 hover:bg-red-50 text-base py-2 px-4"
-                            onClick={() => { setDeleteError(null); setShowDeleteConfirm(true); }}
-                        >
-                            🗑 Zerar Dados
-                        </Button>
+                        <>
+                            <Button
+                                variant="ghost"
+                                className="border-2 border-slate-400 text-slate-600 hover:border-primary hover:text-primary text-base py-2 px-4 disabled:opacity-50"
+                                onClick={handleRestoreClick}
+                                disabled={isRestoring}
+                            >
+                                {isRestoring ? '⏳ Restaurando...' : '↩ Restaurar Backup'}
+                            </Button>
+                            <Button
+                                variant="ghost"
+                                className="border-2 border-red-500 text-red-600 hover:bg-red-50 text-base py-2 px-4"
+                                onClick={() => { setDeleteError(null); setShowDeleteConfirm(true); }}
+                            >
+                                🗑 Zerar Dados
+                            </Button>
+                        </>
                     )}
                 </div>
             </div>
 
-            {/* Feedback de restauração */}
-            {restoreStatus && (
+            {/* ── Gerenciamento de Pesquisadores (Gestor apenas) ────────────── */}
+            {gestorMode && (
+                <Card>
+                    <div className="flex justify-between items-center mb-4">
+                        <h2 className="text-2xl font-bold text-primary-dark">Pesquisadores</h2>
+                        <Button
+                            variant="ghost"
+                            className="border-2 border-primary text-base py-2 px-4"
+                            onClick={() => { setShowAddResearcher(v => !v); setAddResearcherError(null); }}
+                        >
+                            {showAddResearcher ? '✕ Cancelar' : '+ Adicionar'}
+                        </Button>
+                    </div>
+
+                    {/* Formulário de adição */}
+                    {showAddResearcher && (
+                        <div className="bg-slate-50 rounded-lg p-4 mb-4 space-y-3 border border-slate-200">
+                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                                <div>
+                                    <label className="text-sm font-semibold text-slate-700 block mb-1">Código de login *</label>
+                                    <input
+                                        type="text"
+                                        value={newResearcher.code}
+                                        onChange={e => setNewResearcher(v => ({ ...v, code: e.target.value.toUpperCase() }))}
+                                        placeholder="ex: DALMO"
+                                        className="w-full p-2 border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-primary focus:outline-none"
+                                    />
+                                </div>
+                                <div>
+                                    <label className="text-sm font-semibold text-slate-700 block mb-1">Nome completo *</label>
+                                    <input
+                                        type="text"
+                                        value={newResearcher.name}
+                                        onChange={e => setNewResearcher(v => ({ ...v, name: e.target.value }))}
+                                        placeholder="ex: Dalmo Machado"
+                                        className="w-full p-2 border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-primary focus:outline-none"
+                                    />
+                                </div>
+                                <div>
+                                    <label className="text-sm font-semibold text-slate-700 block mb-1">Senha *</label>
+                                    <input
+                                        type="password"
+                                        value={newResearcher.password}
+                                        onChange={e => setNewResearcher(v => ({ ...v, password: e.target.value }))}
+                                        placeholder="Senha de acesso"
+                                        className="w-full p-2 border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-primary focus:outline-none"
+                                    />
+                                </div>
+                                <div>
+                                    <label className="text-sm font-semibold text-slate-700 block mb-1">Centro</label>
+                                    <select
+                                        value={newResearcher.site}
+                                        onChange={e => setNewResearcher(v => ({ ...v, site: e.target.value }))}
+                                        className="w-full p-2 border border-slate-300 rounded-lg text-sm bg-white focus:ring-2 focus:ring-primary focus:outline-none"
+                                    >
+                                        <option value="">Todos os centros</option>
+                                        <option value="BR">Brasil (BR)</option>
+                                        <option value="ES">Espanha (ES)</option>
+                                    </select>
+                                </div>
+                            </div>
+                            {addResearcherError && (
+                                <p className="text-sm text-red-600 bg-red-50 border border-red-200 rounded p-2">⚠️ {addResearcherError}</p>
+                            )}
+                            <div className="flex justify-end">
+                                <Button onClick={handleAddResearcher} disabled={addingResearcher} className="py-2 px-6">
+                                    {addingResearcher ? '⏳ Salvando...' : 'Salvar Pesquisador'}
+                                </Button>
+                            </div>
+                        </div>
+                    )}
+
+                    {/* Lista de pesquisadores */}
+                    {researchersLoading ? (
+                        <p className="text-slate-500 text-sm py-2">Carregando...</p>
+                    ) : researchers.length === 0 ? (
+                        <p className="text-slate-500 text-sm py-2">Nenhum pesquisador cadastrado ainda.</p>
+                    ) : (
+                        <div className="overflow-x-auto">
+                            <table className="w-full text-left text-sm whitespace-nowrap">
+                                <thead className="bg-slate-100 text-slate-600 uppercase text-xs">
+                                    <tr>
+                                        <th className="p-3">Código</th>
+                                        <th className="p-3">Nome</th>
+                                        <th className="p-3">Centro</th>
+                                        <th className="p-3">Cadastrado em</th>
+                                        <th className="p-3 text-center">Status</th>
+                                        <th className="p-3 text-center">Ação</th>
+                                    </tr>
+                                </thead>
+                                <tbody className="divide-y divide-slate-200">
+                                    {researchers.map(r => (
+                                        <tr key={r.id} className={`hover:bg-slate-50 ${!r.active ? 'opacity-50' : ''}`}>
+                                            <td className="p-3 font-mono font-semibold text-primary-dark">{r.code}</td>
+                                            <td className="p-3">{r.name}</td>
+                                            <td className="p-3">{r.site ?? '—'}</td>
+                                            <td className="p-3">{formatDate(new Date(r.created_at), { day: '2-digit', month: '2-digit', year: 'numeric' })}</td>
+                                            <td className="p-3 text-center">
+                                                <span className={`text-xs font-bold px-2 py-1 rounded-full ${r.active ? 'bg-green-100 text-green-700' : 'bg-slate-200 text-slate-500'}`}>
+                                                    {r.active ? 'Ativo' : 'Inativo'}
+                                                </span>
+                                            </td>
+                                            <td className="p-3 text-center">
+                                                <Button
+                                                    variant="ghost"
+                                                    className={`text-xs py-1 px-3 border ${r.active ? 'border-red-400 text-red-600 hover:bg-red-50' : 'border-green-500 text-green-700 hover:bg-green-50'}`}
+                                                    onClick={() => handleToggleResearcher(r.id, r.active)}
+                                                >
+                                                    {r.active ? 'Desativar' : 'Reativar'}
+                                                </Button>
+                                            </td>
+                                        </tr>
+                                    ))}
+                                </tbody>
+                            </table>
+                        </div>
+                    )}
+                </Card>
+            )}
+
+            {/* Feedback de restauração (Gestor apenas) */}
+            {gestorMode && restoreStatus && (
                 <div className={`rounded-lg p-4 text-sm whitespace-pre-line border ${
                     restoreStatus.type === 'success'
                         ? 'bg-green-50 border-green-300 text-green-800'

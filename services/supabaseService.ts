@@ -348,6 +348,70 @@ export async function restoreFromBackup(backup: BackupData): Promise<RestoreResu
   return { restored, errors };
 }
 
+// ─────────────────────────────────────────────
+//  Researchers (managed by Gestor)
+// ─────────────────────────────────────────────
+
+export interface ResearcherRecord {
+  id: string;
+  code: string;
+  name: string;
+  password_hash: string;
+  site: string | null;
+  active: boolean;
+  created_at: string;
+}
+
+/** Load all registered researchers ordered by creation date. */
+export async function loadResearchers(): Promise<ResearcherRecord[]> {
+  const { data, error } = await supabase
+    .from('researchers')
+    .select('*')
+    .order('created_at', { ascending: true });
+  if (error) throw error;
+  return (data ?? []) as ResearcherRecord[];
+}
+
+/** Find a single active researcher by login code. Returns null if not found. */
+export async function findResearcherByCode(code: string): Promise<ResearcherRecord | null> {
+  const { data, error } = await supabase
+    .from('researchers')
+    .select('*')
+    .eq('code', code.toUpperCase())
+    .eq('active', true)
+    .maybeSingle();
+  if (error) throw error;
+  return data as ResearcherRecord | null;
+}
+
+/** Create a new researcher (Gestor only). */
+export async function createResearcher(
+  code: string,
+  name: string,
+  passwordHash: string,
+  site: string | null,
+): Promise<void> {
+  const { error } = await supabase.from('researchers').insert({
+    code: code.toUpperCase().trim(),
+    name: name.trim(),
+    password_hash: passwordHash,
+    site: site || null,
+    active: true,
+  });
+  if (error) throw error;
+}
+
+/** Toggle a researcher's active status (Gestor only). */
+export async function toggleResearcherActive(id: string, active: boolean): Promise<void> {
+  const { error } = await supabase
+    .from('researchers')
+    .update({ active })
+    .eq('id', id);
+  if (error) throw error;
+}
+
+// ─────────────────────────────────────────────
+
 /**
  * Bulk-insert mock participants when the DB is empty on first run.
  */
