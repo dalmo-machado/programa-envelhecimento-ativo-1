@@ -49,7 +49,9 @@ const ScreeningPage: React.FC = () => {
     const navigate = useNavigate();
     const { addParticipant, participants } = useParticipantData();
 
-    const [status, setStatus] = useState<'registration' | 'screening' | 'risk' | 'success'>('registration');
+    // Flow: screening (PAR-Q) → registration → success → save
+    // PAR-Q comes FIRST so we don't fill the form for excluded participants.
+    const [status, setStatus] = useState<'screening' | 'registration' | 'risk' | 'success'>('screening');
     const [formData, setFormData] = useState<RegistrationForm>({
         name: '',
         sex: 'M',
@@ -73,11 +75,13 @@ const ScreeningPage: React.FC = () => {
     const allAnswered = Object.values(answers).every(a => a !== null);
 
     const handleSubmit = () => {
-        const hasRisk = Object.values(answers).some(a => a === 'yes');
-        if (hasRisk) {
+        // Exclude only if ≥2 "SIM" answers (single SIM is insufficient for exclusion).
+        const yesCount = Object.values(answers).filter(a => a === 'yes').length;
+        if (yesCount >= 2) {
             setStatus('risk');
         } else {
-            setStatus('success');
+            // PAR-Q cleared → proceed to registration form
+            setStatus('registration');
         }
     };
 
@@ -111,7 +115,8 @@ const ScreeningPage: React.FC = () => {
     const handleRegistrationSubmit = (e: React.FormEvent) => {
         e.preventDefault();
         if (formData.name && formData.birth_date) {
-            setStatus('screening');
+            // PAR-Q already passed — go straight to success/confirmation
+            setStatus('success');
         }
     };
 
