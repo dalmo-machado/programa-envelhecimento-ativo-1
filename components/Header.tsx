@@ -52,7 +52,7 @@ const Header: React.FC = () => {
                         </div>
                         <h1 className="text-xl font-bold">{t('welcome_title')}</h1>
                     </div>
-                    {canSwitchView && (
+                    {canSwitchView && role === UserRole.ADMIN && (
                         <div className="flex items-center space-x-2">
                             <label htmlFor="role-switcher" className="text-sm">View:</label>
                             <select
@@ -61,11 +61,8 @@ const Header: React.FC = () => {
                                 onChange={handleRoleChange}
                                 className="bg-primary text-white border-accent rounded-md p-2 text-sm"
                             >
-                                <option value={UserRole.PARTICIPANT}>{t('participant_view')}</option>
                                 <option value={UserRole.RESEARCHER}>{t('researcher_view')}</option>
-                                {role === UserRole.ADMIN && (
-                                    <option value={UserRole.ADMIN}>Gestor</option>
-                                )}
+                                <option value={UserRole.ADMIN}>Gestor</option>
                             </select>
                         </div>
                     )}

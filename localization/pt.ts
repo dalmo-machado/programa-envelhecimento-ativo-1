@@ -299,6 +299,7 @@ export const pt: I18nKeys = {
   register_participant_intro: 'Preencha os dados do participante. A data de nascimento será usada como senha de acesso.',
   study_id_label: 'ID do Participante no Estudo',
   study_id_hint: 'Se deixado em branco, um ID será gerado automaticamente.',
+  study_id_auto_hint: 'Gerado automaticamente',
   site_label: 'Polo',
   birth_date_password_hint: 'Esta data será usada como senha de acesso do participante.',
   enrollment_save_and_return: 'Salvar e Voltar ao Painel',

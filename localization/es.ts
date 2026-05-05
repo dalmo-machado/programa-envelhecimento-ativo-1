@@ -297,6 +297,7 @@ export const es = {
   register_participant_intro: 'Complete los datos del participante. La fecha de nacimiento se usará como contraseña de acceso.',
   study_id_label: 'ID del Participante en el Estudio',
   study_id_hint: 'Si se deja en blanco, se generará un ID automáticamente.',
+  study_id_auto_hint: 'Generado automáticamente',
   site_label: 'Sede',
   birth_date_password_hint: 'Esta fecha se usará como contraseña de acceso del participante.',
   enrollment_save_and_return: 'Guardar y Volver al Panel',

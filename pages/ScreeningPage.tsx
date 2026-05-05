@@ -1,15 +1,35 @@
 
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ChevronLeft } from 'lucide-react';
 import { useLocalization } from '../context/LocalizationContext';
 import { useParticipantData } from '../context/ParticipantDataContext';
-import { Language } from '../types';
+import { Language, Participant } from '../types';
 import { I18nKeys } from '../localization/es';
 import { newParticipant } from '../services/mockData';
 import Button from '../components/ui/Button';
 import Card from '../components/ui/Card';
 import Header from '../components/Header';
+
+/**
+ * Generates the next sequential study_id for a given site.
+ * Format: BR-001, BR-002 … / ES-001, ES-002 …
+ * Looks at existing participants for that site and increments the highest number found.
+ * Falls back to 001 if no participants exist yet.
+ */
+function generateStudyId(site: string, participants: Participant[]): string {
+    const prefix = site === 'Spain' ? 'ES' : 'BR';
+    const pattern = new RegExp(`^${prefix}-(\\d+)$`);
+    const numbers = participants
+        .filter(p => p.site === site)
+        .map(p => {
+            const m = p.study_id.match(pattern);
+            return m ? parseInt(m[1], 10) : 0;
+        })
+        .filter(n => n > 0);
+    const next = numbers.length > 0 ? Math.max(...numbers) + 1 : 1;
+    return `${prefix}-${String(next).padStart(3, '0')}`;
+}
 
 const questions: (keyof I18nKeys)[] = [
     'screening_q1', 'screening_q2', 'screening_q3', 'screening_q4', 'screening_q5',
@@ -18,7 +38,6 @@ const questions: (keyof I18nKeys)[] = [
 type Answers = Record<string, 'yes' | 'no' | null>;
 
 interface RegistrationForm {
-    study_id: string;
     name: string;
     sex: string;
     birth_date: string;
@@ -28,16 +47,21 @@ interface RegistrationForm {
 const ScreeningPage: React.FC = () => {
     const { t } = useLocalization();
     const navigate = useNavigate();
-    const { addParticipant } = useParticipantData();
+    const { addParticipant, participants } = useParticipantData();
 
     const [status, setStatus] = useState<'registration' | 'screening' | 'risk' | 'success'>('registration');
     const [formData, setFormData] = useState<RegistrationForm>({
-        study_id: '',
         name: '',
         sex: 'M',
         birth_date: '',
         site: 'Brazil',
     });
+
+    // Preview the ID that will be assigned — updates live when site changes.
+    const previewId = useMemo(
+        () => generateStudyId(formData.site, participants),
+        [formData.site, participants],
+    );
 
     const initialAnswers = questions.reduce((acc, q) => ({ ...acc, [q]: null }), {});
     const [answers, setAnswers] = useState<Answers>(initialAnswers);
@@ -58,9 +82,8 @@ const ScreeningPage: React.FC = () => {
     };
 
     const handleContinue = () => {
-        // Generate a fallback study_id if the researcher left it blank
-        const study_id = formData.study_id.trim() ||
-            `${formData.site === 'Spain' ? 'ES' : 'BR'}-${Math.floor(Math.random() * 9000) + 1000}`;
+        // Generate sequential study_id based on existing participants for this site.
+        const study_id = generateStudyId(formData.site, participants);
 
         // Normalise birth_date to YYYY-MM-DD via string manipulation only.
         // Using new Date() would shift the date by the browser's UTC offset.
@@ -126,6 +149,9 @@ const ScreeningPage: React.FC = () => {
                         <div className="text-center p-6 bg-green-100 border-l-4 border-green-500 text-green-800 rounded-md">
                             <h2 className="text-2xl font-bold mb-2">{t('screening_success_title')}</h2>
                             <p className="text-xl">{t('screening_success_message')}</p>
+                            <p className="mt-4 text-base">
+                                {t('study_id_label')}: <strong className="text-2xl tracking-widest">{previewId}</strong>
+                            </p>
                             <Button onClick={handleContinue} className="mt-6">{t('enrollment_save_and_return')}</Button>
                         </div>
                     )}
@@ -134,18 +160,11 @@ const ScreeningPage: React.FC = () => {
                         <form onSubmit={handleRegistrationSubmit} className="space-y-6">
                             <p className="text-lg text-slate-600">{t('register_participant_intro')}</p>
 
-                            <div>
-                                <label className="block text-sm font-medium text-slate-700 mb-1">
-                                    {t('study_id_label')}
-                                </label>
-                                <input
-                                    type="text"
-                                    value={formData.study_id}
-                                    onChange={e => setFormData({ ...formData, study_id: e.target.value })}
-                                    className="w-full p-3 border border-slate-300 rounded-md focus:ring-primary focus:border-primary"
-                                    placeholder={t('study_id_placeholder' as any)}
-                                />
-                                <p className="text-xs text-slate-400 mt-1">{t('study_id_hint')}</p>
+                            {/* Auto-generated ID preview */}
+                            <div className="flex items-center gap-3 bg-primary/10 border border-primary/30 rounded-lg px-4 py-3">
+                                <span className="text-sm font-medium text-slate-600">{t('study_id_label')}:</span>
+                                <span className="text-lg font-bold text-primary-dark tracking-widest">{previewId}</span>
+                                <span className="text-xs text-slate-400 ml-auto">{t('study_id_auto_hint' as any)}</span>
                             </div>
 
                             <div className="grid sm:grid-cols-2 gap-6">
