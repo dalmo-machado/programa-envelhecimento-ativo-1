@@ -160,7 +160,7 @@ const ResearcherParticipantView: React.FC = () => {
             <ChevronLeft size={18} />
             {t('back_to_dashboard')}
           </Button>
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-3 flex-wrap">
             <Button
               variant="ghost"
               className="flex items-center gap-2 py-2 px-4 text-base text-slate-600"
@@ -169,6 +169,15 @@ const ResearcherParticipantView: React.FC = () => {
               <Pencil size={16} />
               {t('edit_participant' as any)}
             </Button>
+            {participant.assessments.length > 0 && (
+              <Button
+                variant="ghost"
+                className="py-2 px-4 text-base border-2 border-secondary text-secondary hover:bg-secondary/10"
+                onClick={() => navigate('/assessment/summary', { state: { participantId: participant.study_id } })}
+              >
+                {t('view_performance_summary' as any)}
+              </Button>
+            )}
             <Button
               variant="secondary"
               className="py-2 px-4 text-base"

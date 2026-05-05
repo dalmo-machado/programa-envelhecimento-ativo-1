@@ -188,9 +188,9 @@ const SessionPage: React.FC = () => {
                     </div>
 
                     <div className="bg-amber-50 border border-amber-200 rounded-xl p-5 flex gap-4 items-start shadow-sm">
-                        <AlertTriangle className="text-amber-500 shrink-0 mt-0.5" size={24} />
+                        <AlertTriangle className="text-amber-600 shrink-0 mt-0.5" size={24} />
                         <div>
-                            <p className="text-xs font-bold text-amber-700 uppercase tracking-wider mb-1">{t('safety_note_title')}</p>
+                            <p className="text-xs font-bold text-amber-900 uppercase tracking-wider mb-1">{t('safety_note_title')}</p>
                             <p className="text-amber-900">{t(currentExercise.safetyKey)}</p>
                         </div>
                     </div>
@@ -266,8 +266,8 @@ const SessionPage: React.FC = () => {
           {sessionState === 'warmup' && (
             <div>
               <div className="mb-4 p-3 bg-orange-50 border border-orange-200 rounded-xl text-center">
-                <p className="text-sm font-bold text-orange-700 uppercase tracking-wider">{t('warmup_phase_label' as any)}</p>
-                <p className="text-orange-600 text-sm">{t('warmup_phase_desc' as any)}</p>
+                <p className="text-sm font-bold text-orange-800 uppercase tracking-wider">{t('warmup_phase_label' as any)}</p>
+                <p className="text-orange-800 text-sm">{t('warmup_phase_desc' as any)}</p>
               </div>
               {warmupExercises.map((ex, idx) => (
                 <div key={idx} className="mb-4 bg-white border border-slate-200 rounded-xl overflow-hidden shadow-sm">
@@ -373,7 +373,7 @@ const SessionPage: React.FC = () => {
                         <Button
                             onClick={handleReportIncident}
                             variant="secondary"
-                            className="w-full border-2 border-amber-500 text-amber-700 bg-amber-50 hover:bg-amber-100"
+                            className="w-full border-2 border-amber-500 text-amber-900 bg-amber-50 hover:bg-amber-100"
                         >
                             {t('incident_yes')}
                         </Button>
@@ -390,7 +390,7 @@ const SessionPage: React.FC = () => {
                 ) : (
                     <div className="w-full">
                         <div className="bg-amber-50 border border-amber-200 rounded-xl p-6 mb-8">
-                            <p className="text-amber-800 font-medium">{t('incident_reported')}</p>
+                            <p className="text-amber-900 font-medium">{t('incident_reported')}</p>
                         </div>
                         <Button onClick={() => setSessionState('post')} className="w-full">
                             {t('continue')}

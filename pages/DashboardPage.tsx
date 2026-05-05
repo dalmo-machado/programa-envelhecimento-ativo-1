@@ -279,6 +279,17 @@ const ParticipantDashboard: React.FC = () => {
                             {t('view_full_plan')}
                         </Button>
                     </Card>
+
+                    {participant.assessments.length > 0 && (
+                        <Card title={t('my_performance_title' as any)} className="flex flex-col">
+                            <div className="flex-grow">
+                                <p className="text-slate-600 mb-4">{t('my_performance_desc' as any)}</p>
+                            </div>
+                            <Button onClick={() => navigate('/assessment/summary')} variant="ghost" className="w-full border-2 border-secondary">
+                                {t('view_performance_summary' as any)}
+                            </Button>
+                        </Card>
+                    )}
                 </div>
             </div>
 
