@@ -9,7 +9,7 @@ export interface Belt {
 
 export const belts: Belt[] = [
   { key: 'belt_white',  colorClass: 'bg-slate-100 text-slate-800 border-slate-300',   barColorClass: 'bg-slate-400',  minSessions: 0  },
-  { key: 'belt_yellow', colorClass: 'bg-yellow-400 text-yellow-900 border-yellow-500', barColorClass: 'bg-yellow-400', minSessions: 4  },
+  { key: 'belt_yellow', colorClass: 'bg-yellow-400 text-slate-900 border-yellow-600', barColorClass: 'bg-yellow-400', minSessions: 4  },
   { key: 'belt_orange', colorClass: 'bg-orange-500 text-white border-orange-600',      barColorClass: 'bg-orange-500', minSessions: 8  },
   { key: 'belt_green',  colorClass: 'bg-green-500 text-white border-green-600',        barColorClass: 'bg-green-500',  minSessions: 12 },
   { key: 'belt_blue',   colorClass: 'bg-blue-500 text-white border-blue-600',          barColorClass: 'bg-blue-500',   minSessions: 16 },

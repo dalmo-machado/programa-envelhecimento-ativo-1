@@ -4,10 +4,10 @@ import { useParams, useNavigate } from 'react-router-dom';
 import {
   LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer,
 } from 'recharts';
-import { Award, ChevronLeft, Shield } from 'lucide-react';
+import { Award, ChevronLeft, Shield, Pencil } from 'lucide-react';
 import { useLocalization } from '../context/LocalizationContext';
 import { useParticipantData } from '../context/ParticipantDataContext';
-import { Assessment } from '../types';
+import { Assessment, Language } from '../types';
 import { trainingPrograms } from '../services/trainingData';
 import { getCurrentBelt } from '../utils/gamification';
 import Card from '../components/ui/Card';
@@ -62,9 +62,14 @@ const ResearcherParticipantView: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const { t, formatNumber, formatDate } = useLocalization();
-  const { participants } = useParticipantData();
+  const { participants, updateParticipant } = useParticipantData();
   const [selectedMetric, setSelectedMetric] = useState<keyof Assessment>('grip_kgf');
   const [modalSessionIndex, setModalSessionIndex] = useState<number | null>(null);
+
+  // ── Edit participant state ──────────────────────────────────────────────────
+  const [isEditing, setIsEditing] = useState(false);
+  const [editForm, setEditForm] = useState({ name: '', sex: '', birth_date: '', site: '' });
+  const [isSaving, setIsSaving] = useState(false);
 
   const participant = participants.find(p => p.study_id === id);
 
@@ -106,6 +111,33 @@ const ResearcherParticipantView: React.FC = () => {
     return site;
   };
 
+  const handleEditOpen = () => {
+    setEditForm({
+      name: participant.name,
+      sex: participant.sex,
+      birth_date: participant.birth_date,
+      site: participant.site,
+    });
+    setIsEditing(true);
+  };
+
+  const handleEditSave = async () => {
+    if (!editForm.name.trim() || !editForm.birth_date) return;
+    setIsSaving(true);
+    try {
+      await updateParticipant(participant.study_id, {
+        name: editForm.name.trim(),
+        sex: editForm.sex as 'M' | 'F' | 'Other',
+        birth_date: editForm.birth_date,
+        site: editForm.site as 'Brazil' | 'Spain',
+        language: editForm.site === 'Spain' ? Language.ES_ES : Language.PT_BR,
+      });
+      setIsEditing(false);
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
   const chartData = participant.assessments.map(a => ({
     date: formatDate(new Date(a.date), { month: 'short', day: 'numeric' }),
     value: a.data[selectedMetric],
@@ -130,6 +162,14 @@ const ResearcherParticipantView: React.FC = () => {
           </Button>
           <div className="flex items-center gap-3">
             <Button
+              variant="ghost"
+              className="flex items-center gap-2 py-2 px-4 text-base text-slate-600"
+              onClick={handleEditOpen}
+            >
+              <Pencil size={16} />
+              {t('edit_participant' as any)}
+            </Button>
+            <Button
               variant="secondary"
               className="py-2 px-4 text-base"
               onClick={() => navigate('/assessment/new', { state: { participantId: participant.study_id } })}
@@ -152,6 +192,69 @@ const ResearcherParticipantView: React.FC = () => {
               {participant.study_id} • {age} {t('years_old' as any)} • {getSexLabel(participant.sex)} • {getSiteLabel(participant.site)}
             </p>
           </div>
+
+          {/* Edit participant modal */}
+          {isEditing && (
+            <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-[9999] p-4">
+              <div className="bg-white rounded-xl p-6 max-w-lg w-full shadow-xl text-slate-800">
+                <h3 className="text-xl font-bold mb-5">{t('edit_participant' as any)}</h3>
+                <div className="space-y-4">
+                  <div>
+                    <label className="block text-sm font-semibold text-slate-700 mb-1">{t('participant_name' as any)}</label>
+                    <input
+                      type="text"
+                      value={editForm.name}
+                      onChange={e => setEditForm(f => ({ ...f, name: e.target.value }))}
+                      className="w-full p-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-primary"
+                    />
+                  </div>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-sm font-semibold text-slate-700 mb-1">{t('participant_sex' as any)}</label>
+                      <select
+                        value={editForm.sex}
+                        onChange={e => setEditForm(f => ({ ...f, sex: e.target.value }))}
+                        className="w-full p-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-primary"
+                      >
+                        <option value="M">{t('sex_m' as any)}</option>
+                        <option value="F">{t('sex_f' as any)}</option>
+                        <option value="Other">{t('sex_other' as any)}</option>
+                      </select>
+                    </div>
+                    <div>
+                      <label className="block text-sm font-semibold text-slate-700 mb-1">{t('site_label' as any)}</label>
+                      <select
+                        value={editForm.site}
+                        onChange={e => setEditForm(f => ({ ...f, site: e.target.value }))}
+                        className="w-full p-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-primary"
+                      >
+                        <option value="Brazil">{t('site_brazil' as any)}</option>
+                        <option value="Spain">{t('site_spain' as any)}</option>
+                      </select>
+                    </div>
+                  </div>
+                  <div>
+                    <label className="block text-sm font-semibold text-slate-700 mb-1">{t('participant_dob' as any)}</label>
+                    <input
+                      type="date"
+                      value={editForm.birth_date}
+                      onChange={e => setEditForm(f => ({ ...f, birth_date: e.target.value }))}
+                      className="w-full p-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-primary"
+                    />
+                    <p className="text-xs text-slate-400 mt-1">{t('birth_date_password_hint' as any)}</p>
+                  </div>
+                </div>
+                <div className="flex justify-end gap-3 mt-6">
+                  <Button variant="secondary" onClick={() => setIsEditing(false)} disabled={isSaving}>
+                    {t('cancel' as any)}
+                  </Button>
+                  <Button onClick={handleEditSave} disabled={isSaving || !editForm.name.trim()}>
+                    {isSaving ? t('saving' as any) : t('save' as any)}
+                  </Button>
+                </div>
+              </div>
+            </div>
+          )}
 
           {/* Stats */}
           <div className="grid sm:grid-cols-3 gap-6">
