@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { AlertTriangle, Award } from 'lucide-react';
 import { useLocalization } from '../context/LocalizationContext';
@@ -13,6 +13,16 @@ import Button from '../components/ui/Button';
 import Header from '../components/Header';
 
 type Difficulty = 'easy' | 'adequate' | 'hard';
+
+/**
+ * Rest duration between exercises (Asier Phase 2)
+ * Session layout: 0-1 = balance (45 s), 2-7 = strength/core (60 s), 8-9 = cardio (30 s)
+ */
+const getRestSeconds = (exerciseIndex: number): number => {
+  if (exerciseIndex <= 1) return 45;
+  if (exerciseIndex >= 8) return 30;
+  return 60;
+};
 
 const SessionPage: React.FC = () => {
   const { sessionIndex: sessionIndexStr } = useParams<{ sessionIndex: string }>();
@@ -34,10 +44,27 @@ const SessionPage: React.FC = () => {
   const [exerciseRpeRatings, setExerciseRpeRatings] = useState<ExerciseRpe[]>([]);
   const [showRpePicker, setShowRpePicker] = useState(false);
 
+  // Asier Phase 2 — rest timer between exercises
+  const [isResting, setIsResting] = useState(false);
+  const [restSecondsLeft, setRestSecondsLeft] = useState(0);
+  const restTotalRef = useRef(0);
+
   useEffect(() => {
     setPreMessage(getRandomPreSessionMessage());
     setPostMessage(getRandomPostSessionMessage());
   }, []);
+
+  // Asier Phase 2 — countdown tick
+  useEffect(() => {
+    if (!isResting) return;
+    if (restSecondsLeft <= 0) {
+      setIsResting(false);
+      setCurrentExerciseIndex(i => i + 1);
+      return;
+    }
+    const timer = setTimeout(() => setRestSecondsLeft(s => s - 1), 1000);
+    return () => clearTimeout(timer);
+  }, [isResting, restSecondsLeft]);
 
   const participant = participants.find(p => p.study_id === participantId);
   const sessionPlan = participant?.training_plan?.[sessionIndex];
@@ -67,7 +94,11 @@ const SessionPage: React.FC = () => {
   const handleRpeSelected = (rpe: 1 | 2 | 3) => {
     setExerciseRpeRatings(prev => [...prev, { exercise_index: currentExerciseIndex, rpe }]);
     setShowRpePicker(false);
-    setCurrentExerciseIndex(i => i + 1);
+    // Asier Phase 2 — start rest timer before advancing to next exercise
+    const seconds = getRestSeconds(currentExerciseIndex);
+    restTotalRef.current = seconds;
+    setRestSecondsLeft(seconds);
+    setIsResting(true);
   };
 
   const handleCompleteSession = () => {
@@ -127,7 +158,7 @@ const SessionPage: React.FC = () => {
           
           <div className="flex justify-between items-center mb-8">
             <h3 className="text-xl font-bold text-primary self-start">
-              {sessionState === 'active' ? `${t('exercise_x_of_y', { current: currentExerciseIndex + 1, total: exercises.length })} - ${t('level')} ${sessionLevel}` : ''}
+              {sessionState === 'active' && !isResting ? `${t('exercise_x_of_y', { current: currentExerciseIndex + 1, total: exercises.length })} - ${t('level')} ${sessionLevel}` : ''}
             </h3>
             <Button onClick={() => navigate('/dashboard')} variant="ghost" className="text-slate-500 hover:text-danger">
               {t('exit_session')}
@@ -147,7 +178,57 @@ const SessionPage: React.FC = () => {
             </div>
           )}
 
-          {sessionState === 'active' && (
+          {sessionState === 'active' && isResting && (
+            <div className="flex flex-col items-center justify-center py-8 text-center">
+              {/* Rest timer — Asier Phase 2 */}
+              <h2 className="text-2xl font-bold text-slate-700 mb-6 uppercase tracking-wide">
+                ⏱ {t('rest_phase_title' as any)}
+              </h2>
+
+              {/* Circular countdown */}
+              <div className="relative w-44 h-44 mb-6">
+                <svg className="w-full h-full -rotate-90" viewBox="0 0 120 120">
+                  {/* Background track */}
+                  <circle cx="60" cy="60" r="52" fill="none" stroke="#e2e8f0" strokeWidth="10" />
+                  {/* Progress arc */}
+                  <circle
+                    cx="60" cy="60" r="52" fill="none"
+                    stroke="#0a9396"
+                    strokeWidth="10"
+                    strokeLinecap="round"
+                    strokeDasharray={2 * Math.PI * 52}
+                    strokeDashoffset={2 * Math.PI * 52 * (1 - restSecondsLeft / restTotalRef.current)}
+                    style={{ transition: 'stroke-dashoffset 0.9s linear' }}
+                  />
+                </svg>
+                <div className="absolute inset-0 flex flex-col items-center justify-center">
+                  <span className="text-5xl font-bold text-primary-dark">{restSecondsLeft}</span>
+                  <span className="text-base text-slate-500">{t('rest_seconds_label' as any)}</span>
+                </div>
+              </div>
+
+              {/* Next exercise preview */}
+              {exercises[currentExerciseIndex + 1] && (
+                <div className="mb-8 max-w-xs">
+                  <p className="text-sm font-semibold text-slate-500 uppercase tracking-wider mb-1">
+                    {t('rest_next_label' as any)}
+                  </p>
+                  <p className="text-xl font-bold text-slate-800">
+                    {t(exercises[currentExerciseIndex + 1].nameKey)}
+                  </p>
+                </div>
+              )}
+
+              <button
+                onClick={() => { setIsResting(false); setCurrentExerciseIndex(i => i + 1); }}
+                className="text-slate-500 hover:text-primary underline text-base"
+              >
+                {t('rest_skip_button' as any)}
+              </button>
+            </div>
+          )}
+
+          {sessionState === 'active' && !isResting && (
             <>
               <div className="mb-8 flex flex-col items-center">
                 <h2 className="text-3xl font-bold text-slate-800 mb-6 text-center">{t(currentExercise.nameKey)}</h2>
