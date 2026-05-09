@@ -503,6 +503,12 @@ export const es = {
   exercise_step_touch: 'Toque lateral (Step Touch)',
   instruction_step_touch: 'Da un paso hacia la derecha con el pie derecho y luego toca el suelo con el pie izquierdo a su lado. Repite hacia la izquierda. Mantén un ritmo constante y mueve los brazos de forma sincronizada.',
   safety_step_touch: 'Comprueba el espacio a los lados. Reduce la amplitud del paso si sientes desequilibrio.',
+
+  // Alerta de inactividad
+  inactivity_alert_banner: "Atención: este participante lleva {days} días sin realizar sesión de fuerza.",
+  inactivity_alert_badge: "{days}d sin entrenar",
+  researcher_table_last_session: "Última sesión",
+  last_session_days_ago: "hace {days}d",
 };
 
 export type I18nKeys = typeof es;

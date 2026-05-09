@@ -505,4 +505,10 @@ export const pt: I18nKeys = {
   exercise_step_touch: 'Toque lateral (Step Touch)',
   instruction_step_touch: 'Dê um passo para a direita com o pé direito e toque o chão com o pé esquerdo ao lado. Repita para a esquerda. Mantenha um ritmo constante e os braços em movimento sincronizado.',
   safety_step_touch: 'Verifique o espaço dos lados. Reduza a amplitude do passo se sentir desequilíbrio.',
+
+  // Alerta de inatividade
+  inactivity_alert_banner: 'Atenção: este participante está há {days} dias sem realizar sessão de força.',
+  inactivity_alert_badge: '{days}d sem treino',
+  researcher_table_last_session: 'Última sessão',
+  last_session_days_ago: 'há {days}d',
 };

@@ -4,7 +4,8 @@ import { useParams, useNavigate } from 'react-router-dom';
 import {
   LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer,
 } from 'recharts';
-import { Award, ChevronLeft, Shield, Pencil } from 'lucide-react';
+import { Award, ChevronLeft, Shield, Pencil, AlertTriangle } from 'lucide-react';
+import { getDaysSinceLastSession, isInactiveParticipant } from '../utils/inactivityAlert';
 import { useLocalization } from '../context/LocalizationContext';
 import { useParticipantData } from '../context/ParticipantDataContext';
 import { Assessment, Language } from '../types';
@@ -201,6 +202,16 @@ const ResearcherParticipantView: React.FC = () => {
               {participant.study_id} • {age} {t('years_old' as any)} • {getSexLabel(participant.sex)} • {getSiteLabel(participant.site)}
             </p>
           </div>
+
+          {/* Inactivity warning banner */}
+          {isInactiveParticipant(participant) && (
+            <div className="bg-amber-50 border-l-4 border-amber-500 p-4 rounded-r-xl flex items-center gap-3 shadow-sm">
+              <AlertTriangle size={22} className="text-amber-600 shrink-0" />
+              <p className="text-amber-800 font-semibold">
+                {t('inactivity_alert_banner' as any, { days: getDaysSinceLastSession(participant)! })}
+              </p>
+            </div>
+          )}
 
           {/* Edit participant modal */}
           {isEditing && (

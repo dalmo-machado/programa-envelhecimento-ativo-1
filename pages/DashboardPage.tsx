@@ -1,13 +1,14 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
-import { Award } from 'lucide-react';
+import { Award, AlertTriangle } from 'lucide-react';
 import { useUserRole } from '../context/UserRoleContext';
 import { useLocalization } from '../context/LocalizationContext';
 import { useParticipantData } from '../context/ParticipantDataContext';
 import { UserRole, Assessment } from '../types';
 import { trainingPrograms } from '../services/trainingData';
 import { getCurrentBelt, getBeltProgress, BeltProgress } from '../utils/gamification';
+import { getDaysSinceLastSession, isInactiveParticipant } from '../utils/inactivityAlert';
 import { restoreFromBackup, BackupData, loadAllParticipants, ResearcherRecord, loadResearchers, createResearcher, toggleResearcherActive } from '../services/supabaseService';
 import { supabase } from '../lib/supabase';
 import { hashPassword } from '../utils/auth';
@@ -802,6 +803,7 @@ const ResearcherDashboard: React.FC<{ gestorMode?: boolean }> = ({ gestorMode = 
                                 <th className="p-3">{t('researcher_table_sex' as any)}</th>
                                 <th className="p-3">{t('researcher_table_age' as any)}</th>
                                 <th className="p-3 text-center">{t('researcher_table_sessions')}</th>
+                                <th className="p-3 text-center">{t('researcher_table_last_session' as any)}</th>
                                 <th className="p-3 text-center">{t('researcher_table_adherence')}</th>
                                 <th className="p-3">{t('researcher_table_last_assessment')}</th>
                                 <th className="p-3 text-center">{t('height')}</th>
@@ -839,6 +841,25 @@ const ResearcherDashboard: React.FC<{ gestorMode?: boolean }> = ({ gestorMode = 
                                         <td className="p-3">{getSexLabel(p.sex)}</td>
                                         <td className="p-3">{age}</td>
                                         <td className="p-3 text-center">{p.sessions_completed}</td>
+                                        <td className="p-3 text-center">
+                                            {(() => {
+                                                const days = getDaysSinceLastSession(p);
+                                                if (days === null) return <span className="text-slate-400">—</span>;
+                                                if (isInactiveParticipant(p)) {
+                                                    return (
+                                                        <span className="inline-flex items-center gap-1 bg-amber-100 text-amber-700 text-xs font-bold px-2 py-1 rounded-full whitespace-nowrap">
+                                                            <AlertTriangle size={11} />
+                                                            {t('inactivity_alert_badge' as any, { days })}
+                                                        </span>
+                                                    );
+                                                }
+                                                return (
+                                                    <span className="text-slate-500 text-xs whitespace-nowrap">
+                                                        {t('last_session_days_ago' as any, { days })}
+                                                    </span>
+                                                );
+                                            })()}
+                                        </td>
                                         <td className="p-3 text-center">{formatNumber(adherence, {maximumFractionDigits: 0})}%</td>
                                         <td className="p-3">{latestAssessment ? formatDate(new Date(latestAssessment.date), { day: '2-digit', month: '2-digit', year: 'numeric'}) : '-'}</td>
                                         <td className="p-3 text-center">{latestAssessment ? latestAssessment.data.height_cm : '-'}</td>
