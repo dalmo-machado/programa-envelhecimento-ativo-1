@@ -184,13 +184,7 @@ const LoginPage: React.FC = () => {
                 : 'border-slate-200 text-slate-600 hover:border-primary/50'
             }`}
           >
-            <img
-              src="https://flagcdn.com/br.svg"
-              alt=""
-              aria-hidden="true"
-              className="w-6 h-4 object-cover rounded-sm shadow-sm"
-              referrerPolicy="no-referrer"
-            />
+            <span aria-hidden="true" style={{ fontSize: '1.1rem', lineHeight: 1 }}>🇧🇷</span>
             PT
           </button>
           <button
@@ -203,13 +197,7 @@ const LoginPage: React.FC = () => {
                 : 'border-slate-200 text-slate-600 hover:border-primary/50'
             }`}
           >
-            <img
-              src="https://flagcdn.com/es.svg"
-              alt=""
-              aria-hidden="true"
-              className="w-6 h-4 object-cover rounded-sm shadow-sm"
-              referrerPolicy="no-referrer"
-            />
+            <span aria-hidden="true" style={{ fontSize: '1.1rem', lineHeight: 1 }}>🇪🇸</span>
             ES
           </button>
         </div>
