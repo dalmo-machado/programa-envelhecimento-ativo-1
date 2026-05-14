@@ -160,7 +160,7 @@ const AppRouter: React.FC = () => {
         <Route
           path="/assessment/summary"
           element={
-            <RouteGuard allowedRoles={RESEARCHER_ROLES}>
+            <RouteGuard allowedRoles={ALL_AUTHENTICATED}>
               <AssessmentSummaryPage />
             </RouteGuard>
           }
