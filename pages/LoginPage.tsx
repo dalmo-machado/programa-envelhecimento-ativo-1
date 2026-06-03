@@ -184,7 +184,12 @@ const LoginPage: React.FC = () => {
                 : 'border-slate-200 text-slate-600 hover:border-primary/50'
             }`}
           >
-            <span aria-hidden="true" style={{ fontSize: '1.1rem', lineHeight: 1 }}>🇧🇷</span>
+            <img
+              src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/72x72/1f1e7-1f1f7.png"
+              alt=""
+              aria-hidden="true"
+              style={{ width: '20px', height: '20px' }}
+            />
             PT
           </button>
           <button
@@ -197,7 +202,12 @@ const LoginPage: React.FC = () => {
                 : 'border-slate-200 text-slate-600 hover:border-primary/50'
             }`}
           >
-            <span aria-hidden="true" style={{ fontSize: '1.1rem', lineHeight: 1 }}>🇪🇸</span>
+            <img
+              src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/72x72/1f1ea-1f1f8.png"
+              alt=""
+              aria-hidden="true"
+              style={{ width: '20px', height: '20px' }}
+            />
             ES
           </button>
         </div>
