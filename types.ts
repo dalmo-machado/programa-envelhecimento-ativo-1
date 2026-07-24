@@ -37,8 +37,6 @@ export interface Assessment {
   six_min_walk_meters?: number;
   six_min_walk_predicted?: number;
   six_min_walk_percent?: number;
-  // Other
-  whoqol_total: number;
 }
 
 export interface AssessmentRecord {

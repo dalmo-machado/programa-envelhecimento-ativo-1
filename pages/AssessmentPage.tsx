@@ -246,8 +246,6 @@ const AssessmentPage: React.FC = () => {
             six_min_walk_meters: parseFloat(formData.six_min_walk_meters) || 0,
             six_min_walk_predicted: sixMinWalkPredicted || 0,
             six_min_walk_percent: sixMinWalkPercent || 0,
-            // Other
-            whoqol_total: 0,
         };
 
         const newRecord: AssessmentRecord = {

@@ -50,14 +50,14 @@ export const mockParticipants: Participant[] = [
             date: new Date('2023-10-01').toISOString(),
             data: {
                 grip_kgf: 25, balance_s: 15, back_scratch_cm: -5, weight_kg: 70, height_cm: 165,
-                bmi: 25.7, calf_circum_cm: 35, cc_bmi_index: 1.36, whoqol_total: 75,
+                bmi: 25.7, calf_circum_cm: 35, cc_bmi_index: 1.36,
             }
         },
         { 
             date: new Date('2023-12-15').toISOString(),
             data: {
                 grip_kgf: 28, balance_s: 20, back_scratch_cm: -2, weight_kg: 69, height_cm: 165,
-                bmi: 25.3, calf_circum_cm: 36, cc_bmi_index: 1.42, whoqol_total: 82,
+                bmi: 25.3, calf_circum_cm: 36, cc_bmi_index: 1.42,
             }
         },
     ],
@@ -78,7 +78,7 @@ export const mockParticipants: Participant[] = [
             date: new Date('2023-10-02').toISOString(),
             data: {
                 grip_kgf: 20, balance_s: 10, back_scratch_cm: -10, weight_kg: 80, height_cm: 170,
-                bmi: 27.7, calf_circum_cm: 33, cc_bmi_index: 1.19, whoqol_total: 68,
+                bmi: 27.7, calf_circum_cm: 33, cc_bmi_index: 1.19,
             }
         },
     ],
@@ -99,14 +99,14 @@ export const mockParticipants: Participant[] = [
             date: new Date('2023-10-05').toISOString(),
             data: {
                 grip_kgf: 30, balance_s: 22, back_scratch_cm: 0, weight_kg: 75, height_cm: 175,
-                bmi: 24.5, calf_circum_cm: 38, cc_bmi_index: 1.55, whoqol_total: 80,
+                bmi: 24.5, calf_circum_cm: 38, cc_bmi_index: 1.55,
             }
         },
         { 
             date: new Date('2024-01-10').toISOString(),
             data: {
                 grip_kgf: 34, balance_s: 28, back_scratch_cm: 2, weight_kg: 74, height_cm: 175,
-                bmi: 24.2, calf_circum_cm: 39, cc_bmi_index: 1.61, whoqol_total: 88,
+                bmi: 24.2, calf_circum_cm: 39, cc_bmi_index: 1.61,
             }
         },
     ],

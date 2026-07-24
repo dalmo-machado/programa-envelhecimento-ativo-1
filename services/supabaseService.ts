@@ -12,7 +12,6 @@
  *   six_min_walk_percent_predicted ↔ six_min_walk_percent
  *
  * Fields not in DB:
- *   whoqol_total   → not stored in Supabase
  *   six_min_walk_predicted → calculated, not stored
  *   moment         → not tracked by app (default null)
  */
@@ -74,7 +73,6 @@ function dbToAssessmentRecord(row: Record<string, any>): AssessmentRecord {
       up_and_go_seconds: row.up_and_go_seconds ?? undefined,
       six_min_walk_meters: row.six_min_walk_meters ?? undefined,
       six_min_walk_percent: row.six_min_walk_percent_predicted ?? undefined,
-      whoqol_total: 0,
     } as Assessment,
   };
 }
