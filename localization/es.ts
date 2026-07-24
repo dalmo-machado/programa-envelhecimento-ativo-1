@@ -97,6 +97,8 @@ export const es = {
   delete_participant_warning: 'Esta acción es irreversible. Todos los datos de {name} ({id}) serán eliminados del servidor, incluyendo evaluaciones, sesiones e incidentes.',
   delete_confirm_type_prompt: 'Escriba {id} para confirmar:',
   deleting_participant: 'Eliminando...',
+  override_level_label: 'Ajustar nivel de inicio:',
+  override_level_note: '⚠️ Nivel ajustado por el evaluador (calculado: {computed})',
   duration_reps: '{count} reps',
   duration_reps_sets: '{count} reps × {sets} series',
   duration_seconds: '{count}s',

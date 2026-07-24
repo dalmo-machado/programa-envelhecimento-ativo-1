@@ -143,11 +143,15 @@ const SESSION_ROTATION: SessionKey[] = ['session1', 'session2', 'session3'];
  * Initial level is derived from computeFitnessProfile() using all available
  * SFT metrics. Level advances automatically at sessions 8 and 16 (weeks 3–4
  * and 5–6 of the 8-week programme).
+ *
+ * @param forcedLevel — when provided by the researcher, overrides the computed
+ *   profile level. The automatic progression (sessions 9 and 17) still applies
+ *   relative to this starting level.
  */
-export const generateTrainingPlan = (assessment: Assessment): PersonalizedSession[] => {
+export const generateTrainingPlan = (assessment: Assessment, forcedLevel?: 1 | 2 | 3): PersonalizedSession[] => {
     const plan: PersonalizedSession[] = [];
     const { level } = computeFitnessProfile(assessment);
-    let currentLevel = level;
+    let currentLevel: 1 | 2 | 3 = forcedLevel ?? level;
 
     for (let i = 0; i < TOTAL_SESSIONS; i++) {
         if (i === 8  && currentLevel < 3) currentLevel = (currentLevel + 1) as 2 | 3;

@@ -99,6 +99,8 @@ export const pt: I18nKeys = {
   delete_participant_warning: 'Esta ação é irreversível. Todos os dados de {name} ({id}) serão apagados do servidor, incluindo avaliações, sessões e ocorrências.',
   delete_confirm_type_prompt: 'Digite {id} para confirmar:',
   deleting_participant: 'Excluindo...',
+  override_level_label: 'Ajustar nível de início:',
+  override_level_note: '⚠️ Nível ajustado pelo avaliador (calculado: {computed})',
   duration_reps: '{count} repetições',
   duration_reps_sets: '{count} reps × {sets} séries',
   duration_seconds: '{count}s',

@@ -58,6 +58,7 @@ const AssessmentSummaryPage: React.FC = () => {
     const { participantId, role } = useUserRole();
 
     const [generatingPlan, setGeneratingPlan] = useState(false);
+    const [overrideLevel, setOverrideLevel] = useState<1 | 2 | 3 | null>(null);
 
     // If the assessment was registered by a researcher for a specific participant,
     // the participantId is forwarded via router state so we can return there.
@@ -169,10 +170,12 @@ const AssessmentSummaryPage: React.FC = () => {
 
     // ── Generate plan ─────────────────────────────────────────────────────────
 
+    const effectiveLevel = overrideLevel ?? profile.level;
+
     const handleGeneratePlan = () => {
         if (!effectiveParticipantId) return;
         setGeneratingPlan(true);
-        const plan = generateTrainingPlan(data);
+        const plan = generateTrainingPlan(data, overrideLevel ?? undefined);
         updateParticipant(effectiveParticipantId, { training_plan: plan });
         navigate(returnPath);
     };
@@ -207,7 +210,7 @@ const AssessmentSummaryPage: React.FC = () => {
                                     {t('fitness_profile_title' as any)}
                                 </p>
                                 <p className="text-2xl font-bold">
-                                    {t(profile.profileKey as any)} — {t('level' as any)} {profile.level}
+                                    {t(profile.profileKey as any)} — {t('level' as any)} {effectiveLevel}
                                 </p>
                             </div>
                             <div className="text-right text-sm">
@@ -217,6 +220,35 @@ const AssessmentSummaryPage: React.FC = () => {
                             </div>
                         </div>
                         <p className="mt-3 text-sm opacity-80">{t(profileDescKey as any)}</p>
+
+                        {/* Level override — researcher/admin only, only when plan not yet generated */}
+                        {isResearcher && !hasPlan && (
+                            <div className="mt-4 pt-4 border-t border-current border-opacity-20">
+                                <p className="text-xs font-semibold uppercase tracking-wider opacity-70 mb-2">
+                                    {t('override_level_label' as any)}
+                                </p>
+                                <div className="flex gap-2">
+                                    {([1, 2, 3] as const).map(lvl => (
+                                        <button
+                                            key={lvl}
+                                            onClick={() => setOverrideLevel(lvl === profile.level && overrideLevel === null ? null : lvl)}
+                                            className={`flex-1 py-2 rounded-lg font-bold text-sm border-2 transition-all ${
+                                                effectiveLevel === lvl
+                                                    ? 'bg-white bg-opacity-80 border-current shadow'
+                                                    : 'bg-transparent border-current border-opacity-30 opacity-50 hover:opacity-80'
+                                            }`}
+                                        >
+                                            {t('level' as any)} {lvl}
+                                        </button>
+                                    ))}
+                                </div>
+                                {overrideLevel !== null && overrideLevel !== profile.level && (
+                                    <p className="text-xs mt-2 font-medium opacity-80">
+                                        {(t('override_level_note' as any) as string).replace('{computed}', String(profile.level))}
+                                    </p>
+                                )}
+                            </div>
+                        )}
                     </div>
 
                     {/* ── SFT Results ────────────────────────────────────────── */}
@@ -243,7 +275,7 @@ const AssessmentSummaryPage: React.FC = () => {
                         hasPlan ? (
                             <div className="mt-6">
                                 <p className="text-sm text-slate-500 text-center mb-4">
-                                    {(t('plan_already_generated' as any) as string).replace('{level}', String((participant?.training_plan?.[0]?.level ?? profile.level)))}
+                                    {(t('plan_already_generated' as any) as string).replace('{level}', String(participant?.training_plan?.[0]?.level ?? profile.level))}
                                 </p>
                                 <Button onClick={() => navigate(returnPath)} className="w-full">
                                     {t('continue_to_dashboard')}
