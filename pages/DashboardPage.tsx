@@ -9,7 +9,7 @@ import { UserRole, Assessment } from '../types';
 import { trainingPrograms } from '../services/trainingData';
 import { getCurrentBelt, getBeltProgress, BeltProgress } from '../utils/gamification';
 import { getDaysSinceLastSession, isInactiveParticipant } from '../utils/inactivityAlert';
-import { restoreFromBackup, BackupData, loadAllParticipants, ResearcherRecord, loadResearchers, createResearcher, toggleResearcherActive } from '../services/supabaseService';
+import { restoreFromBackup, BackupData, loadAllParticipants, ResearcherRecord, loadResearchers, createResearcher, toggleResearcherActive, resyncAllAssessments } from '../services/supabaseService';
 import { supabase } from '../lib/supabase';
 import { hashPassword } from '../utils/auth';
 import Card from '../components/ui/Card';
@@ -344,6 +344,10 @@ const ResearcherDashboard: React.FC<{ gestorMode?: boolean }> = ({ gestorMode = 
     const [isRestoring, setIsRestoring] = useState(false);
     const [restoreStatus, setRestoreStatus] = useState<{ type: 'success' | 'error'; message: string } | null>(null);
 
+    // Gestor: Recuperar avaliações → Supabase
+    const [isSyncingAssessments, setIsSyncingAssessments] = useState(false);
+    const [syncStatus, setSyncStatus] = useState<{ type: 'success' | 'error'; message: string } | null>(null);
+
     // Gestor: Zerar Dados
     const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
     const [isDeleting, setIsDeleting] = useState(false);
@@ -393,6 +397,29 @@ const ResearcherDashboard: React.FC<{ gestorMode?: boolean }> = ({ gestorMode = 
             setResearchers(prev => prev.map(r => r.id === id ? { ...r, active: !currentActive } : r));
         } catch (err: any) {
             console.error('[Gestor] toggleResearcher:', err);
+        }
+    };
+
+    const handleResyncAssessments = async () => {
+        setIsSyncingAssessments(true);
+        setSyncStatus(null);
+        try {
+            const result = await resyncAllAssessments(participants);
+            if (result.errors.length > 0) {
+                setSyncStatus({
+                    type: 'error',
+                    message: `${result.upserted} avaliação(ões) sincronizada(s). ${result.errors.length} erro(s):\n${result.errors.slice(0, 5).join('\n')}`,
+                });
+            } else {
+                setSyncStatus({
+                    type: 'success',
+                    message: `✅ ${result.upserted} avaliação(ões) sincronizada(s) com sucesso.`,
+                });
+            }
+        } catch (err: any) {
+            setSyncStatus({ type: 'error', message: `Erro: ${err?.message ?? 'desconhecido'}` });
+        } finally {
+            setIsSyncingAssessments(false);
         }
     };
 
@@ -641,6 +668,15 @@ const ResearcherDashboard: React.FC<{ gestorMode?: boolean }> = ({ gestorMode = 
                         <>
                             <Button
                                 variant="ghost"
+                                className="border-2 border-amber-500 text-amber-700 hover:bg-amber-50 text-base py-2 px-4 disabled:opacity-50"
+                                onClick={handleResyncAssessments}
+                                disabled={isSyncingAssessments}
+                                title="Reenvia todas as avaliações para o Supabase via upsert. Use após rodar a migration SQL de colunas SFT."
+                            >
+                                {isSyncingAssessments ? '⏳ Sincronizando...' : '🔄 Recuperar Avaliações → Supabase'}
+                            </Button>
+                            <Button
+                                variant="ghost"
                                 className="border-2 border-slate-400 text-slate-600 hover:border-primary hover:text-primary text-base py-2 px-4 disabled:opacity-50"
                                 onClick={handleRestoreClick}
                                 disabled={isRestoring}
@@ -777,6 +813,17 @@ const ResearcherDashboard: React.FC<{ gestorMode?: boolean }> = ({ gestorMode = 
                         </div>
                     )}
                 </Card>
+            )}
+
+            {/* Feedback de sincronização de avaliações (Gestor apenas) */}
+            {gestorMode && syncStatus && (
+                <div className={`rounded-lg p-4 text-sm whitespace-pre-line border ${
+                    syncStatus.type === 'success'
+                        ? 'bg-green-50 border-green-300 text-green-800'
+                        : 'bg-red-50 border-red-300 text-red-800'
+                }`}>
+                    {syncStatus.message}
+                </div>
             )}
 
             {/* Feedback de restauração (Gestor apenas) */}

@@ -221,14 +221,17 @@ export async function syncUpdate(
     );
   }
 
-  // ── New assessments (append-only) ─────────────────────────────────────────
+  // ── New assessments (upsert so re-runs are safe) ─────────────────────────
+  // Using upsert with onConflict:'participant_id,date' prevents silent data
+  // loss when a previously-failed insert is retried after a schema migration.
+  // Requires: UNIQUE (participant_id, date) — see add_sft_columns_to_assessments.sql
   if (changes.assessments && changes.assessments.length > old.assessments.length) {
     const newRecords = changes.assessments.slice(old.assessments.length);
     for (const record of newRecords) {
       ops.push(
         supabase
           .from('assessments')
-          .insert(assessmentToDb(record, participantId))
+          .upsert(assessmentToDb(record, participantId), { onConflict: 'participant_id,date' })
           .then(({ error }) => { if (error) throw error; }),
       );
     }
@@ -411,6 +414,46 @@ export async function toggleResearcherActive(id: string, active: boolean): Promi
 }
 
 // ─────────────────────────────────────────────
+
+// ─────────────────────────────────────────────
+//  Data recovery
+// ─────────────────────────────────────────────
+
+export interface ResyncResult {
+  upserted: number;
+  errors: string[];
+}
+
+/**
+ * Re-push ALL assessments from the current in-memory participant list to
+ * Supabase using UPSERT.  Safe to run multiple times.
+ *
+ * Use this after running the add_sft_columns_to_assessments.sql migration
+ * to recover any assessment rows that were not saved (or saved with NULLs
+ * for the new SFT columns) due to a schema mismatch.
+ *
+ * Requires: UNIQUE (participant_id, date) on the assessments table.
+ */
+export async function resyncAllAssessments(participants: Participant[]): Promise<ResyncResult> {
+  let upserted = 0;
+  const errors: string[] = [];
+
+  for (const p of participants) {
+    for (const record of p.assessments) {
+      const { error } = await supabase
+        .from('assessments')
+        .upsert(assessmentToDb(record, p.study_id), { onConflict: 'participant_id,date' });
+
+      if (error) {
+        errors.push(`${p.study_id}/${record.date}: ${error.message}`);
+      } else {
+        upserted++;
+      }
+    }
+  }
+
+  return { upserted, errors };
+}
 
 /**
  * Bulk-insert mock participants when the DB is empty on first run.
