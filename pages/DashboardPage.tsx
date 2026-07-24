@@ -773,9 +773,9 @@ const ResearcherDashboard: React.FC<{ gestorMode?: boolean }> = ({ gestorMode = 
                     ) : researchers.length === 0 ? (
                         <p className="text-slate-500 text-sm py-2">{t('researchers_empty' as any)}</p>
                     ) : (
-                        <div className="overflow-x-auto">
+                        <div className="overflow-scroll max-h-60">
                             <table className="w-full text-left text-sm whitespace-nowrap">
-                                <thead className="bg-slate-100 text-slate-600 uppercase text-xs">
+                                <thead className="bg-slate-100 text-slate-600 uppercase text-xs sticky top-0 z-10">
                                     <tr>
                                         <th className="p-3">{t('researchers_col_code' as any)}</th>
                                         <th className="p-3">{t('researchers_col_name' as any)}</th>
@@ -841,9 +841,9 @@ const ResearcherDashboard: React.FC<{ gestorMode?: boolean }> = ({ gestorMode = 
                     <h2 className="text-2xl font-bold text-primary-dark">{t('participants')}</h2>
                     <Button onClick={handleExport} variant="secondary">{t('export_csv')}</Button>
                 </div>
-                <div className="overflow-x-auto">
+                <div className="overflow-scroll max-h-[60vh]">
                     <table className="w-full text-left text-sm whitespace-nowrap">
-                        <thead className="bg-slate-100 text-slate-600 uppercase">
+                        <thead className="bg-slate-100 text-slate-600 uppercase sticky top-0 z-10">
                             <tr>
                                 <th className="p-3">{t('researcher_table_id')}</th>
                                 <th className="p-3">{t('researcher_table_name' as any)}</th>
