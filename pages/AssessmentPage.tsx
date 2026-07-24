@@ -31,6 +31,28 @@ interface FormData {
     six_min_walk_meters: string;
 }
 
+// ─── Physiological range limits ───────────────────────────────────────────────
+// Values outside these ranges block saving and highlight the offending field.
+// Ranges are intentionally generous — they only catch obvious data-entry errors
+// (e.g. sit-and-reach = 1000 cm, TUG = 0.5 s).
+const FIELD_RANGES: Record<string, { min: number; max: number; label: string }> = {
+    weight_kg:                 { min: 30,  max: 200,  label: 'Peso' },
+    height_cm:                 { min: 100, max: 220,  label: 'Altura' },
+    calf_circum_cm:            { min: 15,  max: 65,   label: 'Panturrilha' },
+    cintura_cm:                { min: 40,  max: 200,  label: 'Cintura' },
+    quadril_cm:                { min: 50,  max: 200,  label: 'Quadril' },
+    gordura_percent:           { min: 3,   max: 70,   label: '% Gordura' },
+    grip_kgf:                  { min: 1,   max: 100,  label: 'Preensão dominante' },
+    handgrip_nondominant_kgf:  { min: 1,   max: 100,  label: 'Preensão não-dominante' },
+    chair_stand_reps:          { min: 0,   max: 50,   label: 'Sentar e Levantar (reps)' },
+    arm_curl_reps:             { min: 0,   max: 50,   label: 'Rosca Bíceps (reps)' },
+    chair_sit_reach_cm:        { min: -60, max: 60,   label: 'Chair Sit-and-Reach (cm)' },
+    up_and_go_seconds:         { min: 3,   max: 300,  label: 'TUG (s)' },
+    balance_s:                 { min: 0,   max: 120,  label: 'Equilíbrio (s)' },
+    back_scratch_cm:           { min: -80, max: 50,   label: 'Back Scratch (cm)' },
+    six_min_walk_meters:       { min: 0,   max: 1000, label: 'TC6 (m)' },
+};
+
 const InputField: React.FC<{
     label: string;
     name: string;
@@ -39,7 +61,8 @@ const InputField: React.FC<{
     type?: string;
     unit: string;
     step?: string;
-}> = ({ label, name, value, onChange, type = 'number', unit, step = '0.1' }) => (
+    hasError?: boolean;
+}> = ({ label, name, value, onChange, type = 'number', unit, step = '0.1', hasError = false }) => (
     <div>
         <label className="block text-lg font-semibold text-slate-700 mb-2">{label}</label>
         <div className="flex items-center">
@@ -48,7 +71,11 @@ const InputField: React.FC<{
                 name={name}
                 value={value}
                 onChange={onChange}
-                className="w-full text-lg p-3 border border-slate-300 bg-white rounded-lg focus:ring-2 focus:ring-primary"
+                className={`w-full text-lg p-3 border bg-white rounded-lg focus:ring-2 focus:outline-none ${
+                    hasError
+                        ? 'border-red-500 focus:ring-red-300 bg-red-50'
+                        : 'border-slate-300 focus:ring-primary'
+                }`}
                 step={step}
             />
             <span className="ml-3 text-lg text-slate-500">{unit}</span>
@@ -116,6 +143,7 @@ const AssessmentPage: React.FC = () => {
     const [rcq, setRcq] = useState<number | null>(null);
     const [sixMinWalkPredicted, setSixMinWalkPredicted] = useState<number | null>(null);
     const [sixMinWalkPercent, setSixMinWalkPercent] = useState<number | null>(null);
+    const [rangeErrors, setRangeErrors] = useState<Record<string, string>>({});
 
     useEffect(() => {
         const weight = parseFloat(formData.weight_kg);
@@ -165,10 +193,34 @@ const AssessmentPage: React.FC = () => {
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const { name, value } = e.target;
         setFormData(prev => ({ ...prev, [name]: value }));
+        // Clear error for this field as soon as the user starts correcting it
+        if (rangeErrors[name]) {
+            setRangeErrors(prev => { const next = { ...prev }; delete next[name]; return next; });
+        }
+    };
+
+    /** Returns a map of { fieldName → errorMessage } for values outside physiological ranges. */
+    const validateRanges = (): Record<string, string> => {
+        const errors: Record<string, string> = {};
+        for (const [field, range] of Object.entries(FIELD_RANGES)) {
+            const raw = (formData as Record<string, string>)[field];
+            if (!raw || raw.trim() === '') continue; // empty handled by isFormValid
+            const num = parseFloat(raw);
+            if (isNaN(num)) continue;
+            if (num < range.min || num > range.max) {
+                errors[field] = `${range.label}: ${num} fora do intervalo [${range.min}, ${range.max}]`;
+            }
+        }
+        return errors;
     };
 
     const handleSubmit = () => {
         if (!effectiveParticipantId || !participant) return;
+
+        // Range validation — block save if any field is physiologically impossible
+        const errors = validateRanges();
+        setRangeErrors(errors);
+        if (Object.keys(errors).length > 0) return;
 
         const assessmentData: Assessment = {
             // Station 1
@@ -227,30 +279,30 @@ const AssessmentPage: React.FC = () => {
 
                         {/* ── ESTAÇÃO 1 ── */}
                         <SectionHeader title={t('assessment_station1' as any)} />
-                        <InputField label={t('weight')} name="weight_kg" value={formData.weight_kg} onChange={handleChange} unit="kg" />
-                        <InputField label={t('height')} name="height_cm" value={formData.height_cm} onChange={handleChange} unit="cm" />
-                        <InputField label={t('calf_circumference')} name="calf_circum_cm" value={formData.calf_circum_cm} onChange={handleChange} unit="cm" />
-                        <InputField label={t('waist_circumference' as any)} name="cintura_cm" value={formData.cintura_cm} onChange={handleChange} unit="cm" />
-                        <InputField label={t('hip_circumference' as any)} name="quadril_cm" value={formData.quadril_cm} onChange={handleChange} unit="cm" />
-                        <InputField label={t('body_fat_percent' as any)} name="gordura_percent" value={formData.gordura_percent} onChange={handleChange} unit="%" />
+                        <InputField label={t('weight')} name="weight_kg" value={formData.weight_kg} onChange={handleChange} unit="kg" hasError={!!rangeErrors.weight_kg} />
+                        <InputField label={t('height')} name="height_cm" value={formData.height_cm} onChange={handleChange} unit="cm" hasError={!!rangeErrors.height_cm} />
+                        <InputField label={t('calf_circumference')} name="calf_circum_cm" value={formData.calf_circum_cm} onChange={handleChange} unit="cm" hasError={!!rangeErrors.calf_circum_cm} />
+                        <InputField label={t('waist_circumference' as any)} name="cintura_cm" value={formData.cintura_cm} onChange={handleChange} unit="cm" hasError={!!rangeErrors.cintura_cm} />
+                        <InputField label={t('hip_circumference' as any)} name="quadril_cm" value={formData.quadril_cm} onChange={handleChange} unit="cm" hasError={!!rangeErrors.quadril_cm} />
+                        <InputField label={t('body_fat_percent' as any)} name="gordura_percent" value={formData.gordura_percent} onChange={handleChange} unit="%" hasError={!!rangeErrors.gordura_percent} />
                         <CalculatedField label={t('bmi')} value={bmi ? formatNumber(bmi, { maximumFractionDigits: 2 }) : '-'} />
                         <CalculatedField label={t('cc_bmi_index')} value={ccBmiIndex ? formatNumber(ccBmiIndex, { maximumFractionDigits: 2 }) : '-'} />
                         <CalculatedField label={t('waist_hip_ratio' as any)} value={rcq ? formatNumber(rcq, { maximumFractionDigits: 3 }) : '-'} />
 
                         {/* ── ESTAÇÃO 2 ── */}
                         <SectionHeader title={t('assessment_station2' as any)} />
-                        <InputField label={t('handgrip_dominant' as any)} name="grip_kgf" value={formData.grip_kgf} onChange={handleChange} unit="kgf" />
-                        <InputField label={t('handgrip_nondominant' as any)} name="handgrip_nondominant_kgf" value={formData.handgrip_nondominant_kgf} onChange={handleChange} unit="kgf" />
-                        <InputField label={t('chair_stand_test' as any)} name="chair_stand_reps" value={formData.chair_stand_reps} onChange={handleChange} unit="rep" step="1" />
-                        <InputField label={t('arm_curl_test' as any)} name="arm_curl_reps" value={formData.arm_curl_reps} onChange={handleChange} unit="rep" step="1" />
-                        <InputField label={t('chair_sit_reach' as any)} name="chair_sit_reach_cm" value={formData.chair_sit_reach_cm} onChange={handleChange} unit="cm" />
-                        <InputField label={t('up_and_go' as any)} name="up_and_go_seconds" value={formData.up_and_go_seconds} onChange={handleChange} unit="s" />
-                        <InputField label={t('balance')} name="balance_s" value={formData.balance_s} onChange={handleChange} unit="s" />
-                        <InputField label={t('flexibility')} name="back_scratch_cm" value={formData.back_scratch_cm} onChange={handleChange} unit="cm" />
+                        <InputField label={t('handgrip_dominant' as any)} name="grip_kgf" value={formData.grip_kgf} onChange={handleChange} unit="kgf" hasError={!!rangeErrors.grip_kgf} />
+                        <InputField label={t('handgrip_nondominant' as any)} name="handgrip_nondominant_kgf" value={formData.handgrip_nondominant_kgf} onChange={handleChange} unit="kgf" hasError={!!rangeErrors.handgrip_nondominant_kgf} />
+                        <InputField label={t('chair_stand_test' as any)} name="chair_stand_reps" value={formData.chair_stand_reps} onChange={handleChange} unit="rep" step="1" hasError={!!rangeErrors.chair_stand_reps} />
+                        <InputField label={t('arm_curl_test' as any)} name="arm_curl_reps" value={formData.arm_curl_reps} onChange={handleChange} unit="rep" step="1" hasError={!!rangeErrors.arm_curl_reps} />
+                        <InputField label={t('chair_sit_reach' as any)} name="chair_sit_reach_cm" value={formData.chair_sit_reach_cm} onChange={handleChange} unit="cm" hasError={!!rangeErrors.chair_sit_reach_cm} />
+                        <InputField label={t('up_and_go' as any)} name="up_and_go_seconds" value={formData.up_and_go_seconds} onChange={handleChange} unit="s" hasError={!!rangeErrors.up_and_go_seconds} />
+                        <InputField label={t('balance')} name="balance_s" value={formData.balance_s} onChange={handleChange} unit="s" hasError={!!rangeErrors.balance_s} />
+                        <InputField label={t('flexibility')} name="back_scratch_cm" value={formData.back_scratch_cm} onChange={handleChange} unit="cm" hasError={!!rangeErrors.back_scratch_cm} />
 
                         {/* ── ESTAÇÃO 3 ── */}
                         <SectionHeader title={t('assessment_station3' as any)} />
-                        <InputField label={t('six_min_walk' as any)} name="six_min_walk_meters" value={formData.six_min_walk_meters} onChange={handleChange} unit="m" />
+                        <InputField label={t('six_min_walk' as any)} name="six_min_walk_meters" value={formData.six_min_walk_meters} onChange={handleChange} unit="m" hasError={!!rangeErrors.six_min_walk_meters} />
                         <CalculatedField
                             label={t('six_min_walk_predicted' as any)}
                             value={sixMinWalkPredicted ? formatNumber(sixMinWalkPredicted, { maximumFractionDigits: 1 }) + ' m' : '-'}
@@ -260,6 +312,18 @@ const AssessmentPage: React.FC = () => {
                             value={sixMinWalkPercent ? formatNumber(sixMinWalkPercent, { maximumFractionDigits: 1 }) + ' %' : '-'}
                         />
                     </div>
+
+                    {/* Range validation errors */}
+                    {Object.keys(rangeErrors).length > 0 && (
+                        <div className="mt-6 bg-red-50 border border-red-300 rounded-lg p-4">
+                            <p className="font-bold text-red-800 mb-2">⚠ Valores fora do intervalo fisiológico — corrija antes de salvar:</p>
+                            <ul className="list-disc list-inside text-sm text-red-700 space-y-1">
+                                {Object.values(rangeErrors).map((msg, i) => (
+                                    <li key={i}>{msg}</li>
+                                ))}
+                            </ul>
+                        </div>
+                    )}
 
                     <div className="mt-8 flex flex-col-reverse sm:flex-row gap-4">
                         <Button onClick={() => navigate(-1)} variant="ghost" className="w-full sm:w-auto">
