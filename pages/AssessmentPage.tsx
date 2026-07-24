@@ -5,7 +5,7 @@ import { useLocalization } from '../context/LocalizationContext';
 import { useParticipantData } from '../context/ParticipantDataContext';
 import { useUserRole } from '../context/UserRoleContext';
 import { Assessment, AssessmentRecord, Participant } from '../types';
-import { generateTrainingPlan } from '../services/trainingPlanner';
+
 import Card from '../components/ui/Card';
 import Button from '../components/ui/Button';
 import Header from '../components/Header';
@@ -205,10 +205,11 @@ const AssessmentPage: React.FC = () => {
 
         const updatedAssessments = [...participant.assessments, newRecord];
 
-        let participantUpdate: Partial<Participant> = { assessments: updatedAssessments };
-        if (participant.assessments.length === 0) {
-            participantUpdate.training_plan = generateTrainingPlan(assessmentData);
-        }
+        // Training plan is now generated on AssessmentSummaryPage after the
+        // assessor reviews the fitness profile. Auto-regeneration in
+        // ParticipantDataContext acts as a safety-net for participants who
+        // leave the summary page before confirming.
+        const participantUpdate: Partial<Participant> = { assessments: updatedAssessments };
 
         updateParticipant(effectiveParticipantId, participantUpdate);
         alert(t('assessment_saved_success'));
