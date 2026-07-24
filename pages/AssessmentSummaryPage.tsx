@@ -31,6 +31,9 @@ const classificationColors: Record<ClassificationKey, string> = {
     'classification_attention':  'bg-red-100 text-red-800',
 };
 
+/** % of base load per training level — used in profile badge and override note */
+const LEVEL_LOAD_PCT: Record<1 | 2 | 3, number> = { 1: 60, 2: 80, 3: 100 };
+
 const profileColors: Record<string, string> = {
     'profile_beginner':     'bg-red-50 border-red-300 text-red-800',
     'profile_intermediate': 'bg-yellow-50 border-yellow-300 text-yellow-800',
@@ -211,6 +214,9 @@ const AssessmentSummaryPage: React.FC = () => {
                                 </p>
                                 <p className="text-2xl font-bold">
                                     {t(profile.profileKey as any)} — {t('level' as any)} {effectiveLevel}
+                                    <span className="text-base font-normal opacity-75 ml-2">
+                                        ({(t('load_pct_label' as any) as string).replace('{pct}', String(LEVEL_LOAD_PCT[effectiveLevel]))})
+                                    </span>
                                 </p>
                             </div>
                             <div className="text-right text-sm">
@@ -244,7 +250,11 @@ const AssessmentSummaryPage: React.FC = () => {
                                 </div>
                                 {overrideLevel !== null && overrideLevel !== profile.level && (
                                     <p className="text-xs mt-2 font-medium opacity-80">
-                                        {(t('override_level_note' as any) as string).replace('{computed}', String(profile.level))}
+                                        {(t('override_level_note' as any) as string)
+                                            .replace('{selected}',     String(overrideLevel))
+                                            .replace('{selectedPct}',  String(LEVEL_LOAD_PCT[overrideLevel]))
+                                            .replace('{computed}',     String(profile.level))
+                                            .replace('{computedPct}',  String(LEVEL_LOAD_PCT[profile.level]))}
                                     </p>
                                 )}
                             </div>
@@ -275,7 +285,12 @@ const AssessmentSummaryPage: React.FC = () => {
                         hasPlan ? (
                             <div className="mt-6">
                                 <p className="text-sm text-slate-500 text-center mb-4">
-                                    {(t('plan_already_generated' as any) as string).replace('{level}', String(participant?.training_plan?.[0]?.level ?? profile.level))}
+                                    {(() => {
+                                        const planLevel = (participant?.training_plan?.[0]?.level ?? profile.level) as 1 | 2 | 3;
+                                        return (t('plan_already_generated' as any) as string)
+                                            .replace('{level}', String(planLevel))
+                                            .replace('{pct}',   String(LEVEL_LOAD_PCT[planLevel]));
+                                    })()}
                                 </p>
                                 <Button onClick={() => navigate(returnPath)} className="w-full">
                                     {t('continue_to_dashboard')}
