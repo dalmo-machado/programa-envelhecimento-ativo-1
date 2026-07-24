@@ -4,11 +4,12 @@ import { useParams, useNavigate } from 'react-router-dom';
 import {
   LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer,
 } from 'recharts';
-import { Award, ChevronLeft, Shield, Pencil, AlertTriangle } from 'lucide-react';
+import { Award, ChevronLeft, Shield, Pencil, AlertTriangle, Trash2 } from 'lucide-react';
 import { getDaysSinceLastSession, isInactiveParticipant } from '../utils/inactivityAlert';
 import { useLocalization } from '../context/LocalizationContext';
 import { useParticipantData } from '../context/ParticipantDataContext';
-import { Assessment, Language } from '../types';
+import { useUserRole } from '../context/UserRoleContext';
+import { Assessment, Language, UserRole } from '../types';
 import { trainingPrograms } from '../services/trainingData';
 import { getCurrentBelt } from '../utils/gamification';
 import Card from '../components/ui/Card';
@@ -63,7 +64,9 @@ const ResearcherParticipantView: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const { t, formatNumber, formatDate } = useLocalization();
-  const { participants, updateParticipant } = useParticipantData();
+  const { participants, updateParticipant, deleteParticipant } = useParticipantData();
+  const { role } = useUserRole();
+  const isAdmin = role === UserRole.ADMIN;
   const [selectedMetric, setSelectedMetric] = useState<keyof Assessment>('grip_kgf');
   const [modalSessionIndex, setModalSessionIndex] = useState<number | null>(null);
 
@@ -71,6 +74,12 @@ const ResearcherParticipantView: React.FC = () => {
   const [isEditing, setIsEditing] = useState(false);
   const [editForm, setEditForm] = useState({ name: '', sex: '', birth_date: '', site: '' });
   const [isSaving, setIsSaving] = useState(false);
+
+  // ── Delete participant state ────────────────────────────────────────────────
+  const [isDeleting, setIsDeleting] = useState(false);
+  const [deleteConfirmText, setDeleteConfirmText] = useState('');
+  const [isDeleteLoading, setIsDeleteLoading] = useState(false);
+  const [deleteError, setDeleteError] = useState<string | null>(null);
 
   const participant = participants.find(p => p.study_id === id);
 
@@ -139,6 +148,19 @@ const ResearcherParticipantView: React.FC = () => {
     }
   };
 
+  const handleDeleteConfirm = async () => {
+    if (deleteConfirmText !== participant.study_id) return;
+    setIsDeleteLoading(true);
+    setDeleteError(null);
+    try {
+      await deleteParticipant(participant.study_id);
+      navigate('/dashboard');
+    } catch (err) {
+      setDeleteError(err instanceof Error ? err.message : 'Erro ao excluir participante.');
+      setIsDeleteLoading(false);
+    }
+  };
+
   const chartData = participant.assessments.map(a => ({
     date: formatDate(new Date(a.date), { month: 'short', day: 'numeric' }),
     value: a.data[selectedMetric],
@@ -170,6 +192,16 @@ const ResearcherParticipantView: React.FC = () => {
               <Pencil size={16} />
               {t('edit_participant' as any)}
             </Button>
+            {isAdmin && (
+              <Button
+                variant="ghost"
+                className="flex items-center gap-2 py-2 px-4 text-base text-red-600 hover:bg-red-50 border border-red-200"
+                onClick={() => { setIsDeleting(true); setDeleteConfirmText(''); setDeleteError(null); }}
+              >
+                <Trash2 size={16} />
+                {t('delete_participant' as any)}
+              </Button>
+            )}
             {participant.assessments.length > 0 && (
               <Button
                 variant="ghost"
@@ -270,6 +302,47 @@ const ResearcherParticipantView: React.FC = () => {
                   </Button>
                   <Button onClick={handleEditSave} disabled={isSaving || !editForm.name.trim()}>
                     {isSaving ? t('saving' as any) : t('save' as any)}
+                  </Button>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Delete participant modal — admin only */}
+          {isDeleting && (
+            <div className="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center z-[9999] p-4">
+              <div className="bg-white rounded-xl p-6 max-w-md w-full shadow-xl text-slate-800">
+                <div className="flex items-center gap-3 mb-4">
+                  <Trash2 size={22} className="text-red-600 shrink-0" />
+                  <h3 className="text-xl font-bold text-red-700">{t('delete_participant_title' as any)}</h3>
+                </div>
+                <p className="text-slate-700 mb-5 leading-relaxed">
+                  {t('delete_participant_warning' as any, { name: participant.name, id: participant.study_id })}
+                </p>
+                <label className="block text-sm font-semibold text-slate-700 mb-1">
+                  {t('delete_confirm_type_prompt' as any, { id: participant.study_id })}
+                </label>
+                <input
+                  type="text"
+                  value={deleteConfirmText}
+                  onChange={e => setDeleteConfirmText(e.target.value)}
+                  placeholder={participant.study_id}
+                  className="w-full p-3 border border-red-300 rounded-lg focus:ring-2 focus:ring-red-400 mb-4 font-mono"
+                  disabled={isDeleteLoading}
+                />
+                {deleteError && (
+                  <p className="text-red-600 text-sm mb-3">{deleteError}</p>
+                )}
+                <div className="flex justify-end gap-3">
+                  <Button variant="secondary" onClick={() => setIsDeleting(false)} disabled={isDeleteLoading}>
+                    {t('cancel' as any)}
+                  </Button>
+                  <Button
+                    onClick={handleDeleteConfirm}
+                    disabled={deleteConfirmText !== participant.study_id || isDeleteLoading}
+                    className="bg-red-600 hover:bg-red-700 text-white disabled:opacity-40"
+                  >
+                    {isDeleteLoading ? t('deleting_participant' as any) : t('delete_participant' as any)}
                   </Button>
                 </div>
               </div>

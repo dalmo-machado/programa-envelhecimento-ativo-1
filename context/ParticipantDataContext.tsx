@@ -88,6 +88,7 @@ interface ParticipantDataContextType {
   supabaseLoadFailed: boolean;
   updateParticipant: (participantId: string, updatedData: Partial<Participant>) => void;
   addParticipant: (participant: Participant) => void;
+  deleteParticipant: (participantId: string) => Promise<void>;
 }
 
 const ParticipantDataContext = createContext<ParticipantDataContextType | undefined>(undefined);
@@ -231,8 +232,19 @@ export const ParticipantDataProvider: React.FC<{ children: ReactNode }> = ({ chi
     });
   };
 
+  const deleteParticipant = async (participantId: string): Promise<void> => {
+    // Remove from Supabase first (throws on failure)
+    await supa.deleteParticipant(participantId);
+    // Remove from local state + localStorage
+    setParticipants(prev => {
+      const next = prev.filter(p => p.study_id !== participantId);
+      localStorage.setItem('participantsData', JSON.stringify(next));
+      return next;
+    });
+  };
+
   const value = useMemo(
-    () => ({ participants, isLoading, supabaseLoadFailed, updateParticipant, addParticipant }),
+    () => ({ participants, isLoading, supabaseLoadFailed, updateParticipant, addParticipant, deleteParticipant }),
     [participants, isLoading, supabaseLoadFailed],
   );
 

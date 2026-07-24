@@ -458,6 +458,17 @@ export async function resyncAllAssessments(participants: Participant[]): Promise
 /**
  * Bulk-insert mock participants when the DB is empty on first run.
  */
+export async function deleteParticipant(studyId: string): Promise<void> {
+  // Cascade: delete child records first, then the participant row.
+  const tables = ['incidents', 'sessions', 'assessments'] as const;
+  for (const table of tables) {
+    const { error } = await supabase.from(table).delete().eq('participant_id', studyId);
+    if (error) console.warn(`[Supabase] deleteParticipant – ${table}:`, error);
+  }
+  const { error } = await supabase.from('participants').delete().eq('study_id', studyId);
+  if (error) throw new Error(`[Supabase] deleteParticipant – participants: ${error.message}`);
+}
+
 export async function migrateParticipants(participants: Participant[]): Promise<void> {
   for (const p of participants) {
     // upsert so re-running never duplicates
