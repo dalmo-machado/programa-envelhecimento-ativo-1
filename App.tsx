@@ -16,6 +16,7 @@ import AssessmentSummaryPage from './pages/AssessmentSummaryPage';
 import TrainingPlanPage from './pages/TrainingPlanPage';
 import ResearcherParticipantView from './pages/ResearcherParticipantView';
 import AlertsPage from './pages/AlertsPage';
+import AppFeedbackPage from './pages/AppFeedbackPage';
 import { pt } from './localization/pt';
 import { es, I18nKeys } from './localization/es';
 
@@ -170,6 +171,14 @@ const AppRouter: React.FC = () => {
           element={
             <RouteGuard allowedRoles={PARTICIPANT_ROLES}>
               <SessionPage />
+            </RouteGuard>
+          }
+        />
+        <Route
+          path="/feedback/app"
+          element={
+            <RouteGuard allowedRoles={PARTICIPANT_ROLES}>
+              <AppFeedbackPage />
             </RouteGuard>
           }
         />

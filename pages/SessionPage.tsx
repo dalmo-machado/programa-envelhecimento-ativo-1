@@ -118,12 +118,19 @@ const SessionPage: React.FC = () => {
       exercise_rpe: exerciseRpeRatings.length > 0 ? exerciseRpeRatings : undefined,
     };
 
+    const newSessionsCompleted = participant.sessions_completed + 1;
     updateParticipant(participant.study_id, {
-      sessions_completed: participant.sessions_completed + 1,
+      sessions_completed: newSessionsCompleted,
       session_logs: [...(participant.session_logs ?? []), newLog],
     });
 
-    navigate('/dashboard');
+    // After the final session (24), redirect to the app-feedback questionnaire
+    // if it hasn't been submitted yet.
+    if (newSessionsCompleted >= 24 && !participant.app_feedback) {
+      navigate('/feedback/app');
+    } else {
+      navigate('/dashboard');
+    }
   }
 
   const handleFinish = () => {

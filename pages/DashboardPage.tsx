@@ -231,6 +231,19 @@ const ParticipantDashboard: React.FC = () => {
                     <p className="text-yellow-700">{t('happy_birthday_msg' as any)}</p>
                 </div>
             )}
+
+            {/* App-feedback banner — shown when training is complete but questionnaire not yet submitted */}
+            {isTrainingComplete && !participant?.app_feedback && (
+                <div className="bg-gradient-to-r from-primary-light to-teal-50 border-l-4 border-primary p-6 rounded-r-xl shadow-sm flex flex-col sm:flex-row sm:items-center gap-4">
+                    <div className="flex-1">
+                        <h2 className="text-xl font-bold text-primary-dark mb-1">{t('fb_banner_title' as any)}</h2>
+                        <p className="text-slate-600 text-sm">{t('fb_banner_desc' as any)}</p>
+                    </div>
+                    <Button onClick={() => navigate('/feedback/app')} className="shrink-0">
+                        {t('fb_banner_cta' as any)}
+                    </Button>
+                </div>
+            )}
             
             <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
                  <Card title={t('next_session_title')} className="flex flex-col lg:col-span-1">

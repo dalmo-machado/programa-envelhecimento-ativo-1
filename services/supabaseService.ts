@@ -112,6 +112,7 @@ function participantToDb(p: Participant): Record<string, unknown> {
     sessions_completed: p.sessions_completed,
     training_plan: p.training_plan,
     session_logs: p.session_logs ?? [],
+    app_feedback: p.app_feedback ?? null,
   };
 }
 
@@ -154,6 +155,7 @@ export async function loadAllParticipants(): Promise<Participant[]> {
       incidents,
       training_plan: Array.isArray(row.training_plan) ? row.training_plan : [],
       session_logs: Array.isArray(row.session_logs) ? (row.session_logs as SessionLog[]) : [],
+      app_feedback: row.app_feedback ?? null,
     };
   });
 
@@ -252,6 +254,17 @@ export async function syncUpdate(
       supabase
         .from('participants')
         .update({ training_plan: changes.training_plan })
+        .eq('study_id', participantId)
+        .then(({ error }) => { if (error) throw error; }),
+    );
+  }
+
+  // ── App feedback (submitted once after session 24) ────────────────────────
+  if (changes.app_feedback && !old.app_feedback) {
+    ops.push(
+      supabase
+        .from('participants')
+        .update({ app_feedback: changes.app_feedback })
         .eq('study_id', participantId)
         .then(({ error }) => { if (error) throw error; }),
     );

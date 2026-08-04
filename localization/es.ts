@@ -531,6 +531,69 @@ export const es = {
   inactivity_alert_badge: "{days}d sin entrenar",
   researcher_table_last_session: "Última sesión",
   last_session_days_ago: "hace {days}d",
+
+  // ── Cuestionario final de uso de la app (AppFeedbackPage) ────────────────
+  // Etiquetas de bloque (barra de progreso)
+  fb_block1_label: 'Bloque 1 — Usabilidad de la aplicación',
+  fb_block2_label: 'Bloque 2 — Mejora física percibida',
+  fb_block3_label: 'Bloque 3 — Experiencia con el programa',
+  fb_block4_label: 'Bloque 4 — Opinión abierta',
+
+  // Escala Likert — rótulos de los 5 puntos (de acuerdo, todos positivos)
+  fb_likert_1: 'No concordo en absoluto',
+  fb_likert_2: 'Concordo poco',
+  fb_likert_3: 'Concordo más o menos',
+  fb_likert_4: 'Concordo bastante',
+  fb_likert_5: 'Concordo totalmente',
+
+  // Navegación
+  fb_prev: '← Anterior',
+  fb_next: 'Siguiente →',
+  fb_skip: 'Omitir esta pregunta',
+  fb_submit: 'Enviar cuestionario',
+  fb_submitting: 'Enviando…',
+  fb_open_placeholder: 'Escriba aquí su respuesta…',
+
+  // Bloque 1 — SUS adaptado (formulación positiva)
+  fb_sus_1:  'Me gustaría seguir usando la aplicación para hacer ejercicio.',
+  fb_sus_2:  'La aplicación era sencilla de usar.',
+  fb_sus_3:  'Encontré la aplicación fácil de usar.',
+  fb_sus_4:  'Pude usar la aplicación solo/a, sin necesitar ayuda de otra persona.',
+  fb_sus_5:  'Las partes de la aplicación (sesiones, plan, resultados) funcionaban bien juntas.',
+  fb_sus_6:  'La aplicación funcionaba sin problemas ni errores.',
+  fb_sus_7:  'Cualquier persona aprendería a usar esta aplicación con facilidad.',
+  fb_sus_8:  'Usar la aplicación era fácil y sin esfuerzo.',
+  fb_sus_9:  'Me sentí seguro/a usando la aplicación.',
+  fb_sus_10: 'Empecé a usar la aplicación sin necesitar aprender muchas cosas.',
+
+  // Bloque 2 — Mejora física percibida (escala de acuerdo, contexto en el enunciado)
+  fb_imp_1: 'Comparado con el inicio del programa, siento que mejoré mi fuerza muscular (brazos y piernas).',
+  fb_imp_2: 'Comparado con el inicio, siento que mejoré mi equilibrio y estabilidad.',
+  fb_imp_3: 'Comparado con el inicio, siento que mejoré mi flexibilidad.',
+  fb_imp_4: 'Tengo más resistencia para las actividades del día a día (subir escaleras, caminar).',
+  fb_imp_5: 'Siento que mejoré mi agilidad y rapidez en los movimientos.',
+  fb_imp_6: 'Siento que tengo más bienestar y energía que al inicio del programa.',
+
+  // Bloque 3 — Experiencia con el programa y la aplicación
+  fb_exp_1: 'El temporizador de descanso mostrado en la pantalla fue útil para seguir el ritmo correcto.',
+  fb_exp_2: 'Los entrenamientos me mantuvieron animado/a para continuar hasta el final.',
+  fb_exp_3: 'El plan de entrenamiento generado pareció adecuado para mi condición física.',
+  fb_exp_4: 'Las instrucciones de los ejercicios dentro de la aplicación eran claras.',
+  fb_exp_5: 'Recomendaría este programa de entrenamiento a otras personas de mi edad.',
+  fb_exp_6: 'La aplicación me ayudó a completar las 24 sesiones de entrenamiento.',
+
+  // Bloque 4 — Preguntas abiertas
+  fb_open_best:    '¿Qué fue lo que más le gustó del programa de entrenamiento y de la aplicación?',
+  fb_open_improve: '¿Qué podría mejorar en la aplicación o en el programa para facilitar aún más el entrenamiento?',
+
+  // Estado: ya enviado
+  fb_already_submitted:      'Cuestionario ya enviado',
+  fb_already_submitted_desc: '¡Gracias por participar! Sus respuestas han sido registradas.',
+
+  // Banner en el dashboard
+  fb_banner_title: '¡Cuestionario final disponible!',
+  fb_banner_desc:  '¡Ha completado las 24 sesiones! Reserve unos minutos para responder el cuestionario sobre su experiencia con el programa y la aplicación.',
+  fb_banner_cta:   'Responder ahora',
 };
 
 export type I18nKeys = typeof es;

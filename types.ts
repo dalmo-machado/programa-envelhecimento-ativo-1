@@ -73,6 +73,22 @@ export interface SessionLog {
   exercise_rpe?: ExerciseRpe[];     // per-exercise RPE (Asier Phase 1)
 }
 
+/**
+ * Final app-usability questionnaire submitted after session 24.
+ * All Likert scores are 1–5 (positive framing throughout).
+ *   sus_scores[0..9]        — Q1–Q10  (SUS adapted, all positive)
+ *   improvement_scores[0..5]— Q11–Q16 (perceived physical improvement)
+ *   experience_scores[0..5] — Q17–Q22 (program & app experience)
+ */
+export interface AppFeedback {
+  submitted_at: string;           // ISO timestamp
+  sus_scores: number[];           // length 10, values 1–5
+  improvement_scores: number[];   // length 6,  values 1–5
+  experience_scores: number[];    // length 6,  values 1–5
+  open_best: string;              // free text — what participant liked most
+  open_improve: string;           // free text — suggestions
+}
+
 export interface Participant {
   study_id: string;
   name: string;
@@ -86,4 +102,5 @@ export interface Participant {
   training_plan: PersonalizedSession[];
   incidents: IncidentReport[];
   session_logs?: SessionLog[];
+  app_feedback?: AppFeedback | null;
 }
