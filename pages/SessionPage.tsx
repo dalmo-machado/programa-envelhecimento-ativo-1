@@ -67,8 +67,24 @@ const SessionPage: React.FC = () => {
   }, [isResting, restSecondsLeft]);
 
   const participant = participants.find(p => p.study_id === participantId);
-  const sessionPlan = participant?.training_plan?.[sessionIndex];
-  const sessionType = sessionPlan?.sessionType;
+
+  // ── Maintenance mode: sessions beyond the 24-session protocol ────────────
+  // Index >= 24 means the participant completed the study and wants to keep going.
+  // We cycle through the same session types at Level 3, without altering
+  // sessions_completed (the study outcome variable).
+  const STUDY_SESSIONS = 24;
+  const isMaintenance = sessionIndex >= STUDY_SESSIONS;
+  const cycleIndex = isMaintenance
+    ? (sessionIndex - STUDY_SESSIONS) % STUDY_SESSIONS
+    : sessionIndex;
+
+  const studyPlan   = participant?.training_plan?.[sessionIndex];   // regular path
+  const cyclePlan   = participant?.training_plan?.[cycleIndex];      // maintenance path
+  const sessionPlan = isMaintenance
+    ? (cyclePlan ? { sessionType: cyclePlan.sessionType, level: 3 as const } : undefined)
+    : studyPlan;
+
+  const sessionType  = sessionPlan?.sessionType;
   const sessionLevel = sessionPlan?.level;
   const program = sessionType ? trainingPrograms[sessionType] : null;
 
@@ -118,18 +134,25 @@ const SessionPage: React.FC = () => {
       exercise_rpe: exerciseRpeRatings.length > 0 ? exerciseRpeRatings : undefined,
     };
 
-    const newSessionsCompleted = participant.sessions_completed + 1;
-    updateParticipant(participant.study_id, {
-      sessions_completed: newSessionsCompleted,
-      session_logs: [...(participant.session_logs ?? []), newLog],
-    });
-
-    // After the final session (24), redirect to the app-feedback questionnaire
-    // if it hasn't been submitted yet.
-    if (newSessionsCompleted >= 24 && !participant.app_feedback) {
-      navigate('/feedback/app');
-    } else {
+    if (isMaintenance) {
+      // Maintenance: only append the log — sessions_completed stays unchanged.
+      updateParticipant(participant.study_id, {
+        session_logs: [...(participant.session_logs ?? []), newLog],
+      });
       navigate('/dashboard');
+    } else {
+      const newSessionsCompleted = participant.sessions_completed + 1;
+      updateParticipant(participant.study_id, {
+        sessions_completed: newSessionsCompleted,
+        session_logs: [...(participant.session_logs ?? []), newLog],
+      });
+      // After the final session (24), redirect to the app-feedback questionnaire
+      // if it hasn't been submitted yet.
+      if (newSessionsCompleted >= STUDY_SESSIONS && !participant.app_feedback) {
+        navigate('/feedback/app');
+      } else {
+        navigate('/dashboard');
+      }
     }
   }
 

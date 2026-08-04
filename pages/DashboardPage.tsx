@@ -180,10 +180,17 @@ const ParticipantDashboard: React.FC = () => {
 
     const totalSessions = 24;
     const adherence = participant.sessions_completed > 0 ? (participant.sessions_completed / totalSessions) * 100 : 0;
-    
+
     const nextSessionIndex = participant.sessions_completed;
     const nextSessionPlan = participant.training_plan?.[nextSessionIndex];
     const isTrainingComplete = nextSessionIndex >= totalSessions;
+
+    // Maintenance mode — count extra sessions from logs (index >= 24)
+    const extraSessionsCompleted = (participant.session_logs ?? [])
+        .filter(l => l.session_index >= totalSessions).length;
+    const maintenanceCycleIndex = extraSessionsCompleted % totalSessions;
+    const maintenancePlan = participant.training_plan?.[maintenanceCycleIndex];
+    const maintenanceSessionIndex = totalSessions + extraSessionsCompleted;
 
     const chartData = participant.assessments.map(assessment => ({
         date: formatDate(new Date(assessment.date), { month: 'short', day: 'numeric' }),
@@ -249,7 +256,27 @@ const ParticipantDashboard: React.FC = () => {
                  <Card title={t('next_session_title')} className="flex flex-col lg:col-span-1">
                     <div className="flex-grow">
                         {isTrainingComplete ? (
-                            <p className="text-xl text-slate-600 my-4">{t('training_complete')}</p>
+                            <>
+                                <p className="text-base font-semibold text-green-700 mb-3">
+                                    ✅ {t('training_complete')}
+                                </p>
+                                {maintenancePlan && (
+                                    <div className="bg-teal-50 border border-teal-200 rounded-xl p-4">
+                                        <span className="text-xs font-bold uppercase tracking-wider text-teal-600 block mb-2">
+                                            {t('maintenance_mode_badge' as any)}
+                                        </span>
+                                        <h3 className="text-xl font-bold text-primary-dark">
+                                            {t(trainingPrograms[maintenancePlan.sessionType]?.titleKey as any)}
+                                        </h3>
+                                        <p className="text-sm text-slate-500 mt-1">
+                                            {t('maintenance_level_label' as any)} &nbsp;·&nbsp;
+                                            {extraSessionsCompleted > 0
+                                                ? (t('maintenance_sessions_done' as any) as string).replace('{count}', String(extraSessionsCompleted))
+                                                : t('maintenance_first_extra' as any)}
+                                        </p>
+                                    </div>
+                                )}
+                            </>
                         ) : nextSessionPlan ? (
                             <>
                                 <h3 className="text-2xl font-bold text-primary-dark">{t('next_session_info_with_level', {
@@ -263,13 +290,18 @@ const ParticipantDashboard: React.FC = () => {
                             <p className="text-slate-600 my-4">{t('awaiting_first_assessment')}</p>
                         )}
                     </div>
-                    <Button 
-                        variant="secondary" 
-                        onClick={() => navigate(`/session/${nextSessionIndex}`)} 
-                        className="w-full mt-4" 
-                        disabled={isTrainingComplete || !nextSessionPlan}
+                    <Button
+                        variant="secondary"
+                        onClick={() => navigate(isTrainingComplete
+                            ? `/session/${maintenanceSessionIndex}`
+                            : `/session/${nextSessionIndex}`
+                        )}
+                        className="w-full mt-4"
+                        disabled={isTrainingComplete ? !maintenancePlan : !nextSessionPlan}
                     >
-                        {t('start_session')}
+                        {isTrainingComplete
+                            ? t('maintenance_start_button' as any)
+                            : t('start_session')}
                     </Button>
                 </Card>
 

@@ -534,6 +534,13 @@ export const pt: I18nKeys = {
   researcher_table_last_session: 'Última sessão',
   last_session_days_ago: 'há {days}d',
 
+  // ── Modo manutenção (sessões após o protocolo de 24) ─────────────────────
+  maintenance_mode_badge:      'Modo Manutenção',
+  maintenance_level_label:     'Nível 3 — Manutenção',
+  maintenance_first_extra:     'Primeira sessão extra',
+  maintenance_sessions_done:   '{count} sessão(ões) extra(s) concluída(s)',
+  maintenance_start_button:    'Continuar treinando',
+
   // ── Questionário final de uso do app (AppFeedbackPage) ────────────────────
   // Rótulos de bloco (barra de progresso)
   fb_block1_label: 'Bloco 1 — Usabilidade do aplicativo',

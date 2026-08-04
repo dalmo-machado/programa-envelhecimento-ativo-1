@@ -532,6 +532,13 @@ export const es = {
   researcher_table_last_session: "Última sesión",
   last_session_days_ago: "hace {days}d",
 
+  // ── Modo mantenimiento (sesiones después del protocolo de 24) ────────────
+  maintenance_mode_badge:      'Modo Mantenimiento',
+  maintenance_level_label:     'Nivel 3 — Mantenimiento',
+  maintenance_first_extra:     'Primera sesión extra',
+  maintenance_sessions_done:   '{count} sesión(es) extra(s) completada(s)',
+  maintenance_start_button:    'Continuar entrenando',
+
   // ── Cuestionario final de uso de la app (AppFeedbackPage) ────────────────
   // Etiquetas de bloque (barra de progreso)
   fb_block1_label: 'Bloque 1 — Usabilidad de la aplicación',
