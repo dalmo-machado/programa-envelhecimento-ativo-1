@@ -8,7 +8,7 @@ import { Home } from 'lucide-react';
 import Button from './ui/Button';
 
 const Header: React.FC = () => {
-    const { role, setRole, setParticipantId } = useUserRole();
+    const { role, setRole, setParticipantId, setResearcherCode } = useUserRole();
     const { t } = useLocalization();
     const navigate = useNavigate();
     const [showConfirm, setShowConfirm] = useState(false);
@@ -27,6 +27,7 @@ const Header: React.FC = () => {
 
     const handleConfirmEndSession = () => {
         setShowConfirm(false);
+        setResearcherCode(null);
         setRole(UserRole.NONE);
         setParticipantId(null);
         navigate('/');

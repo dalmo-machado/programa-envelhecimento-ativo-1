@@ -113,6 +113,7 @@ function participantToDb(p: Participant): Record<string, unknown> {
     training_plan: p.training_plan,
     session_logs: p.session_logs ?? [],
     app_feedback: p.app_feedback ?? null,
+    plan_authorization: p.plan_authorization ?? null,
   };
 }
 
@@ -156,6 +157,7 @@ export async function loadAllParticipants(): Promise<Participant[]> {
       training_plan: Array.isArray(row.training_plan) ? row.training_plan : [],
       session_logs: Array.isArray(row.session_logs) ? (row.session_logs as SessionLog[]) : [],
       app_feedback: row.app_feedback ?? null,
+      plan_authorization: row.plan_authorization ?? null,
     };
   });
 
@@ -254,6 +256,17 @@ export async function syncUpdate(
       supabase
         .from('participants')
         .update({ training_plan: changes.training_plan })
+        .eq('study_id', participantId)
+        .then(({ error }) => { if (error) throw error; }),
+    );
+  }
+
+  // ── Plan authorization (written together with the training plan) ──────────
+  if (changes.plan_authorization) {
+    ops.push(
+      supabase
+        .from('participants')
+        .update({ plan_authorization: changes.plan_authorization })
         .eq('study_id', participantId)
         .then(({ error }) => { if (error) throw error; }),
     );

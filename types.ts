@@ -89,6 +89,20 @@ export interface AppFeedback {
   open_improve: string;           // free text — suggestions
 }
 
+/**
+ * Record of the researcher's endorsement of the training level and load before
+ * the plan is generated. The app computes a suggestion from the SFT results;
+ * this is the evidence that a professional reviewed it and took responsibility
+ * for the prescription — either accepting the suggestion or changing it.
+ */
+export interface PlanAuthorization {
+  authorized_at: string;          // ISO timestamp
+  authorized_by: string;          // researcher access code, or role when unknown
+  computed_level: 1 | 2 | 3;      // what the algorithm suggested
+  applied_level: 1 | 2 | 3;       // what was actually prescribed
+  adjusted: boolean;              // applied !== computed
+}
+
 export interface Participant {
   study_id: string;
   name: string;
@@ -103,4 +117,5 @@ export interface Participant {
   incidents: IncidentReport[];
   session_logs?: SessionLog[];
   app_feedback?: AppFeedback | null;
+  plan_authorization?: PlanAuthorization | null;
 }

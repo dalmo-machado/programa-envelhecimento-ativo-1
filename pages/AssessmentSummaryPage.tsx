@@ -58,10 +58,13 @@ const AssessmentSummaryPage: React.FC = () => {
     const location = useLocation();
     const { t, formatNumber } = useLocalization();
     const { participants, updateParticipant } = useParticipantData();
-    const { participantId, role } = useUserRole();
+    const { participantId, role, researcherCode } = useUserRole();
 
     const [generatingPlan, setGeneratingPlan] = useState(false);
     const [overrideLevel, setOverrideLevel] = useState<1 | 2 | 3 | null>(null);
+    // The researcher must actively endorse the level and load before a plan is
+    // generated. The algorithm suggests; the professional prescribes.
+    const [levelConfirmed, setLevelConfirmed] = useState(false);
 
     // If the assessment was registered by a researcher for a specific participant,
     // the participantId is forwarded via router state so we can return there.
@@ -176,10 +179,19 @@ const AssessmentSummaryPage: React.FC = () => {
     const effectiveLevel = overrideLevel ?? profile.level;
 
     const handleGeneratePlan = () => {
-        if (!effectiveParticipantId) return;
+        if (!effectiveParticipantId || !levelConfirmed) return;
         setGeneratingPlan(true);
         const plan = generateTrainingPlan(data, overrideLevel ?? undefined);
-        updateParticipant(effectiveParticipantId, { training_plan: plan });
+        updateParticipant(effectiveParticipantId, {
+            training_plan: plan,
+            plan_authorization: {
+                authorized_at: new Date().toISOString(),
+                authorized_by: researcherCode ?? String(role),
+                computed_level: profile.level as 1 | 2 | 3,
+                applied_level: effectiveLevel as 1 | 2 | 3,
+                adjusted: effectiveLevel !== profile.level,
+            },
+        });
         navigate(returnPath);
     };
 
@@ -297,13 +309,35 @@ const AssessmentSummaryPage: React.FC = () => {
                                 </Button>
                             </div>
                         ) : (
-                            <Button
-                                onClick={handleGeneratePlan}
-                                className="w-full mt-6"
-                                disabled={generatingPlan}
-                            >
-                                {t('generate_plan_button' as any)}
-                            </Button>
+                            <>
+                                {/* Mandatory endorsement — the plan cannot be generated
+                                    until the researcher confirms level and load. */}
+                                <label className="mt-6 flex items-start gap-3 p-4 rounded-lg border-2 border-secondary bg-secondary/5 cursor-pointer">
+                                    <input
+                                        type="checkbox"
+                                        checked={levelConfirmed}
+                                        onChange={e => setLevelConfirmed(e.target.checked)}
+                                        className="mt-1 w-5 h-5 shrink-0 accent-current"
+                                    />
+                                    <span className="text-sm text-slate-700">
+                                        {(t('confirm_level_label' as any) as string)
+                                            .replace('{level}', String(effectiveLevel))
+                                            .replace('{pct}', String(LEVEL_LOAD_PCT[effectiveLevel]))}
+                                    </span>
+                                </label>
+                                <Button
+                                    onClick={handleGeneratePlan}
+                                    className="w-full mt-3"
+                                    disabled={generatingPlan || !levelConfirmed}
+                                >
+                                    {t('generate_plan_button' as any)}
+                                </Button>
+                                {!levelConfirmed && (
+                                    <p className="text-xs text-slate-500 text-center mt-2">
+                                        {t('confirm_level_hint' as any)}
+                                    </p>
+                                )}
+                            </>
                         )
                     ) : (
                         <Button onClick={() => navigate(returnPath)} className="w-full mt-6">

@@ -99,6 +99,12 @@ export const pt: I18nKeys = {
   delete_participant_warning: 'Esta ação é irreversível. Todos os dados de {name} ({id}) serão apagados do servidor, incluindo avaliações, sessões e ocorrências.',
   delete_confirm_type_prompt: 'Digite {id} para confirmar:',
   deleting_participant: 'Excluindo...',
+  // Mandatory endorsement of level and load before generating the plan
+  confirm_level_label: 'Confirmo, como avaliador responsável, que revisei o desempenho na bateria e que o Nível {level} ({pct}% da carga-base) é adequado para este participante.',
+  confirm_level_hint: 'É necessário confirmar o nível antes de gerar o plano.',
+  plan_auth_view: 'Nível autorizado por {by} em {date} — calculado N{computed}, aplicado N{applied}{adjusted}.',
+  plan_auth_adjusted: ' (ajustado pelo avaliador)',
+  plan_auth_none: 'Plano gerado antes do registro de autorização.',
   override_level_label: 'Ajustar nível de início:',
   override_level_note: '⚠️ Nível ajustado para {selected} ({selectedPct}% da carga-base). Calculado automaticamente: N{computed} ({computedPct}%).',
   load_pct_label: '{pct}% da carga-base',

@@ -41,7 +41,7 @@ const normaliseBirthDate = (s: string): string => {
 const LoginPage: React.FC = () => {
   const { language, setLanguage, t } = useLocalization();
   const navigate = useNavigate();
-  const { setRole, setParticipantId } = useUserRole();
+  const { setRole, setParticipantId, setResearcherCode } = useUserRole();
   const { participants, isLoading, supabaseLoadFailed } = useParticipantData();
 
   const [code, setCode] = useState('');
@@ -78,6 +78,7 @@ const LoginPage: React.FC = () => {
       p => p.study_id.toUpperCase() === normalizedCode
     );
     if (participant && normaliseBirthDate(pwd) === normaliseBirthDate(participant.birth_date)) {
+      setResearcherCode(null);
       setRole(UserRole.PARTICIPANT);
       setParticipantId(participant.study_id);
       navigate('/dashboard', { replace: true });
@@ -106,6 +107,7 @@ const LoginPage: React.FC = () => {
         );
       }
       if (password === gestorPassword) {
+        setResearcherCode(normalizedCode);
         setRole(UserRole.ADMIN);
         navigate('/dashboard', { replace: true });
       } else {
@@ -121,6 +123,7 @@ const LoginPage: React.FC = () => {
         console.warn('[Auth] VITE_RESEARCHER_PASSWORD não está definido.');
       }
       if (password === researcherPassword) {
+        setResearcherCode(normalizedCode);
         setRole(UserRole.RESEARCHER);
         navigate('/dashboard', { replace: true });
       } else {
@@ -138,6 +141,7 @@ const LoginPage: React.FC = () => {
       if (researcher) {
         const isValid = await verifyPassword(password, researcher.password_hash);
         if (isValid) {
+          setResearcherCode(researcher.code ?? normalizedCode);
           setRole(UserRole.RESEARCHER);
           navigate('/dashboard', { replace: true });
         } else {

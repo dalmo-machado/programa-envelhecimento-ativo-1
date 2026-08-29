@@ -510,6 +510,20 @@ const ResearcherParticipantView: React.FC = () => {
           {/* Training plan grid — cards are clickable */}
           {participant.training_plan.length > 0 && (
             <Card title={t('my_training_plan_title')}>
+              {/* Who endorsed the level and load, and whether it was adjusted. */}
+              <p className="text-xs text-slate-500 mb-3 border-l-2 border-slate-300 pl-2">
+                {participant.plan_authorization
+                  ? (t('plan_auth_view' as any) as string)
+                      .replace('{by}', participant.plan_authorization.authorized_by)
+                      .replace('{date}', formatDate(new Date(participant.plan_authorization.authorized_at), {
+                        day: '2-digit', month: '2-digit', year: 'numeric',
+                      }))
+                      .replace('{computed}', String(participant.plan_authorization.computed_level))
+                      .replace('{applied}', String(participant.plan_authorization.applied_level))
+                      .replace('{adjusted}', participant.plan_authorization.adjusted
+                        ? (t('plan_auth_adjusted' as any) as string) : '')
+                  : t('plan_auth_none' as any)}
+              </p>
               <p className="text-slate-500 text-sm mb-3">{t('click_session_hint' as any)}</p>
               <div className="grid grid-cols-3 sm:grid-cols-6 md:grid-cols-8 gap-2">
                 {participant.training_plan.map((session, i) => {

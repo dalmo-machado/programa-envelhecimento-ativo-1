@@ -97,6 +97,12 @@ export const es = {
   delete_participant_warning: 'Esta acción es irreversible. Todos los datos de {name} ({id}) serán eliminados del servidor, incluyendo evaluaciones, sesiones e incidentes.',
   delete_confirm_type_prompt: 'Escriba {id} para confirmar:',
   deleting_participant: 'Eliminando...',
+  // Confirmación obligatoria del nivel y de la carga antes de generar el plan
+  confirm_level_label: 'Confirmo, como evaluador responsable, que he revisado el rendimiento en la batería y que el Nivel {level} ({pct}% de la carga-base) es adecuado para este participante.',
+  confirm_level_hint: 'Es necesario confirmar el nivel antes de generar el plan.',
+  plan_auth_view: 'Nivel autorizado por {by} el {date} — calculado N{computed}, aplicado N{applied}{adjusted}.',
+  plan_auth_adjusted: ' (ajustado por el evaluador)',
+  plan_auth_none: 'Plan generado antes del registro de autorización.',
   override_level_label: 'Ajustar nivel de inicio:',
   override_level_note: '⚠️ Nivel ajustado a {selected} ({selectedPct}% de la carga-base). Calculado automáticamente: N{computed} ({computedPct}%).',
   load_pct_label: '{pct}% de la carga-base',

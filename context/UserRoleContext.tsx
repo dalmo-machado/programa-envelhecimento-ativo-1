@@ -7,6 +7,9 @@ interface UserRoleContextType {
   setRole: (role: UserRole) => void;
   participantId: string | null;
   setParticipantId: (id: string | null) => void;
+  /** Access code of the logged-in researcher, stamped on plan authorizations. */
+  researcherCode: string | null;
+  setResearcherCode: (code: string | null) => void;
 }
 
 const UserRoleContext = createContext<UserRoleContextType | undefined>(undefined);
@@ -19,10 +22,22 @@ export const UserRoleProvider: React.FC<{ children: ReactNode }> = ({ children }
   const [participantId, setParticipantId] = useState<string | null>(() => {
     return localStorage.getItem('participantId');
   });
+  const [researcherCode, setResearcherCode] = useState<string | null>(() => {
+    return localStorage.getItem('researcherCode');
+  });
 
   const handleSetRole = (newRole: UserRole) => {
     setRole(newRole);
     localStorage.setItem('userRole', newRole);
+  };
+
+  const handleSetResearcherCode = (code: string | null) => {
+    setResearcherCode(code);
+    if (code) {
+      localStorage.setItem('researcherCode', code);
+    } else {
+      localStorage.removeItem('researcherCode');
+    }
   };
 
   const handleSetParticipantId = (id: string | null) => {
@@ -38,8 +53,10 @@ export const UserRoleProvider: React.FC<{ children: ReactNode }> = ({ children }
     role, 
     setRole: handleSetRole, 
     participantId, 
-    setParticipantId: handleSetParticipantId 
-  }), [role, participantId]);
+    setParticipantId: handleSetParticipantId,
+    researcherCode,
+    setResearcherCode: handleSetResearcherCode,
+  }), [role, participantId, researcherCode]);
 
   return (
     <UserRoleContext.Provider value={value}>
