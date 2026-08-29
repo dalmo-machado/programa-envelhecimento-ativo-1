@@ -1,7 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
-import { Award, AlertTriangle } from 'lucide-react';
+import { Award, AlertTriangle, CheckCircle } from 'lucide-react';
 import { useUserRole } from '../context/UserRoleContext';
 import { useLocalization } from '../context/LocalizationContext';
 import { useParticipantData } from '../context/ParticipantDataContext';
@@ -15,6 +15,10 @@ import { hashPassword } from '../utils/auth';
 import Card from '../components/ui/Card';
 import Button from '../components/ui/Button';
 import Header from '../components/Header';
+
+// Sessions in the study protocol. A participant only becomes eligible for the
+// final questionnaire after completing all of them.
+const STUDY_SESSIONS = 24;
 
 const DashboardPage: React.FC = () => {
     const { role } = useUserRole();
@@ -897,6 +901,7 @@ const ResearcherDashboard: React.FC<{ gestorMode?: boolean }> = ({ gestorMode = 
                                 <th className="p-3 text-center">{t('researcher_table_sessions')}</th>
                                 <th className="p-3 text-center">{t('researcher_table_last_session' as any)}</th>
                                 <th className="p-3 text-center">{t('researcher_table_adherence')}</th>
+                                <th className="p-3 text-center" title={t('researcher_table_feedback_title' as any)}>{t('researcher_table_feedback' as any)}</th>
                                 <th className="p-3">{t('researcher_table_last_assessment')}</th>
                                 <th className="p-3 text-center">{t('height')}</th>
                                 <th className="p-3 text-center">{t('weight')}</th>
@@ -953,6 +958,46 @@ const ResearcherDashboard: React.FC<{ gestorMode?: boolean }> = ({ gestorMode = 
                                             })()}
                                         </td>
                                         <td className="p-3 text-center">{formatNumber(adherence, {maximumFractionDigits: 0})}%</td>
+                                        <td className="p-3 text-center">
+                                            {(() => {
+                                                // Three distinct states — a participant still mid-protocol is not
+                                                // "missing" the questionnaire, they are simply not eligible yet.
+                                                if (p.app_feedback) {
+                                                    const when = formatDate(
+                                                        new Date(p.app_feedback.submitted_at),
+                                                        { day: '2-digit', month: '2-digit', year: 'numeric' },
+                                                    );
+                                                    return (
+                                                        <span
+                                                            className="inline-flex items-center gap-1 bg-emerald-100 text-emerald-700 text-xs font-bold px-2 py-1 rounded-full whitespace-nowrap"
+                                                            title={t('researcher_table_feedback_yes_title' as any, { date: when })}
+                                                        >
+                                                            <CheckCircle size={11} />
+                                                            {t('researcher_table_feedback_yes' as any)}
+                                                        </span>
+                                                    );
+                                                }
+                                                if (p.sessions_completed >= STUDY_SESSIONS) {
+                                                    return (
+                                                        <span
+                                                            className="inline-flex items-center gap-1 bg-amber-100 text-amber-700 text-xs font-bold px-2 py-1 rounded-full whitespace-nowrap"
+                                                            title={t('researcher_table_feedback_pending_title' as any)}
+                                                        >
+                                                            <AlertTriangle size={11} />
+                                                            {t('researcher_table_feedback_pending' as any)}
+                                                        </span>
+                                                    );
+                                                }
+                                                return (
+                                                    <span
+                                                        className="text-slate-400"
+                                                        title={t('researcher_table_feedback_na_title' as any)}
+                                                    >
+                                                        —
+                                                    </span>
+                                                );
+                                            })()}
+                                        </td>
                                         <td className="p-3">{latestAssessment ? formatDate(new Date(latestAssessment.date), { day: '2-digit', month: '2-digit', year: 'numeric'}) : '-'}</td>
                                         <td className="p-3 text-center">{latestAssessment ? latestAssessment.data.height_cm : '-'}</td>
                                         <td className="p-3 text-center">{latestAssessment ? latestAssessment.data.weight_kg : '-'}</td>
