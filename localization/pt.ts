@@ -262,6 +262,14 @@ export const pt: I18nKeys = {
   percent_change: 'Mudança %',
   week: 'Semana',
   export_csv: 'Exportar para CSV',
+  // Final questionnaire — researcher-side reading (view + export)
+  fb_view_title: 'Questionário final — respostas do participante',
+  fb_view_submitted_on: 'Respondido em {date}. Envio único: o participante não pode reenviar nem corrigir.',
+  fb_view_mean: 'Média do bloco',
+  fb_view_no_answer: 'Sem resposta.',
+  export_feedback_csv: 'Exportar questionário final ({n})',
+  export_feedback_empty: 'Nenhum participante respondeu ao questionário final até o momento.',
+
   researcher_table_id: 'ID',
   researcher_table_site: 'Polo',
   researcher_table_sessions: 'Sessões',

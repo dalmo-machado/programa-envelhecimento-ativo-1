@@ -260,6 +260,14 @@ export const es = {
   percent_change: 'Cambio %',
   week: 'Semana',
   export_csv: 'Exportar a CSV',
+  // Cuestionario final — lectura por el investigador (vista + exportación)
+  fb_view_title: 'Cuestionario final — respuestas del participante',
+  fb_view_submitted_on: 'Respondido el {date}. Envío único: el participante no puede reenviarlo ni corregirlo.',
+  fb_view_mean: 'Media del bloque',
+  fb_view_no_answer: 'Sin respuesta.',
+  export_feedback_csv: 'Exportar cuestionario final ({n})',
+  export_feedback_empty: 'Ningún participante ha respondido al cuestionario final hasta el momento.',
+
   researcher_table_id: 'ID',
   researcher_table_site: 'Sitio',
   researcher_table_sessions: 'Sesiones',

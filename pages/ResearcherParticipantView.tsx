@@ -537,6 +537,67 @@ const ResearcherParticipantView: React.FC = () => {
             </Card>
           )}
 
+          {/* Final app/programme questionnaire — read-only, single submission */}
+          {participant.app_feedback && (() => {
+            const fb = participant.app_feedback!;
+            const blocks: { titleKey: string; keyPrefix: string; scores: number[] }[] = [
+              { titleKey: 'fb_block1_label', keyPrefix: 'fb_sus_', scores: fb.sus_scores ?? [] },
+              { titleKey: 'fb_block2_label', keyPrefix: 'fb_imp_', scores: fb.improvement_scores ?? [] },
+              { titleKey: 'fb_block3_label', keyPrefix: 'fb_exp_', scores: fb.experience_scores ?? [] },
+            ];
+            const mean = (arr: number[]) => arr.length
+              ? (arr.reduce((s, n) => s + n, 0) / arr.length).toFixed(2)
+              : '—';
+            return (
+              <Card title={t('fb_view_title' as any)}>
+                <p className="text-sm text-slate-500 mb-4">
+                  {t('fb_view_submitted_on' as any, {
+                    date: formatDate(new Date(fb.submitted_at), {
+                      day: '2-digit', month: '2-digit', year: 'numeric',
+                    }),
+                  })}
+                </p>
+
+                {blocks.map(block => (
+                  <div key={block.titleKey} className="mb-5">
+                    <div className="flex items-baseline justify-between gap-3 mb-2">
+                      <h4 className="font-bold text-primary-dark">{t(block.titleKey as any)}</h4>
+                      <span className="text-sm text-slate-500 whitespace-nowrap">
+                        {t('fb_view_mean' as any)}: <strong>{mean(block.scores)}</strong> / 5
+                      </span>
+                    </div>
+                    <ul className="divide-y divide-slate-100 border border-slate-200 rounded-lg overflow-hidden">
+                      {block.scores.map((score, i) => (
+                        <li key={i} className="flex items-center gap-3 px-3 py-2 text-sm">
+                          <span className="flex-1 text-slate-700">{t(`${block.keyPrefix}${i + 1}` as any)}</span>
+                          <span
+                            className="shrink-0 w-7 h-7 rounded-full bg-primary/10 text-primary-dark font-bold flex items-center justify-center"
+                            title={t(`fb_likert_${score}` as any)}
+                          >
+                            {score}
+                          </span>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                ))}
+
+                <div className="mb-4">
+                  <h4 className="font-bold text-primary-dark mb-1">{t('fb_open_best' as any)}</h4>
+                  <p className="text-sm text-slate-700 whitespace-pre-wrap bg-slate-50 border border-slate-200 rounded-lg p-3">
+                    {fb.open_best?.trim() || <span className="text-slate-400">{t('fb_view_no_answer' as any)}</span>}
+                  </p>
+                </div>
+                <div>
+                  <h4 className="font-bold text-primary-dark mb-1">{t('fb_open_improve' as any)}</h4>
+                  <p className="text-sm text-slate-700 whitespace-pre-wrap bg-slate-50 border border-slate-200 rounded-lg p-3">
+                    {fb.open_improve?.trim() || <span className="text-slate-400">{t('fb_view_no_answer' as any)}</span>}
+                  </p>
+                </div>
+              </Card>
+            );
+          })()}
+
         </div>
       </main>
 

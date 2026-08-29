@@ -637,6 +637,69 @@ const ResearcherDashboard: React.FC<{ gestorMode?: boolean }> = ({ gestorMode = 
         document.body.removeChild(link);
     };
 
+    // ── Final questionnaire export ────────────────────────────────────────────
+    // One row per respondent, matching the columns of the main export.
+    const handleExportFeedback = () => {
+        // RFC 4180 quoting. The open-ended answers can contain commas, quotes
+        // and line breaks, any of which would corrupt an unquoted CSV.
+        const q = (val: unknown): string => {
+            const str = val === undefined || val === null ? '' : String(val);
+            return /[",\r\n]/.test(str) ? `"${str.replace(/"/g, '""')}"` : str;
+        };
+        const mean = (arr: number[] | undefined, expected: number): string => {
+            if (!Array.isArray(arr) || arr.length === 0) return '';
+            const valid = arr.filter(n => typeof n === 'number' && n >= 1 && n <= 5);
+            if (valid.length !== expected) return '';
+            return (valid.reduce((s, n) => s + n, 0) / valid.length).toFixed(2);
+        };
+        const at = (arr: number[] | undefined, i: number) =>
+            Array.isArray(arr) && typeof arr[i] === 'number' ? arr[i] : '';
+
+        const headers = [
+            'study_id', 'name', 'site', 'sex', 'age_years', 'sessions_completed', 'submitted_at',
+            ...Array.from({ length: 10 }, (_, i) => `sus_${i + 1}`), 'sus_mean',
+            ...Array.from({ length: 6 }, (_, i) => `improvement_${i + 1}`), 'improvement_mean',
+            ...Array.from({ length: 6 }, (_, i) => `experience_${i + 1}`), 'experience_mean',
+            'open_best', 'open_improve',
+        ];
+
+        const respondents = participants.filter(p => p.app_feedback);
+        if (respondents.length === 0) {
+            window.alert(t('export_feedback_empty' as any));
+            return;
+        }
+
+        const rows = [headers.join(',')];
+        respondents.forEach(p => {
+            const fb = p.app_feedback!;
+            const birth = new Date((p.birth_date || '1950-01-01') + 'T12:00:00Z');
+            const now = new Date();
+            let age = now.getFullYear() - birth.getUTCFullYear();
+            const md = now.getMonth() - birth.getUTCMonth();
+            if (md < 0 || (md === 0 && now.getDate() < birth.getUTCDate())) age--;
+
+            rows.push([
+                q(p.study_id), q(p.name), q(p.site), q(p.sex), q(age), q(p.sessions_completed), q(fb.submitted_at),
+                ...Array.from({ length: 10 }, (_, i) => q(at(fb.sus_scores, i))), q(mean(fb.sus_scores, 10)),
+                ...Array.from({ length: 6 }, (_, i) => q(at(fb.improvement_scores, i))), q(mean(fb.improvement_scores, 6)),
+                ...Array.from({ length: 6 }, (_, i) => q(at(fb.experience_scores, i))), q(mean(fb.experience_scores, 6)),
+                q(fb.open_best), q(fb.open_improve),
+            ].join(','));
+        });
+
+        // BOM so Excel opens the accented free text correctly.
+        const blob = new Blob(['﻿' + rows.join('\r\n')], { type: 'text/csv;charset=utf-8;' });
+        const link = document.createElement('a');
+        const url = URL.createObjectURL(blob);
+        link.setAttribute('href', url);
+        link.setAttribute('download', `agecare_questionario_final_${new Date().toISOString().split('T')[0]}.csv`);
+        link.style.visibility = 'hidden';
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        URL.revokeObjectURL(url);
+    };
+
     return (
         <div className="space-y-8">
             {/* Modal de confirmação — Zerar Todos os Dados (Gestor apenas) */}
@@ -888,7 +951,12 @@ const ResearcherDashboard: React.FC<{ gestorMode?: boolean }> = ({ gestorMode = 
             <Card>
                 <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-4 gap-4">
                     <h2 className="text-2xl font-bold text-primary-dark">{t('participants')}</h2>
-                    <Button onClick={handleExport} variant="secondary">{t('export_csv')}</Button>
+                    <div className="flex flex-wrap gap-2">
+                        <Button onClick={handleExport} variant="secondary">{t('export_csv')}</Button>
+                        <Button onClick={handleExportFeedback} variant="secondary">
+                            {t('export_feedback_csv' as any, { n: participants.filter(p => p.app_feedback).length })}
+                        </Button>
+                    </div>
                 </div>
                 <div className="overflow-scroll max-h-[60vh]">
                     <table className="w-full text-left text-sm whitespace-nowrap">
