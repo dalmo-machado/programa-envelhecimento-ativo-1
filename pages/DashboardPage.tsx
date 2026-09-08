@@ -566,7 +566,7 @@ const ResearcherDashboard: React.FC<{ gestorMode?: boolean }> = ({ gestorMode = 
     const handleExport = () => {
         const headers = [
             "study_id", "name", "sex", "birth_date", "site", "sessions_completed", "adherence_rate_percent",
-            "assessment_date",
+            "assessment_moment", "assessment_date",
             // Station 1
             "weight_kg", "height_cm", "bmi", "calf_circum_cm", "cc_bmi_index",
             "cintura_cm", "quadril_cm", "gordura_percent", "rcq",
@@ -595,7 +595,7 @@ const ResearcherDashboard: React.FC<{ gestorMode?: boolean }> = ({ gestorMode = 
 
             if (p.assessments.length === 0) {
                 const row = [p.study_id, p.name, p.sex, p.birth_date, p.site, p.sessions_completed, adherence.toFixed(2),
-                    'N/A', 'N/A', 'N/A', 'N/A', 'N/A', 'N/A', 'N/A', 'N/A', 'N/A', 'N/A',
+                    'N/A', 'N/A', 'N/A', 'N/A', 'N/A', 'N/A', 'N/A', 'N/A', 'N/A', 'N/A', 'N/A',
                     'N/A', 'N/A', 'N/A', 'N/A', 'N/A', 'N/A', 'N/A', 'N/A', 'N/A', 'N/A', 'N/A',
                     avgDuration, totalActiveStr];
                 csvRows.push(row.join(','));
@@ -604,7 +604,8 @@ const ResearcherDashboard: React.FC<{ gestorMode?: boolean }> = ({ gestorMode = 
                     const d = assessment.data;
                     const row = [
                         p.study_id, p.name, p.sex, p.birth_date, p.site,
-                        p.sessions_completed, adherence.toFixed(2), assessment.date,
+                        p.sessions_completed, adherence.toFixed(2),
+                        assessment.moment ?? '', assessment.date,
                         // Station 1
                         d.weight_kg, d.height_cm, d.bmi.toFixed(2), d.calf_circum_cm, d.cc_bmi_index.toFixed(2),
                         na(d.cintura_cm), na(d.quadril_cm), na(d.gordura_percent),

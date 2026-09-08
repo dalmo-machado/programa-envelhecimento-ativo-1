@@ -4,7 +4,7 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import { useLocalization } from '../context/LocalizationContext';
 import { useParticipantData } from '../context/ParticipantDataContext';
 import { useUserRole } from '../context/UserRoleContext';
-import { Assessment, AssessmentRecord, Participant } from '../types';
+import { Assessment, AssessmentMoment, AssessmentRecord, Participant } from '../types';
 
 import Card from '../components/ui/Card';
 import Button from '../components/ui/Button';
@@ -144,6 +144,9 @@ const AssessmentPage: React.FC = () => {
     const [sixMinWalkPredicted, setSixMinWalkPredicted] = useState<number | null>(null);
     const [sixMinWalkPercent, setSixMinWalkPercent] = useState<number | null>(null);
     const [rangeErrors, setRangeErrors] = useState<Record<string, string>>({});
+    // Measurement point. Required: without it the assessment cannot be paired
+    // pre/post later, and the date alone does not resolve it.
+    const [moment, setMoment] = useState<AssessmentMoment | ''>('');
 
     useEffect(() => {
         const weight = parseFloat(formData.weight_kg);
@@ -215,7 +218,7 @@ const AssessmentPage: React.FC = () => {
     };
 
     const handleSubmit = () => {
-        if (!effectiveParticipantId || !participant) return;
+        if (!effectiveParticipantId || !participant || !moment) return;
 
         // Range validation — block save if any field is physiologically impossible
         const errors = validateRanges();
@@ -250,6 +253,7 @@ const AssessmentPage: React.FC = () => {
 
         const newRecord: AssessmentRecord = {
             date: new Date().toISOString(),
+            moment,
             data: assessmentData,
         };
 
@@ -266,13 +270,43 @@ const AssessmentPage: React.FC = () => {
         navigate('/assessment/summary', preselectedId ? { state: { participantId: preselectedId } } : undefined);
     };
 
-    const isFormValid = Object.values(formData).every(value => typeof value === 'string' && value.trim() !== '');
+    const isFormValid = moment !== ''
+        && Object.values(formData).every(value => typeof value === 'string' && value.trim() !== '');
 
     return (
         <div className="bg-background min-h-screen">
             <Header />
             <main className="p-4 sm:p-6 md:p-8 flex justify-center">
                 <Card className="max-w-3xl w-full" title={t('assessment_title')}>
+                    {/* ── Momento da avaliação — obrigatório ── */}
+                    <div className="mb-6 p-4 rounded-lg border-2 border-secondary bg-secondary/5">
+                        <p className="text-sm font-bold text-primary-dark mb-1">
+                            {t('assessment_moment_label' as any)}
+                        </p>
+                        <p className="text-xs text-slate-600 mb-3">{t('assessment_moment_help' as any)}</p>
+                        <div className="flex flex-wrap gap-2">
+                            {(['PRE', 'POS', 'SEG'] as const).map(m => (
+                                <button
+                                    key={m}
+                                    type="button"
+                                    onClick={() => setMoment(m)}
+                                    className={`flex-1 min-w-[8rem] py-2 px-3 rounded-lg font-bold text-sm border-2 transition-all ${
+                                        moment === m
+                                            ? 'bg-secondary text-white border-secondary shadow'
+                                            : 'bg-white text-slate-600 border-slate-300 hover:border-secondary'
+                                    }`}
+                                >
+                                    {t(`assessment_moment_${m.toLowerCase()}` as any)}
+                                </button>
+                            ))}
+                        </div>
+                        {moment === '' && (
+                            <p className="text-xs text-amber-700 font-medium mt-2">
+                                {t('assessment_moment_required' as any)}
+                            </p>
+                        )}
+                    </div>
+
                     <div className="grid md:grid-cols-2 gap-x-8 gap-y-6">
 
                         {/* ── ESTAÇÃO 1 ── */}

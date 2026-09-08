@@ -266,6 +266,18 @@ export const es = {
   percent_change: 'Cambio %',
   week: 'Semana',
   export_csv: 'Exportar a CSV',
+  // Momento de la evaluación — obligatorio antes de guardar
+  assessment_moment_label: 'Momento de la evaluación',
+  assessment_moment_help: 'Obligatorio. Define el emparejamiento pre/post en el análisis — la fecha por sí sola no lo resuelve.',
+  assessment_moment_pre: 'PRE — línea de base',
+  assessment_moment_pos: 'POST — tras las 24 sesiones',
+  assessment_moment_seg: 'SEGUIMIENTO — medida adicional',
+  assessment_moment_required: 'Seleccione el momento antes de guardar.',
+  moment_pre_short: 'PRE',
+  moment_pos_short: 'POST',
+  moment_seg_short: 'SEG',
+  moment_none_short: 'no informado',
+
   // Cuestionario final — lectura por el investigador (vista + exportación)
   fb_view_title: 'Cuestionario final — respuestas del participante',
   fb_view_submitted_on: 'Respondido el {date}. Envío único: el participante no puede reenviarlo ni corregirlo.',

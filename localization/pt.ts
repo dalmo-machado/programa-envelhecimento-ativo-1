@@ -268,6 +268,18 @@ export const pt: I18nKeys = {
   percent_change: 'Mudança %',
   week: 'Semana',
   export_csv: 'Exportar para CSV',
+  // Measurement point — required before saving an assessment
+  assessment_moment_label: 'Momento da avaliação',
+  assessment_moment_help: 'Obrigatório. Define o pareamento pré/pós na análise — a data sozinha não resolve.',
+  assessment_moment_pre: 'PRÉ — linha de base',
+  assessment_moment_pos: 'PÓS — após as 24 sessões',
+  assessment_moment_seg: 'SEGUIMENTO — medida adicional',
+  assessment_moment_required: 'Selecione o momento antes de salvar.',
+  moment_pre_short: 'PRÉ',
+  moment_pos_short: 'PÓS',
+  moment_seg_short: 'SEG',
+  moment_none_short: 'não informado',
+
   // Final questionnaire — researcher-side reading (view + export)
   fb_view_title: 'Questionário final — respostas do participante',
   fb_view_submitted_on: 'Respondido em {date}. Envio único: o participante não pode reenviar nem corrigir.',

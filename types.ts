@@ -39,8 +39,16 @@ export interface Assessment {
   six_min_walk_percent?: number;
 }
 
+/**
+ * Which measurement point an assessment belongs to. Without it, a participant
+ * with several assessments cannot be paired pre/post — the date alone is not
+ * enough, since the study has a third measurement beyond the 24-session post.
+ */
+export type AssessmentMoment = 'PRE' | 'POS' | 'SEG';
+
 export interface AssessmentRecord {
   date: string; // ISO string for easier serialization
+  moment?: AssessmentMoment | null;
   data: Assessment;
 }
 

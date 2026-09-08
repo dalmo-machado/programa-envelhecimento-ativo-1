@@ -429,6 +429,7 @@ const ResearcherParticipantView: React.FC = () => {
                   <thead className="bg-slate-100 text-slate-600 uppercase">
                     <tr>
                       <th className="p-3">{t('researcher_table_last_assessment')}</th>
+                      <th className="p-3 text-center">{t('assessment_moment_label' as any)}</th>
                       <th className="p-3 text-center">{t('researcher_table_grip')}</th>
                       <th className="p-3 text-center">{t('researcher_table_balance')}</th>
                       <th className="p-3 text-center">{t('researcher_table_flexibility')}</th>
@@ -443,6 +444,17 @@ const ResearcherParticipantView: React.FC = () => {
                       <tr key={i} className="hover:bg-slate-50">
                         <td className="p-3 font-semibold text-primary-dark">
                           {formatDate(new Date(assessment.date), { day: '2-digit', month: '2-digit', year: 'numeric' })}
+                        </td>
+                        <td className="p-3 text-center">
+                          {assessment.moment ? (
+                            <span className="inline-block bg-secondary/15 text-secondary text-xs font-bold px-2 py-1 rounded-full">
+                              {t(`moment_${assessment.moment.toLowerCase()}_short` as any)}
+                            </span>
+                          ) : (
+                            <span className="text-amber-600 text-xs" title={t('assessment_moment_help' as any)}>
+                              {t('moment_none_short' as any)}
+                            </span>
+                          )}
                         </td>
                         <td className="p-3 text-center">{assessment.data.grip_kgf}</td>
                         <td className="p-3 text-center">{assessment.data.balance_s}</td>

@@ -13,7 +13,7 @@
  *
  * Fields not in DB:
  *   six_min_walk_predicted → calculated, not stored
- *   moment         → not tracked by app (default null)
+ *   moment         → PRE | POS | SEG, chosen by the assessor on the form
  */
 
 import { supabase } from '../lib/supabase';
@@ -28,6 +28,7 @@ function assessmentToDb(record: AssessmentRecord, participantId: string): Record
   return {
     participant_id: participantId,
     date: record.date,
+    moment: record.moment ?? null,
     grip_kgf: d.grip_kgf,
     handgrip_nondominant_kgf: d.handgrip_nondominant_kgf ?? null,
     balance_seconds: d.balance_s,
@@ -53,6 +54,7 @@ function assessmentToDb(record: AssessmentRecord, participantId: string): Record
 function dbToAssessmentRecord(row: Record<string, any>): AssessmentRecord {
   return {
     date: row.date as string,
+    moment: (row.moment ?? null) as AssessmentRecord['moment'],
     data: {
       grip_kgf: row.grip_kgf ?? 0,
       handgrip_nondominant_kgf: row.handgrip_nondominant_kgf ?? undefined,
