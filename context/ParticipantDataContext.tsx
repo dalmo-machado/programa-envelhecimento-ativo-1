@@ -118,17 +118,20 @@ export const ParticipantDataProvider: React.FC<{ children: ReactNode }> = ({ chi
 
     supa.loadAllParticipants()
       .then(async (data) => {
-        // Incremental migration: insert any mock participant not yet in the DB
-        const existingIds = new Set(data.map(p => p.study_id));
-        const missing = mockParticipants.filter(p => !existingIds.has(p.study_id));
-        if (missing.length > 0) {
-          console.info('[Supabase] Migrating missing mock participants:', missing.map(p => p.study_id));
-          await supa.migrateParticipants(missing);
-          missing.forEach(p => {
+        // Seed the demo participants ONLY on a genuinely empty database.
+        //
+        // This used to top up every mock participant missing from the DB on each
+        // load, which silently resurrected demo records that researchers had
+        // deliberately deleted: the row came back under its original mock name,
+        // so a participant renamed "EXCLUIR ..." before deletion reappeared as
+        // "João Silva". Study data must never be re-created by a page load.
+        if (data.length === 0) {
+          console.info('[Supabase] Empty database — seeding demo participants.');
+          await supa.migrateParticipants(mockParticipants);
+          mockParticipants.forEach(p => {
             if (p.training_plan?.length > 0) saveTrainingPlan(p.study_id, p.training_plan);
           });
-          // Merge newly migrated participants into the loaded list
-          data = [...data, ...missing.map(p => ({ ...p, training_plan: [] }))];
+          data = mockParticipants.map(p => ({ ...p, training_plan: [] }));
         }
 
         // Merge sessions_completed (MAX) and training_plan (Supabase > localStorage)
