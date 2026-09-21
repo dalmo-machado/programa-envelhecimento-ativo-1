@@ -301,6 +301,12 @@ export const pt: I18nKeys = {
   researcher_table_feedback_pending_title: 'Concluiu as 24 sessões e ainda não respondeu ao questionário final',
   researcher_table_feedback_na_title: 'Ainda não concluiu as 24 sessões — não elegível ao questionário final',
   researcher_table_last_assessment: 'Últ. Avaliação',
+  // Ordenação da tabela de participantes
+  sort_by: 'Ordenar por {column}',
+  sort_asc: 'ordem crescente',
+  sort_desc: 'ordem decrescente',
+  sort_click_to_asc: 'Clique para ordenar em ordem crescente',
+  sort_click_to_desc: 'Clique para ordenar em ordem decrescente',
   researcher_table_grip: 'Força',
   researcher_table_balance: 'Equilíbrio',
   researcher_table_flexibility: 'Flexibilidade',

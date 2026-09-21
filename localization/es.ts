@@ -299,6 +299,12 @@ export const es = {
   researcher_table_feedback_pending_title: 'Completó las 24 sesiones y aún no ha respondido al cuestionario final',
   researcher_table_feedback_na_title: 'Aún no ha completado las 24 sesiones — no elegible para el cuestionario final',
   researcher_table_last_assessment: 'Últ. Evaluación',
+  // Ordenación de la tabla de participantes
+  sort_by: 'Ordenar por {column}',
+  sort_asc: 'orden ascendente',
+  sort_desc: 'orden descendente',
+  sort_click_to_asc: 'Pulse para ordenar de forma ascendente',
+  sort_click_to_desc: 'Pulse para ordenar de forma descendente',
   researcher_table_grip: 'Fuerza',
   researcher_table_balance: 'Equilibrio',
   researcher_table_flexibility: 'Flexibilidad',

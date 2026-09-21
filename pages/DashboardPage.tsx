@@ -1,7 +1,7 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
-import { Award, AlertTriangle, CheckCircle } from 'lucide-react';
+import { Award, AlertTriangle, CheckCircle, ArrowUp, ArrowDown, ChevronsUpDown } from 'lucide-react';
 import { useUserRole } from '../context/UserRoleContext';
 import { useLocalization } from '../context/LocalizationContext';
 import { useParticipantData } from '../context/ParticipantDataContext';
@@ -9,6 +9,7 @@ import { UserRole, Assessment } from '../types';
 import { trainingPrograms } from '../services/trainingData';
 import { getCurrentBelt, getBeltProgress, BeltProgress } from '../utils/gamification';
 import { getDaysSinceLastSession, isInactiveParticipant } from '../utils/inactivityAlert';
+import { sortParticipants, nextSort, SortKey, SortState } from '../utils/participantSort';
 import { restoreFromBackup, BackupData, loadAllParticipants, ResearcherRecord, loadResearchers, createResearcher, toggleResearcherActive, resyncAllAssessments } from '../services/supabaseService';
 import { supabase } from '../lib/supabase';
 import { hashPassword } from '../utils/auth';
@@ -19,6 +20,54 @@ import Header from '../components/Header';
 // Sessions in the study protocol. A participant only becomes eligible for the
 // final questionnaire after completing all of them.
 const STUDY_SESSIONS = 24;
+
+/**
+ * A clickable column header. Renders a real <button> so the table can be sorted
+ * from the keyboard, and sets aria-sort so screen readers announce the state.
+ */
+interface SortableThProps {
+    sortKey: SortKey;
+    sort: SortState | null;
+    onSort: (key: SortKey) => void;
+    label: string;
+    t: (key: any, replacements?: Record<string, string | number>) => string;
+    className?: string;
+    title?: string;
+}
+
+const SortableTh: React.FC<SortableThProps> = ({ sortKey, sort, onSort, label, t, className = '', title }) => {
+    const active = sort?.key === sortKey;
+    const dir = active ? sort!.dir : null;
+    const Icon = !active ? ChevronsUpDown : dir === 'asc' ? ArrowUp : ArrowDown;
+
+    const state = dir === 'asc' ? t('sort_asc') : dir === 'desc' ? t('sort_desc') : '';
+    const hint = !active || dir === 'desc' ? t('sort_click_to_asc') : t('sort_click_to_desc');
+    const aria = `${t('sort_by', { column: label })}${state ? ` — ${state}` : ''}`;
+
+    return (
+        <th
+            className={`p-3 ${className}`}
+            aria-sort={dir === 'asc' ? 'ascending' : dir === 'desc' ? 'descending' : 'none'}
+        >
+            <button
+                type="button"
+                onClick={() => onSort(sortKey)}
+                title={title ? `${title} — ${hint}` : hint}
+                aria-label={aria}
+                className={`group inline-flex items-center gap-1 uppercase w-full focus:outline-none focus-visible:ring-2 focus-visible:ring-primary rounded-sm ${
+                    className.includes('text-center') ? 'justify-center' : ''
+                } ${active ? 'text-primary-dark font-bold' : 'hover:text-slate-900'}`}
+            >
+                <span>{label}</span>
+                <Icon
+                    size={13}
+                    aria-hidden="true"
+                    className={active ? 'opacity-100 shrink-0' : 'opacity-30 group-hover:opacity-70 shrink-0'}
+                />
+            </button>
+        </th>
+    );
+};
 
 const DashboardPage: React.FC = () => {
     const { role } = useUserRole();
@@ -386,8 +435,17 @@ const ParticipantDashboard: React.FC = () => {
 };
 
 const ResearcherDashboard: React.FC<{ gestorMode?: boolean }> = ({ gestorMode = false }) => {
-    const { t, formatDate, formatNumber } = useLocalization();
+    const { t, formatDate, formatNumber, language } = useLocalization();
     const { participants } = useParticipantData();
+
+    // Ordenação da tabela de participantes. Começa sem ordenação: a lista vem
+    // na ordem do banco até que alguém clique num cabeçalho.
+    const [sort, setSort] = useState<SortState | null>(null);
+    const handleSort = (key: SortKey) => setSort(current => nextSort(current, key));
+    const sortedParticipants = useMemo(
+        () => sortParticipants(participants, sort, language),
+        [participants, sort, language],
+    );
     const navigate = useNavigate();
     const fileInputRef = useRef<HTMLInputElement>(null);
     const [isRestoring, setIsRestoring] = useState(false);
@@ -963,26 +1021,99 @@ const ResearcherDashboard: React.FC<{ gestorMode?: boolean }> = ({ gestorMode = 
                     <table className="w-full text-left text-sm whitespace-nowrap">
                         <thead className="bg-slate-100 text-slate-600 uppercase sticky top-0 z-10">
                             <tr>
-                                <th className="p-3">{t('researcher_table_id')}</th>
-                                <th className="p-3">{t('researcher_table_name' as any)}</th>
-                                <th className="p-3">{t('researcher_table_sex' as any)}</th>
-                                <th className="p-3">{t('researcher_table_age' as any)}</th>
-                                <th className="p-3 text-center">{t('researcher_table_sessions')}</th>
-                                <th className="p-3 text-center">{t('researcher_table_last_session' as any)}</th>
-                                <th className="p-3 text-center">{t('researcher_table_adherence')}</th>
-                                <th className="p-3 text-center" title={t('researcher_table_feedback_title' as any)}>{t('researcher_table_feedback' as any)}</th>
-                                <th className="p-3">{t('researcher_table_last_assessment')}</th>
-                                <th className="p-3 text-center">{t('height')}</th>
-                                <th className="p-3 text-center">{t('weight')}</th>
-                                <th className="p-3">{t('participant_dob')}</th>
-                                <th className="p-3 text-center" title={t('handgrip_strength')}>{t('researcher_table_grip')}</th>
-                                <th className="p-3 text-center" title={t('balance')}>{t('researcher_table_balance')}</th>
-                                <th className="p-3 text-center" title={t('bmi')}>{t('researcher_table_bmi')}</th>
+                                <SortableTh
+                                    sortKey="study_id"
+                                    sort={sort} onSort={handleSort} t={t}
+                                    label={t('researcher_table_id' as any)}
+                                />
+                                <SortableTh
+                                    sortKey="name"
+                                    sort={sort} onSort={handleSort} t={t}
+                                    label={t('researcher_table_name' as any)}
+                                />
+                                <SortableTh
+                                    sortKey="sex"
+                                    sort={sort} onSort={handleSort} t={t}
+                                    label={t('researcher_table_sex' as any)}
+                                />
+                                <SortableTh
+                                    sortKey="age"
+                                    sort={sort} onSort={handleSort} t={t}
+                                    label={t('researcher_table_age' as any)}
+                                />
+                                <SortableTh
+                                    sortKey="sessions"
+                                    sort={sort} onSort={handleSort} t={t}
+                                    label={t('researcher_table_sessions' as any)}
+                                    className="text-center"
+                                />
+                                <SortableTh
+                                    sortKey="last_session"
+                                    sort={sort} onSort={handleSort} t={t}
+                                    label={t('researcher_table_last_session' as any)}
+                                    className="text-center"
+                                />
+                                <SortableTh
+                                    sortKey="adherence"
+                                    sort={sort} onSort={handleSort} t={t}
+                                    label={t('researcher_table_adherence' as any)}
+                                    className="text-center"
+                                />
+                                <SortableTh
+                                    sortKey="feedback"
+                                    sort={sort} onSort={handleSort} t={t}
+                                    label={t('researcher_table_feedback' as any)}
+                                    className="text-center"
+                                    title={t('researcher_table_feedback_title' as any)}
+                                />
+                                <SortableTh
+                                    sortKey="last_assessment"
+                                    sort={sort} onSort={handleSort} t={t}
+                                    label={t('researcher_table_last_assessment' as any)}
+                                />
+                                <SortableTh
+                                    sortKey="height"
+                                    sort={sort} onSort={handleSort} t={t}
+                                    label={t('height' as any)}
+                                    className="text-center"
+                                />
+                                <SortableTh
+                                    sortKey="weight"
+                                    sort={sort} onSort={handleSort} t={t}
+                                    label={t('weight' as any)}
+                                    className="text-center"
+                                />
+                                <SortableTh
+                                    sortKey="dob"
+                                    sort={sort} onSort={handleSort} t={t}
+                                    label={t('participant_dob' as any)}
+                                />
+                                <SortableTh
+                                    sortKey="grip"
+                                    sort={sort} onSort={handleSort} t={t}
+                                    label={t('researcher_table_grip' as any)}
+                                    className="text-center"
+                                    title={t('handgrip_strength' as any)}
+                                />
+                                <SortableTh
+                                    sortKey="balance"
+                                    sort={sort} onSort={handleSort} t={t}
+                                    label={t('researcher_table_balance' as any)}
+                                    className="text-center"
+                                    title={t('balance' as any)}
+                                />
+                                <SortableTh
+                                    sortKey="bmi"
+                                    sort={sort} onSort={handleSort} t={t}
+                                    label={t('researcher_table_bmi' as any)}
+                                    className="text-center"
+                                    title={t('bmi' as any)}
+                                />
                                 <th className="p-3 text-center">{t('table_col_actions' as any)}</th>
                             </tr>
                         </thead>
                         <tbody className="divide-y divide-slate-200">
-                            {participants.map(p => {
+                            {sortedParticipants.map(p => {
                                 const latestAssessment = p.assessments.length > 0 ? p.assessments[p.assessments.length - 1] : null;
                                 const adherence = (p.sessions_completed / 24) * 100;
                                 
