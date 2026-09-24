@@ -4,7 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import { ChevronLeft } from 'lucide-react';
 import { useLocalization } from '../context/LocalizationContext';
 import { useParticipantData } from '../context/ParticipantDataContext';
-import { Language, Participant } from '../types';
+import { Language, Participant, ParqRecord } from '../types';
 import { I18nKeys } from '../localization/es';
 import { newParticipant } from '../services/mockData';
 import Button from '../components/ui/Button';
@@ -34,6 +34,18 @@ function generateStudyId(site: string, participants: Participant[]): string {
 const questions: (keyof I18nKeys)[] = [
     'screening_q1', 'screening_q2', 'screening_q3', 'screening_q4', 'screening_q5',
 ];
+
+/** Identifies which form was applied, so a later revision of the questions
+ *  does not silently make old records unreadable. Official designation of the
+ *  instrument is still to be confirmed with the team. */
+const PARQ_VERSION = 'AGECARE-PARQ-5-v1';
+
+/** Number of 'yes' answers that sends the candidate to a professional instead
+ *  of to enrolment. One is the PAR-Q's own rule: a single affirmative answer
+ *  already calls for medical clearance before starting to exercise. Stored with
+ *  each record so past decisions stay auditable even if this value is revised.
+ *  Changed from 2 to 1 on 2026-09-23, by decision of the study coordinator. */
+const PARQ_THRESHOLD = 1;
 
 type Answers = Record<string, 'yes' | 'no' | null>;
 
@@ -68,6 +80,11 @@ const ScreeningPage: React.FC = () => {
     const initialAnswers = questions.reduce((acc, q) => ({ ...acc, [q]: null }), {});
     const [answers, setAnswers] = useState<Answers>(initialAnswers);
 
+    // The PAR-Q as completed, frozen at the moment it was submitted. Kept in
+    // state rather than recomputed at save time so that the stored timestamp is
+    // when the participant actually answered, not when the form was finished.
+    const [parq, setParq] = useState<ParqRecord | null>(null);
+
     const handleAnswer = (question: keyof I18nKeys, answer: 'yes' | 'no') => {
         setAnswers(prev => ({ ...prev, [question]: answer }));
     };
@@ -75,9 +92,20 @@ const ScreeningPage: React.FC = () => {
     const allAnswered = Object.values(answers).every(a => a !== null);
 
     const handleSubmit = () => {
-        // Exclude only if ≥2 "SIM" answers (single SIM is insufficient for exclusion).
+        // Any "SIM" refers the candidate to a professional before enrolment.
         const yesCount = Object.values(answers).filter(a => a === 'yes').length;
-        if (yesCount >= 2) {
+        const referred = yesCount >= PARQ_THRESHOLD;
+
+        setParq({
+            version: PARQ_VERSION,
+            answered_at: new Date().toISOString(),
+            answers: answers as Record<string, 'yes' | 'no'>,   // all answered — the button is disabled otherwise
+            yes_count: yesCount,
+            outcome: referred ? 'referred' : 'cleared',
+            threshold: PARQ_THRESHOLD,
+        });
+
+        if (referred) {
             setStatus('risk');
         } else {
             // PAR-Q cleared → proceed to registration form
@@ -105,6 +133,7 @@ const ScreeningPage: React.FC = () => {
             site: formData.site as 'Brazil' | 'Spain',
             language: formData.site === 'Spain' ? Language.ES_ES : Language.PT_BR,
             consent_date: new Date().toISOString(),
+            parq,
         };
 
         addParticipant(participantToSave);

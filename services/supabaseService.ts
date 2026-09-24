@@ -116,6 +116,10 @@ function participantToDb(p: Participant): Record<string, unknown> {
     session_logs: p.session_logs ?? [],
     app_feedback: p.app_feedback ?? null,
     plan_authorization: p.plan_authorization ?? null,
+    // parq_date duplicates parq.answered_at on purpose: it is indexable and
+    // queryable without unpacking the jsonb, which is what an audit needs.
+    parq_answers: p.parq ?? null,
+    parq_date: p.parq?.answered_at ?? null,
   };
 }
 
@@ -160,6 +164,7 @@ export async function loadAllParticipants(): Promise<Participant[]> {
       session_logs: Array.isArray(row.session_logs) ? (row.session_logs as SessionLog[]) : [],
       app_feedback: row.app_feedback ?? null,
       plan_authorization: row.plan_authorization ?? null,
+      parq: row.parq_answers ?? null,
     };
   });
 

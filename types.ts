@@ -111,6 +111,29 @@ export interface PlanAuthorization {
   adjusted: boolean;              // applied !== computed
 }
 
+/**
+ * The PAR-Q as it was actually applied to this participant.
+ *
+ * The screening decides whether someone may enrol, so the parecer requires the
+ * answers themselves to be on record — not merely the fact that a screen took
+ * place. Everything needed to reconstruct the decision is stored together:
+ * the answers, when they were given, and the outcome that followed from them.
+ */
+export interface ParqRecord {
+  /** Which form was applied. Designation to be confirmed with the team. */
+  version: string;
+  answered_at: string;                       // ISO timestamp
+  /** Keyed by the question id ('screening_q1' … 'screening_q5'). */
+  answers: Record<string, 'yes' | 'no'>;
+  /** Count of risk flags. Stored so the outcome can be audited without
+   *  re-deriving it from a threshold that may change later. */
+  yes_count: number;
+  /** 'cleared' = proceeded to enrolment · 'referred' = sent to a professional. */
+  outcome: 'cleared' | 'referred';
+  /** The threshold in force when this screening ran. */
+  threshold: number;
+}
+
 export interface Participant {
   study_id: string;
   name: string;
@@ -126,4 +149,6 @@ export interface Participant {
   session_logs?: SessionLog[];
   app_feedback?: AppFeedback | null;
   plan_authorization?: PlanAuthorization | null;
+  /** Null for participants enrolled before the PAR-Q started being recorded. */
+  parq?: ParqRecord | null;
 }
