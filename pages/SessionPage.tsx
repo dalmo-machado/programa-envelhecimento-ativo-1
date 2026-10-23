@@ -68,6 +68,36 @@ const SessionPage: React.FC = () => {
 
   const participant = participants.find(p => p.study_id === participantId);
 
+  // ── Guard against leaving a session that is under way ────────────────────
+  //
+  // Reported from Cádiz on 23/10/2026: a monitor kept the phone on his lap
+  // while assisting the participant, and the app returned to the start screen
+  // with nothing saved. Almost two hours of training were recorded as ten
+  // minutes, because the session had to be started again and the RPE values
+  // reconstructed from memory. A single accidental tap can do that, so every
+  // way out of a session in progress now asks first.
+  //
+  // 'pre' is the only safe state: nothing has been recorded yet, so leaving
+  // costs nothing and must not be obstructed.
+  //
+  // These two hooks sit above the early return below — moving them past it
+  // would change the number of hooks between renders.
+  const sessionInProgress = sessionState !== 'pre';
+  const [pendingExit, setPendingExit] = useState<'dashboard' | 'back' | null>(null);
+
+  // Covers what React Router cannot: a reload, a closed tab, the browser's own
+  // back gesture. The browser supplies its own wording; what matters is that
+  // the question gets asked at all.
+  useEffect(() => {
+    if (!sessionInProgress) return;
+    const warn = (e: BeforeUnloadEvent) => {
+      e.preventDefault();
+      e.returnValue = '';
+    };
+    window.addEventListener('beforeunload', warn);
+    return () => window.removeEventListener('beforeunload', warn);
+  }, [sessionInProgress]);
+
   // ── Maintenance mode: sessions beyond the 24-session protocol ────────────
   // Index >= 24 means the participant completed the study and wants to keep going.
   // We cycle through the same session types at Level 3, without altering
@@ -160,6 +190,20 @@ const SessionPage: React.FC = () => {
     navigate('/dashboard');
   };
 
+  const requestExit = (target: 'dashboard' | 'back') => {
+    if (sessionInProgress) {
+      setPendingExit(target);
+    } else {
+      target === 'back' ? navigate(-1) : navigate('/dashboard');
+    }
+  };
+
+  const confirmExit = () => {
+    const target = pendingExit;
+    setPendingExit(null);
+    target === 'back' ? navigate(-1) : navigate('/dashboard');
+  };
+
   const handleReportIncident = () => {
     setIncidentReported(true);
     if (participant) {
@@ -190,7 +234,7 @@ const SessionPage: React.FC = () => {
             <h3 className="text-xl font-bold text-primary self-start">
               {sessionState === 'active' && !isResting ? `${t('exercise_x_of_y', { current: currentExerciseIndex + 1, total: exercises.length })} - ${t('level')} ${sessionLevel}` : ''}
             </h3>
-            <Button onClick={() => navigate('/dashboard')} variant="ghost" className="text-slate-500 hover:text-danger">
+            <Button onClick={() => requestExit('dashboard')} variant="ghost" className="text-slate-500 hover:text-danger">
               {t('exit_session')}
             </Button>
           </div>
@@ -358,7 +402,7 @@ const SessionPage: React.FC = () => {
               )}
 
               <div className="mt-8 flex flex-col-reverse sm:flex-row gap-4">
-                  <Button onClick={() => navigate(-1)} variant="ghost" className="w-full sm:w-auto">
+                  <Button onClick={() => requestExit('back')} variant="ghost" className="w-full sm:w-auto">
                     {t('back_button')}
                   </Button>
                   {isLastExercise && (
@@ -512,6 +556,33 @@ const SessionPage: React.FC = () => {
           )}
         </Card>
       </main>
+
+      {/* Double confirmation before abandoning a session in progress.
+          Staying is the primary, larger action; leaving is the destructive one
+          and is styled as such, so a hurried tap lands on the safe choice. */}
+      {pendingExit !== null && (
+        <div
+          className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-[9999] p-4"
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="abandon-session-title"
+        >
+          <div className="bg-white rounded-xl p-6 max-w-md w-full shadow-xl text-slate-800">
+            <h3 id="abandon-session-title" className="text-xl font-bold text-slate-800 mb-4">
+              {t('abandon_session_title' as any)}
+            </h3>
+            <p className="text-lg text-slate-600 mb-8">{t('abandon_session_warning' as any)}</p>
+            <div className="flex flex-col-reverse sm:flex-row sm:justify-end gap-3">
+              <Button variant="danger" onClick={confirmExit} className="w-full sm:w-auto">
+                {t('abandon_session_confirm' as any)}
+              </Button>
+              <Button onClick={() => setPendingExit(null)} className="w-full sm:w-auto" autoFocus>
+                {t('abandon_session_stay' as any)}
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
