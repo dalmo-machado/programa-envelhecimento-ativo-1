@@ -79,6 +79,10 @@ export interface SessionLog {
   completed: boolean;
   wellness_score?: number | null;   // 1–5 emoji scale (added with wellness feature)
   exercise_rpe?: ExerciseRpe[];     // per-exercise RPE (Asier Phase 1)
+  /** True when the session was resumed from a local draft after an
+   *  interruption. Lets QA tell a continuous session from a reconstructed one
+   *  without guessing from the duration. */
+  resumed?: boolean;
 }
 
 /**

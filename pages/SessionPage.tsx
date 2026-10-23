@@ -8,6 +8,7 @@ import { trainingPrograms, warmupExercises, cooldownExercises } from '../service
 import { getRandomPreSessionMessage, getRandomPostSessionMessage } from '../utils/gamification';
 import { I18nKeys } from '../localization/es';
 import { ExerciseRpe, IncidentReport, SessionLog } from '../types';
+import { SessionDraft, clearDraft, loadDraft, saveDraft } from '../utils/sessionDraft';
 import Card from '../components/ui/Card';
 import Button from '../components/ui/Button';
 import Header from '../components/Header';
@@ -39,7 +40,8 @@ const SessionPage: React.FC = () => {
   const [preMessage, setPreMessage] = useState<keyof I18nKeys>('motivational_pre_session');
   const [postMessage, setPostMessage] = useState<keyof I18nKeys>('motivational_post_session');
   const [incidentReported, setIncidentReported] = useState<boolean | null>(null);
-  const [sessionStart] = useState<string>(() => new Date().toISOString());
+  const [sessionStart, setSessionStart] = useState<string>(() => new Date().toISOString());
+  const [wasResumed, setWasResumed] = useState(false);
   // Asier Phase 1 — per-exercise RPE
   const [exerciseRpeRatings, setExerciseRpeRatings] = useState<ExerciseRpe[]>([]);
   const [showRpePicker, setShowRpePicker] = useState(false);
@@ -84,6 +86,59 @@ const SessionPage: React.FC = () => {
   // would change the number of hooks between renders.
   const sessionInProgress = sessionState !== 'pre';
   const [pendingExit, setPendingExit] = useState<'dashboard' | 'back' | null>(null);
+
+  // ── Local draft of the session in progress ───────────────────────────────
+  //
+  // The confirmation above stops an accidental exit. This covers what no
+  // dialog can: a reload, a tab the system kills, a flat battery. Nothing is
+  // written to Supabase until the session is completed — see utils/sessionDraft.
+  const [draftOffer, setDraftOffer] = useState<SessionDraft | null>(null);
+  const draftChecked = useRef(false);
+
+  // Offer an unfinished draft once, on arrival, before anything is shown.
+  useEffect(() => {
+    if (draftChecked.current || !participantId) return;
+    draftChecked.current = true;
+    const draft = loadDraft(participantId, sessionIndex);
+    if (draft) setDraftOffer(draft);
+  }, [participantId, sessionIndex]);
+
+  // Checkpoint on every meaningful change. Each session has ten or eleven
+  // exercises, all inside the 'active' phase, so saving only on phase changes
+  // would still lose every RPE given so far.
+  useEffect(() => {
+    if (!participantId || !sessionInProgress || draftOffer) return;
+    saveDraft({
+      study_id: participantId,
+      session_index: sessionIndex,
+      session_start: sessionStart,
+      phase: sessionState as Exclude<typeof sessionState, 'pre'>,
+      exercise_index: currentExerciseIndex,
+      exercise_rpe: exerciseRpeRatings,
+      wellness_score: wellnessScore,
+      difficulty,
+    });
+  }, [
+    participantId, sessionIndex, sessionInProgress, sessionState, sessionStart,
+    currentExerciseIndex, exerciseRpeRatings, wellnessScore, difficulty, draftOffer,
+  ]);
+
+  const resumeDraft = () => {
+    if (!draftOffer) return;
+    setSessionStart(draftOffer.session_start);      // keeps the duration honest
+    setSessionState(draftOffer.phase);
+    setCurrentExerciseIndex(draftOffer.exercise_index);
+    setExerciseRpeRatings(draftOffer.exercise_rpe ?? []);
+    setWellnessScore(draftOffer.wellness_score);
+    setDifficulty(draftOffer.difficulty);
+    setWasResumed(true);
+    setDraftOffer(null);
+  };
+
+  const restartFromDraft = () => {
+    if (participantId) clearDraft(participantId);
+    setDraftOffer(null);
+  };
 
   // Covers what React Router cannot: a reload, a closed tab, the browser's own
   // back gesture. The browser supplies its own wording; what matters is that
@@ -162,7 +217,12 @@ const SessionPage: React.FC = () => {
       completed: true,
       wellness_score: wellnessScore ?? null,
       exercise_rpe: exerciseRpeRatings.length > 0 ? exerciseRpeRatings : undefined,
+      resumed: wasResumed || undefined,
     };
+
+    // The session is finished and about to be persisted — the draft has done
+    // its job and must not be offered again.
+    clearDraft(participant.study_id);
 
     if (isMaintenance) {
       // Maintenance: only append the log — sessions_completed stays unchanged.
@@ -201,6 +261,9 @@ const SessionPage: React.FC = () => {
   const confirmExit = () => {
     const target = pendingExit;
     setPendingExit(null);
+    // The participant was told the session would not be saved, and said yes.
+    // Keeping the draft would offer it straight back on the next visit.
+    if (participantId) clearDraft(participantId);
     target === 'back' ? navigate(-1) : navigate('/dashboard');
   };
 
@@ -556,6 +619,33 @@ const SessionPage: React.FC = () => {
           )}
         </Card>
       </main>
+
+      {/* An unfinished session was found for this participant. Asked once, on
+          arrival, and never restored silently: a draft carries its original
+          start time, so resuming the wrong one would misreport the duration. */}
+      {draftOffer !== null && (
+        <div
+          className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-[9999] p-4"
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="resume-session-title"
+        >
+          <div className="bg-white rounded-xl p-6 max-w-md w-full shadow-xl text-slate-800">
+            <h3 id="resume-session-title" className="text-xl font-bold text-slate-800 mb-4">
+              {t('resume_session_title' as any)}
+            </h3>
+            <p className="text-lg text-slate-600 mb-8">{t('resume_session_desc' as any)}</p>
+            <div className="flex flex-col-reverse sm:flex-row sm:justify-end gap-3">
+              <Button variant="ghost" onClick={restartFromDraft} className="w-full sm:w-auto">
+                {t('resume_session_restart' as any)}
+              </Button>
+              <Button onClick={resumeDraft} className="w-full sm:w-auto" autoFocus>
+                {t('resume_session_continue' as any)}
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Double confirmation before abandoning a session in progress.
           Staying is the primary, larger action; leaving is the destructive one
